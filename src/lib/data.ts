@@ -1,0 +1,87 @@
+import type { HealthData } from './types';
+import { placeholderImages } from './placeholder-images';
+import { HeartPulse, Droplets, Activity, Weight } from 'lucide-react';
+
+export const healthData: HealthData = {
+  user: {
+    name: 'Jane Doe',
+    email: 'jane.doe@example.com',
+    avatarUrl: placeholderImages.find(p => p.id === 'user-avatar')?.imageUrl || '',
+  },
+  weekNumber: 12,
+  progressSummary: 'Patient has shown consistent improvement in blood pressure and stable glucose levels over the past month. Weight has decreased by 2kg. Recommending continued focus on diet and light exercise.',
+  metrics: [
+    {
+      id: 'bp',
+      name: 'Blood Pressure',
+      value: '120/80 mmHg',
+      change: '-5 mmHg',
+      changeType: 'decrease',
+      icon: HeartPulse,
+      data: [
+        { week: '1', value: 140 },
+        { week: '2', value: 138 },
+        { week: '3', value: 135 },
+        { week: '4', value: 130 },
+        { week: '5', value: 128 },
+        { week: '6', value: 125 },
+        { week: '7', value: 122 },
+        { week: '8', value: 120 },
+      ],
+    },
+    {
+      id: 'bg',
+      name: 'Blood Glucose',
+      value: '95 mg/dL',
+      change: '+2 mg/dL',
+      changeType: 'stable',
+      icon: Droplets,
+      data: [
+        { week: '1', value: 105 },
+        { week: '2', value: 102 },
+        { week: '3', value: 98 },
+        { week: '4', value: 96 },
+        { week: '5', value: 95 },
+        { week: '6', value: 94 },
+        { week: '7', value: 93 },
+        { week: '8', value: 95 },
+      ],
+    },
+    {
+      id: 'hr',
+      name: 'Heart Rate',
+      value: '72 bpm',
+      change: '-3 bpm',
+      changeType: 'decrease',
+      icon: Activity,
+      data: [
+        { week: '1', value: 85 },
+        { week: '2', value: 82 },
+        { week: '3', value: 80 },
+        { week: '4', value: 78 },
+        { week: '5', value: 75 },
+        { week: '6', value: 74 },
+        { week: '7', value: 73 },
+        { week: '8', value: 72 },
+      ],
+    },
+    {
+      id: 'wt',
+      name: 'Weight',
+      value: '68 kg',
+      change: '-0.5 kg',
+      changeType: 'decrease',
+      icon: Weight,
+      data: [
+        { week: '1', value: 72 },
+        { week: '2', value: 71.5 },
+        { week: '3', value: 71 },
+        { week: '4', value: 70 },
+        { week: '5', value: 69.5 },
+        { week: '6', value: 69 },
+        { week: '7', value: 68.5 },
+        { week: '8', value: 68 },
+      ],
+    },
+  ],
+};
