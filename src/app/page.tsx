@@ -1,13 +1,61 @@
-import Link from 'next/link';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Logo from '@/components/logo';
 import Image from 'next/image';
 import { placeholderImages } from '@/lib/placeholder-images';
+import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const loginImage = placeholderImages.find(p => p.id === 'login-hero');
+  const [email, setEmail] = useState('admin@superadmin.com');
+  const [password, setPassword] = useState('password');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const user = await res.json();
+
+      // Store user info in localStorage
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+      
+      toast({
+        title: 'Success!',
+        description: 'Logged in successfully.',
+      });
+
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: (error as Error).message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   
   return (
     <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
@@ -23,7 +71,7 @@ export default function LoginPage() {
               Enter your credentials to access the campaign dashboard.
             </p>
           </div>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -32,23 +80,32 @@ export default function LoginPage() {
                   type="email"
                   placeholder="name@example.com"
                   required
-                  defaultValue="staff@taria.health"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="ml-auto inline-block text-sm underline"
                   >
                     Forgot password?
                   </Link>
                 </div>
-                <Input id="password" type="password" required defaultValue="password123" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-              <Button type="submit" className="w-full" asChild>
-                <Link href="/dashboard">Login</Link>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
               </Button>
             </div>
           </form>

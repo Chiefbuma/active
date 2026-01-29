@@ -1,10 +1,13 @@
+'use client';
+
 import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { UserPlus, Building } from 'lucide-react';
-import { placeholderImages } from '@/lib/placeholder-images';
+import { UserPlus, Building, Loader2 } from 'lucide-react';
 import type { User } from '@/lib/types';
 
 
@@ -13,14 +16,38 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const loggedInUser: User = {
-    id: 1,
-    name: 'Dr. Emily Carter',
-    email: 'emily.carter@taria.health',
-    role: 'physician',
-    avatarUrl: placeholderImages.find(p => p.id === 'user-avatar')?.imageUrl || '',
-  };
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+       // Create a user object that matches the type, using a placeholder for avatarUrl
+      const userForState: User = {
+        ...parsedUser,
+        avatarUrl: '', // Will be set from placeholder if available
+      };
+      
+      const userAvatar = placeholderImages.find(p => p.id === 'user-avatar');
+      if (userAvatar) {
+        userForState.avatarUrl = userAvatar.imageUrl;
+      }
+      setUser(userForState);
+    } else {
+      router.push('/'); // Redirect to login if no user is found
+    }
+    setLoading(false);
+  }, [router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -45,7 +72,7 @@ export default function DashboardLayout({
                   Manage Corporates
                 </Link>
               </Button>
-            <Header user={loggedInUser} />
+            <Header user={user} />
           </div>
         </div>
       </header>
@@ -57,3 +84,6 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+// Need to import placeholderImages to use it
+import { placeholderImages } from '@/lib/placeholder-images';

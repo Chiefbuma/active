@@ -1,4 +1,7 @@
+'use client';
+
 import type { User } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -10,10 +13,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { LogOut, User as UserIcon, Settings } from 'lucide-react';
-import Link from 'next/link';
 import { ThemeToggle } from './theme-toggle';
 
 export default function Header({ user }: { user: User }) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('loggedInUser');
+    router.push('/');
+  };
+
   return (
     <div className="flex items-center gap-4">
       <ThemeToggle />
@@ -49,11 +58,9 @@ export default function Header({ user }: { user: User }) {
             <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </Link>
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
