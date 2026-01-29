@@ -63,7 +63,7 @@ export default function RegisterPage() {
     const { corporate_id, ...rest } = formData;
     const payload = {
         ...rest,
-        corporate_id: corporate_id ? parseInt(corporate_id, 10) : null
+        corporate_id: (corporate_id && corporate_id !== 'null') ? parseInt(corporate_id, 10) : null
     };
 
     try {
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                     <SelectValue placeholder="Select corporate" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="null">None</SelectItem>
                     {corporates.map((corporate) => (
                       <SelectItem key={corporate.id} value={String(corporate.id)}>
                         {corporate.name}
