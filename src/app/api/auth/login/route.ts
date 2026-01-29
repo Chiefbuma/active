@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import * as bcrypt from 'bcryptjs';
+// Changed import to require to troubleshoot module resolution issue
+const bcrypt = require('bcryptjs');
 
 export async function POST(request: Request) {
   try {
