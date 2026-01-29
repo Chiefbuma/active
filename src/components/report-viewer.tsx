@@ -32,7 +32,7 @@ export default function ReportViewer({
   const { toast } = useToast();
 
   const handlePrint = () => {
-    // The CSS @media print rules in globals.css will handle showing only the report
+    // The CSS @media print rules in globals.css and report.css will handle the printing layout
     window.print();
   };
 
@@ -46,13 +46,13 @@ export default function ReportViewer({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="report-print-container max-w-4xl h-[95vh] flex flex-col p-0">
+      <DialogContent className="report-print-container max-w-5xl h-[95vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-2 no-print">
           <DialogTitle>Patient Wellness Report</DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-hidden px-1">
+        <div className="flex-1 overflow-hidden bg-muted/50">
           <ScrollArea className="h-full">
-             <div className="p-6">
+             <div className="py-8">
                <Report patient={patient} corporate={corporate} />
              </div>
           </ScrollArea>

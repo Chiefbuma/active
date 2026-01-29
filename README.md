@@ -9,7 +9,7 @@ This is a comprehensive, full-stack web application designed for managing health
 -   **Patient Management**: A complete workflow for registering new patients and viewing their detailed profiles.
 -   **Comprehensive Assessments**: Functionality to add and view records for Vitals, Nutrition, Health Goals, and Clinical Notes.
 -   **Corporate Partner Management**: Full CRUD (Create, Read, Update, Delete) functionality for managing corporate partners.
--   **Dynamic PDF Reporting**: On-the-fly generation of a printable wellness report for each patient, summarizing all their assessment data.
+-   **Dynamic PDF Reporting**: On-the-fly generation of a printable wellness report for each patient, summarizing all their assessment data, fetched directly from the database.
 -   **Local Development Environment**: A fully containerized setup using Docker Compose for easy local development.
 
 ## Tech Stack
@@ -32,6 +32,10 @@ This project is built with a modern and robust technology stack:
 -   **Database-Driven**: All application data is stored in a relational MySQL database, ensuring data integrity and persistence.
 -   **Secure by Design**: Implements a secure authentication flow with industry-standard password hashing to protect user credentials.
 -   **Environment Configuration**: Utilizes `.env` files to manage environment-specific variables, keeping sensitive credentials out of the codebase.
+
+## Performance
+
+The application leverages Next.js Server Components to optimize performance. Key pages like the main dashboard and patient lists are rendered on the server, which reduces the amount of JavaScript sent to the client. This results in faster initial page loads and a better user experience, especially on slower networks. Data is fetched directly from the database on the server, avoiding unnecessary client-side API requests.
 
 ## Getting Started
 

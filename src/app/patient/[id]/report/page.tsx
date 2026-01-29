@@ -1,23 +1,17 @@
-'use client';
-
-import { useEffect } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import { mockData } from '@/lib/data';
-import { useToast } from '@/hooks/use-toast';
+import { notFound } from 'next/navigation';
 import Report from '@/components/report';
+import { fetchPatientById } from '@/lib/data';
+import type { Corporate } from '@/lib/types';
 
-export default function ReportPage() {
-  const params = useParams();
-  const { toast } = useToast();
-  const patientId = parseInt(params.id as string, 10);
-  const patient = mockData.patients.find((p) => p.id === patientId);
+export default async function ReportPage({ params }: { params: { id: string } }) {
+  const patient = await fetchPatientById(params.id);
 
   if (!patient) {
     notFound();
   }
 
   const corporate = patient.corporate_id
-    ? mockData.corporates.find((c) => c.id === patient.corporate_id)
+    ? { id: patient.corporate_id, name: patient.corporate_name!, wellness_date: patient.wellness_date! } as Corporate
     : null;
 
   return (
