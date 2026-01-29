@@ -114,15 +114,15 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="first_name" className="text-foreground">First Name</Label>
-                  <Input id="first_name" placeholder="John" required onChange={handleInputChange} className={inputStyle} />
+                  <Input id="first_name" required onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="middle_name" className="text-foreground">Middle Name (Optional)</Label>
-                  <Input id="middle_name" placeholder="Fitzgerald" onChange={handleInputChange} className={inputStyle} />
+                  <Input id="middle_name" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="surname" className="text-foreground">Surname</Label>
-                  <Input id="surname" placeholder="Doe" required onChange={handleInputChange} className={inputStyle} />
+                  <Input id="surname" required onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
 
@@ -133,7 +133,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="age" className="text-foreground">Age (Optional)</Label>
-                    <Input id="age" type="number" placeholder="Enter age" onChange={handleInputChange} value={formData.age} className={inputStyle} />
+                    <Input id="age" type="number" onChange={handleInputChange} value={formData.age} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="sex" className="text-foreground">Sex</Label>
@@ -153,11 +153,11 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+254 712 345 678" onChange={handleInputChange} className={inputStyle} />
+                  <Input id="phone" type="tel" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email" className="text-foreground">Email Address</Label>
-                  <Input id="email" type="email" placeholder="name@example.com" onChange={handleInputChange} className={inputStyle} />
+                  <Input id="email" type="email" onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
 
