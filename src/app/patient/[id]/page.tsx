@@ -37,6 +37,7 @@ import {
   Save,
   XCircle,
   FileText,
+  UserCircle,
 } from 'lucide-react';
 import {
   Table,
@@ -51,6 +52,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { placeholderImages } from '@/lib/placeholder-images';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const DetailItem = ({
   label,
@@ -61,10 +65,16 @@ const DetailItem = ({
   value: React.ReactNode;
   icon?: React.ElementType;
 }) => (
-  <div className="flex items-start gap-4">
-    {Icon && <Icon className="h-5 w-5 flex-shrink-0 text-primary mt-1" />}
-    <div className="flex-1">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+  <div className="flex items-center gap-4">
+    {Icon && (
+      <div className="bg-muted rounded-full p-2">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+    )}
+    <div>
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+        {label}
+      </p>
       <p className="font-semibold text-foreground break-words">{value || '-'}</p>
     </div>
   </div>
@@ -81,6 +91,8 @@ export default function PatientDetailPage() {
   const [isNutritionModalOpen, setIsNutritionModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isClinicalModalOpen, setIsClinicalModalOpen] = useState(false);
+  
+  const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 
   if (!patient) {
     notFound();
@@ -101,7 +113,7 @@ export default function PatientDetailPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -126,15 +138,15 @@ export default function PatientDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Vitals Section */}
             <Card>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-3">
-                    <HeartPulse className="w-6 h-6" />
-                    <span>Vitals</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Latest vital signs measurement.
-                  </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4">
+                   <HeartPulse className="w-6 h-6 text-primary" />
+                  <div>
+                    <CardTitle>Vitals</CardTitle>
+                    <CardDescription>
+                      Latest vital signs measurement.
+                    </CardDescription>
+                  </div>
                 </div>
                 <Dialog open={isVitalsModalOpen} onOpenChange={setIsVitalsModalOpen}>
                   <DialogTrigger asChild>
@@ -147,12 +159,12 @@ export default function PatientDetailPage() {
                     <DialogHeader>
                       <DialogTitle>{patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add New Vitals'}</DialogTitle>
                     </DialogHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                      <div className="grid gap-2"><Label htmlFor="bp_systolic">Systolic (mmHg)</Label><Input id="bp_systolic" type="number" placeholder="120" /></div>
-                      <div className="grid gap-2"><Label htmlFor="bp_diastolic">Diastolic (mmHg)</Label><Input id="bp_diastolic" type="number" placeholder="80" /></div>
-                      <div className="grid gap-2"><Label htmlFor="pulse">Pulse (bpm)</Label><Input id="pulse" type="number" placeholder="70" /></div>
-                      <div className="grid gap-2"><Label htmlFor="temp">Temp (°C)</Label><Input id="temp" type="number" step="0.1" placeholder="36.5" /></div>
-                      <div className="grid gap-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6 py-4">
+                      <div className="space-y-2"><Label htmlFor="bp_systolic">Systolic (mmHg)</Label><Input id="bp_systolic" type="number" placeholder="120" /></div>
+                      <div className="space-y-2"><Label htmlFor="bp_diastolic">Diastolic (mmHg)</Label><Input id="bp_diastolic" type="number" placeholder="80" /></div>
+                      <div className="space-y-2"><Label htmlFor="pulse">Pulse (bpm)</Label><Input id="pulse" type="number" placeholder="70" /></div>
+                      <div className="space-y-2"><Label htmlFor="temp">Temp (°C)</Label><Input id="temp" type="number" step="0.1" placeholder="36.5" /></div>
+                      <div className="space-y-2 sm:col-span-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
@@ -179,10 +191,13 @@ export default function PatientDetailPage() {
 
             {/* Nutrition Section */}
             <Card>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-3"><Scale className="w-6 h-6" /><span>Nutrition</span></CardTitle>
-                  <CardDescription>Latest nutrition assessment details.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Scale className="w-6 h-6 text-primary" />
+                  <div>
+                    <CardTitle>Nutrition</CardTitle>
+                    <CardDescription>Latest nutrition assessment details.</CardDescription>
+                  </div>
                 </div>
                  <Dialog open={isNutritionModalOpen} onOpenChange={setIsNutritionModalOpen}>
                   <DialogTrigger asChild>
@@ -195,15 +210,15 @@ export default function PatientDetailPage() {
                     <DialogHeader>
                       <DialogTitle>{patient.nutrition && patient.nutrition.length > 0 ? 'Edit Nutrition Assessment' : 'Add Nutrition Assessment'}</DialogTitle>
                     </DialogHeader>
-                    <div className="py-4 space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="grid gap-2"><Label htmlFor="height">Height (cm)</Label><Input id="height" type="number" placeholder="175" /></div>
-                          <div className="grid gap-2"><Label htmlFor="weight">Weight (kg)</Label><Input id="weight" type="number" step="0.1" placeholder="70.5" /></div>
-                          <div className="grid gap-2"><Label htmlFor="bmi">BMI</Label><Input id="bmi" type="number" step="0.1" placeholder="22.9" /></div>
-                          <div className="grid gap-2"><Label htmlFor="visceral_fat">Visceral Fat</Label><Input id="visceral_fat" type="number" placeholder="5" /></div>
-                          <div className="grid gap-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
+                    <div className="py-4 space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                          <div className="space-y-2"><Label htmlFor="height">Height (cm)</Label><Input id="height" type="number" placeholder="175" /></div>
+                          <div className="space-y-2"><Label htmlFor="weight">Weight (kg)</Label><Input id="weight" type="number" step="0.1" placeholder="70.5" /></div>
+                          <div className="space-y-2"><Label htmlFor="bmi">BMI</Label><Input id="bmi" type="number" step="0.1" placeholder="22.9" readOnly /></div>
+                          <div className="space-y-2"><Label htmlFor="visceral_fat">Visceral Fat</Label><Input id="visceral_fat" type="number" placeholder="5" /></div>
+                          <div className="space-y-2 sm:col-span-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
                       </div>
-                      <div className="grid gap-2"><Label htmlFor="notes_nutritionist">Nutritionist Notes</Label><Textarea id="notes_nutritionist" placeholder="Enter notes..." /></div>
+                      <div className="space-y-2"><Label htmlFor="notes_nutritionist">Nutritionist Notes</Label><Textarea id="notes_nutritionist" placeholder="Enter notes..." /></div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
@@ -218,14 +233,14 @@ export default function PatientDetailPage() {
                 {patient.nutrition && patient.nutrition.length > 0 ? (
                     patient.nutrition.map((nutri) => (
                     <div key={nutri.id} className="space-y-4">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                        <DetailItem label="Height (cm)" value={nutri.height} />
-                        <DetailItem label="Weight (kg)" value={nutri.weight} />
-                        <DetailItem label="BMI" value={nutri.bmi} />
-                        <DetailItem label="Visceral Fat" value={nutri.visceral_fat} />
-                        <DetailItem label="Body Fat %" value={nutri.body_fat_percent} />
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm p-4 bg-muted/50 rounded-lg">
+                          <DetailItem label="Height (cm)" value={nutri.height} />
+                          <DetailItem label="Weight (kg)" value={nutri.weight} />
+                          <DetailItem label="BMI" value={nutri.bmi} />
+                          <DetailItem label="Visceral Fat" value={nutri.visceral_fat} />
+                          <DetailItem label="Body Fat %" value={nutri.body_fat_percent} />
                         </div>
-                        {nutri.notes_nutritionist && (<> <Separator /> <div className="p-3"><p className="text-sm font-medium text-muted-foreground">Nutritionist Notes</p><p className="text-foreground mt-1 whitespace-pre-wrap">{nutri.notes_nutritionist}</p></div></>)}
+                        {nutri.notes_nutritionist && (<> <Separator className="my-4" /> <div><p className="text-sm font-medium text-muted-foreground">Nutritionist Notes</p><p className="text-foreground mt-1 whitespace-pre-wrap text-sm">{nutri.notes_nutritionist}</p></div></>)}
                     </div>
                     ))
                 ) : ( <p className="text-muted-foreground text-center py-4">No nutrition assessment recorded.</p> )}
@@ -234,10 +249,13 @@ export default function PatientDetailPage() {
             
             {/* Goals Section */}
             <Card>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                    <CardTitle className="flex items-center gap-3"><Target className="w-6 h-6" /><span>Goals</span></CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Target className="w-6 h-6 text-primary" />
+                  <div>
+                    <CardTitle>Goals</CardTitle>
                     <CardDescription>Patient's health and wellness goals.</CardDescription>
+                  </div>
                 </div>
                  <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
                   <DialogTrigger asChild>
@@ -250,9 +268,9 @@ export default function PatientDetailPage() {
                     <DialogHeader>
                       <DialogTitle>{patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set New Goal'}</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="grid gap-2"><Label htmlFor="discussion">Discussion</Label><Textarea id="discussion" placeholder="Notes from discussion with patient..." /></div>
-                        <div className="grid gap-2"><Label htmlFor="goal">Goal</Label><Textarea id="goal" placeholder="Define a clear, actionable goal..." /></div>
+                    <div className="space-y-6 py-4">
+                        <div className="space-y-2"><Label htmlFor="discussion">Discussion</Label><Textarea id="discussion" placeholder="Notes from discussion with patient..." /></div>
+                        <div className="space-y-2"><Label htmlFor="goal">Goal</Label><Textarea id="goal" placeholder="Define a clear, actionable goal..." /></div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
@@ -280,10 +298,13 @@ export default function PatientDetailPage() {
 
             {/* Clinical Review Section */}
             <Card>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                    <CardTitle className="flex items-center gap-3"><Stethoscope className="w-6 h-6" /><span>Clinical Review</span></CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Stethoscope className="w-6 h-6 text-primary" />
+                  <div>
+                    <CardTitle>Clinical Review</CardTitle>
                     <CardDescription>Notes from clinical staff.</CardDescription>
+                  </div>
                 </div>
                  <Dialog open={isClinicalModalOpen} onOpenChange={setIsClinicalModalOpen}>
                   <DialogTrigger asChild>
@@ -296,9 +317,9 @@ export default function PatientDetailPage() {
                     <DialogHeader>
                       <DialogTitle>{patient.clinical && patient.clinical.length > 0 ? 'Edit Clinical Review' : 'Add Clinical Review'}</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="grid gap-2"><Label htmlFor="notes_doctor">Doctor's Notes</Label><Textarea id="notes_doctor" placeholder="Enter doctor's notes..."/></div>
-                        <div className="grid gap-2"><Label htmlFor="notes_psychologist">Psychologist's Notes</Label><Textarea id="notes_psychologist" placeholder="Enter psychologist's notes..."/></div>
+                    <div className="space-y-6 py-4">
+                        <div className="space-y-2"><Label htmlFor="notes_doctor">Doctor's Notes</Label><Textarea id="notes_doctor" placeholder="Enter doctor's notes..."/></div>
+                        <div className="space-y-2"><Label htmlFor="notes_psychologist">Psychologist's Notes</Label><Textarea id="notes_psychologist" placeholder="Enter psychologist's notes..."/></div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
@@ -327,24 +348,33 @@ export default function PatientDetailPage() {
 
           <div className="lg:col-span-1 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <User className="w-6 h-6" />
-                  <span>Patient Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <DetailItem
-                  icon={User}
-                  label="Full Name"
-                  value={`${patient.first_name} ${patient.middle_name || ''} ${
+              <CardHeader className="flex flex-col items-center text-center gap-4">
+                <Avatar className="w-24 h-24 border-4 border-background shadow-md">
+                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={`${patient.first_name} ${patient.surname || ''}`} />}
+                  <AvatarFallback><UserCircle className="w-12 h-12" /></AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1">
+                  <CardTitle className="text-2xl">{`${patient.first_name} ${
                     patient.surname || ''
-                  }`}
-                />
-                <DetailItem icon={Cake} label="Date of Birth" value={patient.dob} />
-                <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
-                <DetailItem icon={Phone} label="Phone" value={patient.phone} />
-                <DetailItem icon={Mail} label="Email" value={patient.email} />
+                  }`}</CardTitle>
+                  <CardDescription>Patient ID: {patient.id}</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                 <Separator />
+                <div className="grid grid-cols-1 gap-4 pt-4">
+                  <DetailItem
+                    icon={User}
+                    label="Full Name"
+                    value={`${patient.first_name} ${patient.middle_name || ''} ${
+                      patient.surname || ''
+                    }`}
+                  />
+                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob} />
+                  <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
+                  <DetailItem icon={Phone} label="Phone" value={patient.phone} />
+                  <DetailItem icon={Mail} label="Email" value={patient.email} />
+                </div>
               </CardContent>
             </Card>
             {corporate && (
