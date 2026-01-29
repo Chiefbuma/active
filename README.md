@@ -1,14 +1,40 @@
-# Firebase Studio
+# Taria Health Activation
 
-This is a NextJS starter in Firebase Studio.
+This is a NextJS application for managing health activation campaigns. It features patient registration, assessment tracking, and reporting, all backed by a MySQL database.
 
-To get started, take a look at src/app/page.tsx.
+## Features
+
+- **User Authentication**: Secure login for staff members with password validation using the `users` table. Includes a "Forgot Password" flow.
+- **Dashboard**: A central hub to view recently registered patients.
+- **Patient Management**: Register new patients and view detailed profiles with data fetched from the database.
+- **Assessments**: Add and view records for Vitals, Nutrition, Goals, and Clinical notes, all stored in the database.
+- **Corporate Management**: Add, edit, and manage corporate partners.
+- **PDF Reporting**: Generate and view a printable wellness report for each patient.
+
+## Getting Started
+
+To get started, take a look at `src/app/page.tsx`, which is the login page. The default credentials are `admin@superadmin.com` with the password `password`.
 
 ## Database Schema
 
-Below is the SQL schema for the application.
+Below is the SQL schema for the application. You can use this to set up your local MySQL database.
 
 ```sql
+--
+-- Table structure for table `users`
+--
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `role` enum('admin','staff','navigator','payer','physician') NOT NULL DEFAULT 'staff',
+  `password` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 --
 -- Table structure for table `corporates`
 --
@@ -121,12 +147,20 @@ CREATE TABLE `clinicals` (
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 ```
 
 ## Seed Data
 
 ```sql
+--
+-- Dumping data for table `users`
+--
+-- Note: The password for 'admin@superadmin.com' is 'password'.
+-- It is stored as a bcrypt hash for security. The login API handles this automatically.
+--
+INSERT INTO `users` (`id`, `name`, `email`, `role`, `password`) VALUES
+(1, 'Taria Admin', 'admin@superadmin.com', 'admin', '$2a$10$e.ExV22GgR5n2DR1aT58IeB2P5sJvKYp./35E49b2oeCqL44g1yH6');
+
 --
 -- Dumping data for table `corporates`
 --
