@@ -1,19 +1,10 @@
 import type React from 'react';
 import Header from '@/components/header';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import Logo from '@/components/logo';
 import { mockData } from '@/lib/data';
-import { LayoutDashboard, UserPlus } from 'lucide-react';
+import Logo from '@/components/logo';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { UserPlus } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -21,41 +12,31 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="flex items-center gap-2 p-2">
-            <Logo className="w-8 h-8 text-primary" />
-            <h2 className="text-xl font-semibold font-headline text-foreground">
+    <div className="flex flex-col min-h-screen">
+      <header className="sticky top-0 z-40 w-full border-b bg-background">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Logo className="h-8 w-8 text-primary" />
+            <span className="hidden font-bold font-headline text-foreground sm:inline-block">
               Taria Health
-            </h2>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
-                <Link href="/dashboard" tooltip="Dashboard">
-                  <LayoutDashboard />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Register Patient">
+            </span>
+          </Link>
+          <div className="flex items-center gap-4">
+             <Button asChild>
                 <Link href="/register">
-                  <UserPlus />
-                  <span>Register Patient</span>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Register Patient
                 </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <Header user={mockData.loggedInUser} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+              </Button>
+            <Header user={mockData.loggedInUser} />
+          </div>
+        </div>
+      </header>
+      <main className="flex-1">
+        <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            {children}
+        </div>
+      </main>
+    </div>
   );
 }
