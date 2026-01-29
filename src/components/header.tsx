@@ -11,11 +11,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { LogOut, User as UserIcon, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from './theme-toggle';
 
 export default function Header({ user }: { user: User }) {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/60 backdrop-blur-lg px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 lg:px-8">
       <div className="ml-auto flex items-center gap-4">
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
