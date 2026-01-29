@@ -1,19 +1,51 @@
 # Taria Health Activation
 
-This is a NextJS application for managing health activation campaigns. It features patient registration, assessment tracking, and reporting, all backed by a MySQL database.
+This is a comprehensive, full-stack web application designed for managing health activation campaigns. It provides a robust platform for healthcare staff to register patients, track a wide range of health assessments, manage corporate partnerships, and generate detailed wellness reports. The application is built with a modern tech stack and follows best practices for scalability, maintainability, and security.
 
 ## Features
 
-- **User Authentication**: Secure login for staff members with password validation using the `users` table. Includes a "Forgot Password" flow.
-- **Dashboard**: A central hub to view recently registered patients.
-- **Patient Management**: Register new patients and view detailed profiles with data fetched from the database.
-- **Assessments**: Add and view records for Vitals, Nutrition, Goals, and Clinical notes, all stored in the database.
-- **Corporate Management**: Add, edit, and manage corporate partners.
-- **PDF Reporting**: Generate and view a printable wellness report for each patient.
+-   **Secure User Authentication**: A complete login system for staff members with secure password hashing (`bcryptjs`) and a "Forgot Password" flow.
+-   **Centralized Dashboard**: An overview of recently registered patients for the current campaign.
+-   **Patient Management**: A complete workflow for registering new patients and viewing their detailed profiles.
+-   **Comprehensive Assessments**: Functionality to add and view records for Vitals, Nutrition, Health Goals, and Clinical Notes.
+-   **Corporate Partner Management**: Full CRUD (Create, Read, Update, Delete) functionality for managing corporate partners.
+-   **Dynamic PDF Reporting**: On-the-fly generation of a printable wellness report for each patient, summarizing all their assessment data.
+-   **Local Development Environment**: A fully containerized setup using Docker Compose for easy local development.
+
+## Tech Stack
+
+This project is built with a modern and robust technology stack:
+
+-   **Framework**: **Next.js** (v14+ with App Router) for a full-stack React experience with Server Components and API Routes.
+-   **Language**: **TypeScript** for type safety and improved developer experience.
+-   **UI Library**: **ShadCN UI** built on top of **Tailwind CSS** for a professional, component-based design system.
+-   **Database**: **MySQL** for robust, relational data storage.
+-   **Containerization**: **Docker** and **Docker Compose** for a consistent and reproducible development environment.
+-   **Authentication**: **bcryptjs** for secure password hashing and validation.
+
+
+## Software Design Principles
+
+-   **Full-Stack Architecture**: A modern architecture with a Next.js frontend and a backend API built with Next.js API Routes.
+-   **RESTful API**: The backend exposes a clear, RESTful API for all CRUD operations, ensuring a clean separation of concerns between the client and server.
+-   **Component-Based UI**: The frontend is built using reusable React components, promoting maintainability and code reuse.
+-   **Database-Driven**: All application data is stored in a relational MySQL database, ensuring data integrity and persistence.
+-   **Secure by Design**: Implements a secure authentication flow with industry-standard password hashing to protect user credentials.
+-   **Environment Configuration**: Utilizes `.env` files to manage environment-specific variables, keeping sensitive credentials out of the codebase.
 
 ## Getting Started
 
-To get started, take a look at `src/app/page.tsx`, which is the login page. The default credentials are `admin@superadmin.com` with the password `password`.
+To get started with local development, ensure you have Docker and Docker Compose installed.
+
+1.  **Environment Setup**: The project includes a `.env` file with the necessary environment variables for the Docker setup.
+2.  **Build and Run**: From the root of the project, run the following command:
+    ```bash
+    docker-compose up --build
+    ```
+3.  **Access the Application**:
+    -   Next.js App: **http://localhost:3000**
+    -   phpMyAdmin: **http://localhost:8080**
+    -   Default Login: `admin@superadmin.com` / `password`
 
 ## Database Schema
 
