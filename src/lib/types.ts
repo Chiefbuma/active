@@ -12,6 +12,7 @@ export type Corporate = {
   wellness_date: string;
 };
 
+// This represents a row in the `registrations` table
 export type Patient = {
   id: number;
   first_name: string;
@@ -25,15 +26,22 @@ export type Patient = {
   user_id?: number;
   corporate_id?: number;
   created_at: string;
+  updated_at?: string;
+
+  // Joined data
+  corporate_name?: string;
+  wellness_date?: string;
+
+  // Relations
   vitals?: Vital[];
   nutrition?: Nutrition[];
   goals?: Goal[];
-  clinical?: Clinical[];
+  clinicals?: Clinical[];
 };
 
 export type Vital = {
   id: number;
-  registration_id: number;
+  patient_id: number; // Mapped from registration_id
   bp_systolic?: number;
   bp_diastolic?: number;
   pulse?: number;
@@ -45,7 +53,7 @@ export type Vital = {
 
 export type Nutrition = {
   id: number;
-  registration_id: number;
+  patient_id: number; // Mapped from registration_id
   height?: number;
   weight?: number;
   bmi?: number;
@@ -57,7 +65,7 @@ export type Nutrition = {
 
 export type Goal = {
   id: number;
-  registration_id: number;
+  patient_id: number; // Mapped from registration_id
   user_id: number;
   discussion?: string;
   goal?: string;
@@ -65,7 +73,7 @@ export type Goal = {
 
 export type Clinical = {
   id: number;
-  registration_id: number;
+  patient_id: number; // Mapped from registration_id
   notes_psychologist?: string;
   notes_doctor?: string;
   user_id?: number;

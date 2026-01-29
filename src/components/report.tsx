@@ -27,7 +27,7 @@ function getDaySuffix(day: number) {
 export default function Report({ patient, corporate }: ReportProps) {
   const vitals = patient.vitals?.[0];
   const nutrition = patient.nutrition?.[0];
-  const clinical = patient.clinical?.[0];
+  const clinical = patient.clinicals?.[0];
   const goal = patient.goals?.[0];
 
   let reportDate: Date;

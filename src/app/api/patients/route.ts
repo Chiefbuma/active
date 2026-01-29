@@ -6,7 +6,7 @@ export async function GET() {
     const connection = await db.getConnection();
     const [rows] = await connection.query(`
         SELECT p.*, c.name as corporate_name, c.wellness_date 
-        FROM patients p
+        FROM registrations p
         LEFT JOIN corporates c ON p.corporate_id = c.id
         ORDER BY p.created_at DESC
     `);
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
         const connection = await db.getConnection();
         const [result] = await connection.query(
-            'INSERT INTO patients (first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO registrations (first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id || null]
         );
         connection.release();

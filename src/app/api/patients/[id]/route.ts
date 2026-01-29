@@ -7,7 +7,7 @@ async function getPatientWithRelations(patientId: string) {
     // Fetch patient with corporate info
     const [patientRows] = await connection.query(`
       SELECT p.*, c.name as corporate_name, c.wellness_date 
-      FROM patients p
+      FROM registrations p
       LEFT JOIN corporates c ON p.corporate_id = c.id
       WHERE p.id = ?
     `, [patientId]);
@@ -18,10 +18,10 @@ async function getPatientWithRelations(patientId: string) {
     const patient = (patientRows as any)[0];
 
     // Fetch related data
-    const [vitals] = await connection.query('SELECT * FROM vitals WHERE patient_id = ? ORDER BY measured_at DESC', [patientId]);
-    const [nutrition] = await connection.query('SELECT * FROM nutrition WHERE patient_id = ? ORDER BY created_at DESC', [patientId]);
-    const [goals] = await connection.query('SELECT * FROM goals WHERE patient_id = ? ORDER BY created_at DESC', [patientId]);
-    const [clinical] = await connection.query('SELECT * FROM clinical_reviews WHERE patient_id = ? ORDER BY created_at DESC', [patientId]);
+    const [vitals] = await connection.query('SELECT * FROM vitals WHERE registration_id = ? ORDER BY measured_at DESC', [patientId]);
+    const [nutrition] = await connection.query('SELECT * FROM nutritions WHERE registration_id = ? ORDER BY created_at DESC', [patientId]);
+    const [goals] = await connection.query('SELECT * FROM goals WHERE registration_id = ? ORDER BY created_at DESC', [patientId]);
+    const [clinicals] = await connection.query('SELECT * FROM clinicals WHERE registration_id = ? ORDER BY created_at DESC', [patientId]);
 
     // Assemble the patient object
     return {
@@ -29,7 +29,7 @@ async function getPatientWithRelations(patientId: string) {
       vitals,
       nutrition,
       goals,
-      clinical,
+      clinicals,
     };
   } finally {
     connection.release();
@@ -58,7 +58,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     try {
         const connection = await db.getConnection();
-        await connection.query('DELETE FROM patients WHERE id = ?', [params.id]);
+        await connection.query('DELETE FROM registrations WHERE id = ?', [params.id]);
         connection.release();
         return NextResponse.json({ message: 'Patient deleted successfully' });
     } catch (error) {

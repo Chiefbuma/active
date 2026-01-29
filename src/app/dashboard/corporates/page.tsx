@@ -212,8 +212,7 @@ export default function CorporatesPage() {
                                     <AlertDialogHeader>
                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the corporate account.
-                                        Patients associated with this corporate will be unlinked.
+                                        This action cannot be undone. This will permanently delete the corporate and all associated patient registrations.
                                     </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>

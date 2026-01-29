@@ -48,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const connection = await db.getConnection();
-    // The schema has ON DELETE SET NULL, so the database will handle unlinking patients.
+    // The schema has ON DELETE CASCADE, so the database will handle deleting associated registrations (patients).
     await connection.query('DELETE FROM corporates WHERE id = ?', [params.id]);
     connection.release();
     return NextResponse.json({ message: 'Corporate deleted successfully' });
