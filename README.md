@@ -191,7 +191,7 @@ CREATE TABLE `clinicals` (
 -- It is stored as a bcrypt hash for security. The login API handles this automatically.
 --
 INSERT INTO `users` (`id`, `name`, `email`, `role`, `password`) VALUES
-(1, 'Taria Admin', 'admin@superadmin.com', 'admin', '$2a$10$e.ExV22GgR5n2DR1aT58IeB2P5sJvKYp./35E49b2oeCqL44g1yH6');
+(1, 'Taria Admin', 'admin@superadmin.com', 'admin', '$2a$10$GomuBl2mnm5T1C/T6S1gduMJo2TVv5Hrj1gI62xGIJ2Q8yL2wzI4S');
 
 --
 -- Dumping data for table `corporates`
