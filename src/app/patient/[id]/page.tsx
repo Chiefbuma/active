@@ -38,14 +38,6 @@ import {
   XCircle,
   FileText,
 } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -160,12 +152,12 @@ export default function PatientDetailPage() {
                     <DialogHeader>
                       <DialogTitle>{patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add New Vitals'}</DialogTitle>
                     </DialogHeader>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6 py-4">
+                    <div className="grid grid-cols-1 gap-6 py-4">
                       <div className="space-y-2"><Label htmlFor="bp_systolic">Systolic (mmHg)</Label><Input id="bp_systolic" type="number" placeholder="120" /></div>
                       <div className="space-y-2"><Label htmlFor="bp_diastolic">Diastolic (mmHg)</Label><Input id="bp_diastolic" type="number" placeholder="80" /></div>
                       <div className="space-y-2"><Label htmlFor="pulse">Pulse (bpm)</Label><Input id="pulse" type="number" placeholder="70" /></div>
                       <div className="space-y-2"><Label htmlFor="temp">Temp (°C)</Label><Input id="temp" type="number" step="0.1" placeholder="36.5" /></div>
-                      <div className="space-y-2 sm:col-span-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
+                      <div className="space-y-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
                     </div>
                     <DialogFooter>
                       <DialogClose asChild>
@@ -178,14 +170,15 @@ export default function PatientDetailPage() {
               </CardHeader>
               <CardContent>
                 {patient.vitals && patient.vitals.length > 0 ? (
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Systolic (mmHg)</TableHead><TableHead>Diastolic (mmHg)</TableHead><TableHead>Pulse (bpm)</TableHead><TableHead>Temp (°C)</TableHead><TableHead>RBS (mmol/L)</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {patient.vitals.map((vital) => (
-                        <TableRow key={vital.id}><TableCell>{vital.bp_systolic || '-'}</TableCell><TableCell>{vital.bp_diastolic || '-'}</TableCell><TableCell>{vital.pulse || '-'}</TableCell><TableCell>{vital.temp || '-'}</TableCell><TableCell>{vital.rbs || '-'}</TableCell></TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                    patient.vitals.map((vital) => (
+                      <div key={vital.id} className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm p-4 bg-muted/50 rounded-lg">
+                          <DetailItem label="Systolic (mmHg)" value={vital.bp_systolic} />
+                          <DetailItem label="Diastolic (mmHg)" value={vital.bp_diastolic} />
+                          <DetailItem label="Pulse (bpm)" value={vital.pulse} />
+                          <DetailItem label="Temp (°C)" value={vital.temp} />
+                          <DetailItem label="RBS (mmol/L)" value={vital.rbs} />
+                      </div>
+                    ))
                 ) : ( <p className="text-muted-foreground text-center py-4">No vitals recorded.</p> )}
               </CardContent>
             </Card>
@@ -212,12 +205,12 @@ export default function PatientDetailPage() {
                       <DialogTitle>{patient.nutrition && patient.nutrition.length > 0 ? 'Edit Nutrition Assessment' : 'Add Nutrition Assessment'}</DialogTitle>
                     </DialogHeader>
                     <div className="py-4 space-y-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                      <div className="grid grid-cols-1 gap-6">
                           <div className="space-y-2"><Label htmlFor="height">Height (cm)</Label><Input id="height" type="number" placeholder="175" /></div>
                           <div className="space-y-2"><Label htmlFor="weight">Weight (kg)</Label><Input id="weight" type="number" step="0.1" placeholder="70.5" /></div>
                           <div className="space-y-2"><Label htmlFor="bmi">BMI</Label><Input id="bmi" type="number" step="0.1" placeholder="22.9" readOnly /></div>
                           <div className="space-y-2"><Label htmlFor="visceral_fat">Visceral Fat</Label><Input id="visceral_fat" type="number" placeholder="5" /></div>
-                          <div className="space-y-2 sm:col-span-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
+                          <div className="space-y-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
                       </div>
                       <div className="space-y-2"><Label htmlFor="notes_nutritionist">Nutritionist Notes</Label><Textarea id="notes_nutritionist" placeholder="Enter notes..." /></div>
                     </div>
@@ -234,7 +227,7 @@ export default function PatientDetailPage() {
                 {patient.nutrition && patient.nutrition.length > 0 ? (
                     patient.nutrition.map((nutri) => (
                     <div key={nutri.id} className="space-y-4">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm p-4 bg-muted/50 rounded-lg">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm p-4 bg-muted/50 rounded-lg">
                           <DetailItem label="Height (cm)" value={nutri.height} />
                           <DetailItem label="Weight (kg)" value={nutri.weight} />
                           <DetailItem label="BMI" value={nutri.bmi} />
