@@ -31,6 +31,12 @@ export const mockData: AppData = {
       ],
       nutrition: [
         { id: 1, registration_id: 1, height: 169, weight: 64.8, bmi: 23, visceral_fat: 2, body_fat_percent: 10.3, notes_nutritionist: 'normal nutritional status' }
+      ],
+      goals: [
+        { id: 1, registration_id: 1, user_id: 1, discussion: 'Patient wants to improve cardiovascular health and reduce stress.', goal: 'Incorporate 30 minutes of moderate cardio exercise 3 times a week. Practice mindfulness meditation for 10 minutes daily.' }
+      ],
+      clinical: [
+        { id: 1, registration_id: 1, user_id: 1, notes_doctor: 'Patient is in good health. Advised on consistent exercise and a balanced diet. Follow up in 6 months.', notes_psychologist: 'No immediate concerns. Patient seems well-adjusted and motivated.' }
       ]
     },
     {
@@ -50,6 +56,12 @@ export const mockData: AppData = {
       ],
        nutrition: [
         { id: 2, registration_id: 2, height: 175, weight: 84, bmi: 27 }
+      ],
+      goals: [
+        { id: 2, registration_id: 2, user_id: 1, discussion: 'Patient is concerned about his high blood pressure reading and wants to manage it better.', goal: 'Reduce daily sodium intake to under 2,300mg. Monitor blood pressure at home weekly and keep a log.' }
+      ],
+      clinical: [
+        { id: 2, registration_id: 2, user_id: 1, notes_doctor: 'Diagnosed with Stage 1 Hypertension. Prescribed Lisinopril 10mg. Advised on lifestyle modifications, particularly diet and exercise. Follow up in 1 month to check BP.', notes_psychologist: 'Patient is showing signs of anxiety related to his new diagnosis. Provided resources for stress management.' }
       ]
     },
     {

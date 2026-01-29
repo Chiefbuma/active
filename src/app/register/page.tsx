@@ -16,8 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { mockData } from '@/lib/data';
 
 export default function RegisterPage() {
+  const corporates = mockData.corporates;
+
   return (
     <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-2xl">
@@ -74,9 +77,11 @@ export default function RegisterPage() {
                     <SelectValue placeholder="Select corporate" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Bio Food Products</SelectItem>
-                    <SelectItem value="2">Ikomoko</SelectItem>
-                    <SelectItem value="3">Taria</SelectItem>
+                    {corporates.map((corporate) => (
+                      <SelectItem key={corporate.id} value={String(corporate.id)}>
+                        {corporate.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
