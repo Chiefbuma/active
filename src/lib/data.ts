@@ -1,87 +1,105 @@
-import type { HealthData } from './types';
+import type { AppData } from './types';
 import { placeholderImages } from './placeholder-images';
-import { HeartPulse, Droplets, Activity, Weight } from 'lucide-react';
 
-export const healthData: HealthData = {
-  user: {
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
+export const mockData: AppData = {
+  loggedInUser: {
+    id: 1,
+    name: 'Dr. Emily Carter',
+    email: 'emily.carter@taria.health',
+    role: 'physician',
     avatarUrl: placeholderImages.find(p => p.id === 'user-avatar')?.imageUrl || '',
   },
-  weekNumber: 12,
-  progressSummary: 'Patient has shown consistent improvement in blood pressure and stable glucose levels over the past month. Weight has decreased by 2kg. Recommending continued focus on diet and light exercise.',
-  metrics: [
+  corporates: [
+    { id: 1, name: 'Bio Food Products', wellness_date: '2025-09-29' },
+    { id: 2, name: 'Ikomoko', wellness_date: '2025-10-01' },
+    { id: 3, name: 'Taria', wellness_date: '2025-10-01' },
+  ],
+  patients: [
     {
-      id: 'bp',
-      name: 'Blood Pressure',
-      value: '120/80 mmHg',
-      change: '-5 mmHg',
-      changeType: 'decrease',
-      icon: HeartPulse,
-      data: [
-        { week: '1', value: 140 },
-        { week: '2', value: 138 },
-        { week: '3', value: 135 },
-        { week: '4', value: 130 },
-        { week: '5', value: 128 },
-        { week: '6', value: 125 },
-        { week: '7', value: 122 },
-        { week: '8', value: 120 },
+      id: 1,
+      first_name: 'Sylvester',
+      surname: 'Musa',
+      sex: 'Male',
+      dob: '1997-01-01',
+      age: 28,
+      phone: '743955149',
+      email: 'musasylvester1065@gmail.com',
+      corporate_id: 1,
+      created_at: '2025-09-29 13:10:46',
+      vitals: [
+        { id: 1, registration_id: 1, bp_systolic: 114, bp_diastolic: 73, pulse: 58, temp: 36.4, rbs: '5.1' }
       ],
+      nutrition: [
+        { id: 1, registration_id: 1, height: 169, weight: 64.8, bmi: 23, visceral_fat: 2, body_fat_percent: 10.3, notes_nutritionist: 'normal nutritional status' }
+      ]
     },
     {
-      id: 'bg',
-      name: 'Blood Glucose',
-      value: '95 mg/dL',
-      change: '+2 mg/dL',
-      changeType: 'stable',
-      icon: Droplets,
-      data: [
-        { week: '1', value: 105 },
-        { week: '2', value: 102 },
-        { week: '3', value: 98 },
-        { week: '4', value: 96 },
-        { week: '5', value: 95 },
-        { week: '6', value: 94 },
-        { week: '7', value: 93 },
-        { week: '8', value: 95 },
+      id: 2,
+      first_name: 'Tom',
+      middle_name: 'Mbalala',
+      surname: 'Wawire',
+      sex: 'Male',
+      dob: '1970-01-01',
+      age: 55,
+      phone: '729089363',
+      email: 'tommbalala@20.com',
+      corporate_id: 1,
+      created_at: '2025-09-29 13:10:46',
+       vitals: [
+        { id: 2, registration_id: 2, bp_systolic: 150, bp_diastolic: 99, pulse: 62, temp: 36.4, rbs: '6.2' }
       ],
+       nutrition: [
+        { id: 2, registration_id: 2, height: 175, weight: 84, bmi: 27 }
+      ]
     },
     {
-      id: 'hr',
-      name: 'Heart Rate',
-      value: '72 bpm',
-      change: '-3 bpm',
-      changeType: 'decrease',
-      icon: Activity,
-      data: [
-        { week: '1', value: 85 },
-        { week: '2', value: 82 },
-        { week: '3', value: 80 },
-        { week: '4', value: 78 },
-        { week: '5', value: 75 },
-        { week: '6', value: 74 },
-        { week: '7', value: 73 },
-        { week: '8', value: 72 },
+      id: 3,
+      first_name: 'Euticus',
+      middle_name: 'Matumbi',
+      surname: 'Muthuri',
+      sex: 'Male',
+      dob: '1991-01-01',
+      age: 34,
+      phone: '742025594',
+      email: 'matumbieutychus@gmail.com',
+      created_at: '2025-09-29 13:10:46',
+      vitals: [
+        { id: 3, registration_id: 3, bp_systolic: 133, bp_diastolic: 81, pulse: 70, temp: 36.1, rbs: 'NOT SUPPORTED' }
       ],
+       nutrition: [
+        { id: 3, registration_id: 3, height: 169, weight: 81, bmi: 28, notes_nutritionist: 'ecouraged on excercise' }
+      ]
+    },
+     {
+      id: 4,
+      first_name: 'Paul',
+      surname: 'Ratemo',
+      sex: 'Male',
+      dob: '1985-01-01',
+      age: 40,
+      phone: '743760460',
+      email: 'paulratemo84@gmail.com',
+      created_at: '2025-09-29 13:10:46',
+      vitals: [
+        { id: 4, registration_id: 4, bp_systolic: 135, bp_diastolic: 89, pulse: 74, temp: 37, rbs: '5.5' }
+      ],
+       nutrition: [
+        { id: 4, registration_id: 4, height: 181, weight: 74.8, bmi: 23, visceral_fat: 6, body_fat_percent: 18.5, notes_nutritionist: 'encouraged on exercise' }
+      ]
     },
     {
-      id: 'wt',
-      name: 'Weight',
-      value: '68 kg',
-      change: '-0.5 kg',
-      changeType: 'decrease',
-      icon: Weight,
-      data: [
-        { week: '1', value: 72 },
-        { week: '2', value: 71.5 },
-        { week: '3', value: 71 },
-        { week: '4', value: 70 },
-        { week: '5', value: 69.5 },
-        { week: '6', value: 69 },
-        { week: '7', value: 68.5 },
-        { week: '8', value: 68 },
-      ],
-    },
+      id: 5,
+      first_name: 'Kingsley',
+      surname: 'Otieno',
+      sex: 'Male',
+      dob: '1976-01-01',
+      age: 49,
+      phone: '724785997',
+      email: 'nyakrojala@gmail.com',
+      created_at: '2025-09-29 13:10:46',
+       vitals: [
+        { id: 5, registration_id: 5, bp_systolic: 171, bp_diastolic: 118, pulse: 76, temp: 37, rbs: '5.8' }
+      ]
+    }
   ],
 };

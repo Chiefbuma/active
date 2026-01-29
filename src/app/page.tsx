@@ -16,11 +16,11 @@ export default function LoginPage() {
           <div className="grid gap-4 text-center">
             <div className="flex justify-center items-center gap-4 mb-4">
               <Logo className="h-12 w-12 text-primary" />
-              <h1 className="text-4xl font-bold font-headline">Taria Health Compass</h1>
+              <h1 className="text-4xl font-bold font-headline">Taria Health Activation</h1>
             </div>
-            <h2 className="text-2xl font-semibold">Welcome Back</h2>
+            <h2 className="text-2xl font-semibold">Staff Login</h2>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access your dashboard.
+              Enter your credentials to access the campaign dashboard.
             </p>
           </div>
           <form>
@@ -32,7 +32,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="name@example.com"
                   required
-                  defaultValue="patient@taria.health"
+                  defaultValue="staff@taria.health"
                 />
               </div>
               <div className="grid gap-2">
@@ -52,12 +52,6 @@ export default function LoginPage() {
               </Button>
             </div>
           </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-              Sign up
-            </Link>
-          </div>
         </div>
       </div>
       <div className="hidden bg-muted lg:block relative">

@@ -2,15 +2,9 @@
   "placeholderImages": [
     {
       "id": "login-hero",
-      "description": "A person meditating outdoors, conveying a sense of calm and wellbeing.",
-      "imageUrl": "https://images.unsplash.com/photo-1759476532819-e37ac3d05cff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoZWFsdGglMjB3ZWxsYmVpbmd8ZW58MHx8fHwxNzY4NzUzNjg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "health wellbeing"
-    },
-    {
-      "id": "signup-hero",
-      "description": "A vibrant and healthy meal, representing a positive lifestyle change.",
-      "imageUrl": "https://images.unsplash.com/photo-1556386734-4227a180d19e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxoZWFsdGh5JTIwZm9vZHxlbnwwfHx8fDE3Njg3NTEzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "healthy food"
+      "description": "A doctor listening to a patient's heartbeat, representing healthcare and compassion.",
+      "imageUrl": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNDE5ODJ8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlfGVufDB8fHx8MTY3ODg4ODU2Mg&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "healthcare doctor"
     },
     {
       "id": "user-avatar",

@@ -9,11 +9,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
-import { healthData } from '@/lib/data';
-import { Home, User, Settings } from 'lucide-react';
+import { mockData } from '@/lib/data';
+import { LayoutDashboard, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardLayout({
@@ -37,35 +36,24 @@ export default function DashboardLayout({
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive>
                 <Link href="/dashboard" tooltip="Dashboard">
-                  <Home />
+                  <LayoutDashboard />
                   <span>Dashboard</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Profile">
-                <Link href="#">
-                  <User />
-                  <span>Profile</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
-                <Link href="#">
-                  <Settings />
-                  <span>Settings</span>
+              <SidebarMenuButton asChild tooltip="Register Patient">
+                <Link href="/register">
+                  <UserPlus />
+                  <span>Register Patient</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-          {/* Footer content if any */}
-        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <Header user={healthData.user} />
+        <Header user={mockData.loggedInUser} />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background">{children}</main>
       </SidebarInset>
     </SidebarProvider>

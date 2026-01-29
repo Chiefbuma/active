@@ -3,8 +3,8 @@ import './globals.css';
 import {Toaster} from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Taria Health Compass',
-  description: 'Personalized Chronic Disease Management',
+  title: 'Taria Health Activation',
+  description: 'Health Activation Campaign App',
 };
 
 export default function RootLayout({
