@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import type { Corporate } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-
+import { differenceInYears } from 'date-fns';
 
 export default function RegisterPage() {
   const [corporates, setCorporates] = useState<Corporate[]>([]);
@@ -36,6 +36,7 @@ export default function RegisterPage() {
     email: '',
     corporate_id: '',
   });
+  const [age, setAge] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -47,6 +48,24 @@ export default function RegisterPage() {
       .then(data => setCorporates(data))
       .catch(err => console.error("Failed to fetch corporates", err));
   }, []);
+
+  useEffect(() => {
+    if (formData.dob) {
+      try {
+        const birthDate = new Date(formData.dob);
+        if (!isNaN(birthDate.getTime())) {
+          const calculatedAge = differenceInYears(new Date(), birthDate);
+          setAge(calculatedAge >= 0 ? calculatedAge : null);
+        } else {
+          setAge(null);
+        }
+      } catch (error) {
+        setAge(null);
+      }
+    } else {
+      setAge(null);
+    }
+  }, [formData.dob]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -97,8 +116,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-2xl">
+    <div className="flex justify-center items-start py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-4xl">
         <CardHeader>
           <CardTitle>New Patient Registration</CardTitle>
           <CardDescription>
@@ -107,47 +126,61 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="first_name">First Name</Label>
-                <Input id="first_name" placeholder="John" required onChange={handleInputChange} />
+            <div className="space-y-8">
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="first_name" className="text-foreground">First Name</Label>
+                  <Input id="first_name" placeholder="John" required onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="middle_name" className="text-foreground">Middle Name (Optional)</Label>
+                  <Input id="middle_name" placeholder="Fitzgerald" onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="surname" className="text-foreground">Surname</Label>
+                  <Input id="surname" placeholder="Doe" required onChange={handleInputChange} />
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="middle_name">Middle Name (Optional)</Label>
-                <Input id="middle_name" placeholder="Fitzgerald" onChange={handleInputChange} />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="dob" className="text-foreground">Date of Birth</Label>
+                  <Input id="dob" type="date" required onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="age" className="text-foreground">Age</Label>
+                    <Input id="age" type="number" placeholder="Calculated from DOB" disabled value={age ?? ''} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="sex" className="text-foreground">Sex</Label>
+                  <Select required onValueChange={(value) => handleSelectChange('sex', value)}>
+                    <SelectTrigger id="sex">
+                      <SelectValue placeholder="Select sex" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-               <div className="grid gap-2">
-                <Label htmlFor="surname">Surname</Label>
-                <Input id="surname" placeholder="Doe" required onChange={handleInputChange} />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                  <Input id="phone" type="tel" placeholder="+254 712 345 678" onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className="text-foreground">Email Address</Label>
+                  <Input id="email" type="email" placeholder="name@example.com" onChange={handleInputChange} />
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" type="date" required onChange={handleInputChange} />
-              </div>
-               <div className="grid gap-2">
-                <Label htmlFor="sex">Sex</Label>
-                <Select required onValueChange={(value) => handleSelectChange('sex', value)}>
-                  <SelectTrigger id="sex">
-                    <SelectValue placeholder="Select sex" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+254 712 345 678" onChange={handleInputChange} />
-              </div>
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" placeholder="name@example.com" onChange={handleInputChange} />
-              </div>
-               <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="corporate_id">Corporate (Optional)</Label>
-                 <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
+
+              <div className="grid grid-cols-1 gap-2">
+                <Label htmlFor="corporate_id" className="text-foreground">Corporate (Optional)</Label>
+                <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
                   <SelectTrigger id="corporate_id">
                     <SelectValue placeholder="Select corporate" />
                   </SelectTrigger>
@@ -162,8 +195,8 @@ export default function RegisterPage() {
                 </Select>
               </div>
             </div>
-            <div className="mt-6 flex justify-end gap-4">
-               <Button variant="outline" asChild>
+            <div className="mt-8 flex justify-end gap-4">
+              <Button variant="outline" asChild>
                 <Link href="/dashboard">Cancel</Link>
               </Button>
               <Button type="submit" disabled={loading}>{loading ? 'Registering...' : 'Register Patient'}</Button>
