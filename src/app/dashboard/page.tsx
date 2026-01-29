@@ -50,7 +50,6 @@ export default function DashboardPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Corporate</TableHead>
                   <TableHead className="hidden sm:table-cell">Wellness Date</TableHead>
                   <TableHead className="text-right">Action</TableHead>
                 </TableRow>
@@ -68,16 +67,9 @@ export default function DashboardPage() {
                           </Avatar>
                           <div className="grid gap-1">
                             <p className="font-medium leading-none">{`${patient.first_name} ${patient.surname || ''}`}</p>
-                            <p className="text-sm text-muted-foreground">{patient.email}</p>
+                            <p className="text-sm text-muted-foreground">{corporate ? corporate.name : 'No Corporate'}</p>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {corporate ? (
-                          <Badge variant="outline">{corporate.name}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
                         {corporate ? (
