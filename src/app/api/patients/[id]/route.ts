@@ -4,8 +4,14 @@ import { db } from '@/lib/db';
 async function getPatientWithRelations(patientId: string) {
   const connection = await db.getConnection();
   try {
-    // Fetch patient
-    const [patientRows] = await connection.query('SELECT * FROM patients WHERE id = ?', [patientId]);
+    // Fetch patient with corporate info
+    const [patientRows] = await connection.query(`
+      SELECT p.*, c.name as corporate_name, c.wellness_date 
+      FROM patients p
+      LEFT JOIN corporates c ON p.corporate_id = c.id
+      WHERE p.id = ?
+    `, [patientId]);
+
     if ((patientRows as any).length === 0) {
       return null;
     }

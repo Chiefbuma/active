@@ -3,7 +3,7 @@ import Header from '@/components/header';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Building } from 'lucide-react';
 import { placeholderImages } from '@/lib/placeholder-images';
 import type { User } from '@/lib/types';
 
@@ -37,6 +37,12 @@ export default function DashboardLayout({
                 <Link href="/register">
                   <UserPlus className="mr-2 h-4 w-4" />
                   Register Patient
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/corporates">
+                  <Building className="mr-2 h-4 w-4" />
+                  Manage Corporates
                 </Link>
               </Button>
             <Header user={loggedInUser} />
