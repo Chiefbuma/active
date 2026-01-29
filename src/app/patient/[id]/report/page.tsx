@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { mockData } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Printer, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Report from '@/components/report';
 
-export default function ReportPage({ params }: { params: { id: string } }) {
+export default function ReportPage() {
+  const params = useParams();
   const { toast } = useToast();
-  const patientId = parseInt(params.id, 10);
+  const patientId = parseInt(params.id as string, 10);
   const patient = mockData.patients.find((p) => p.id === patientId);
 
   // Auto-trigger print dialog on load for a better user experience

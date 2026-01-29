@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { mockData } from '@/lib/data';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -50,6 +50,7 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const DetailItem = ({
   label,
@@ -69,8 +70,9 @@ const DetailItem = ({
   </div>
 );
 
-export default function PatientDetailPage({ params }: { params: { id: string } }) {
-  const patientId = parseInt(params.id, 10);
+export default function PatientDetailPage() {
+  const params = useParams();
+  const patientId = parseInt(params.id as string, 10);
   const patient = mockData.patients.find((p) => p.id === patientId);
   const corporates = mockData.corporates;
   const { toast } = useToast();
