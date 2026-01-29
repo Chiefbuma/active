@@ -142,10 +142,6 @@ body {
 
 /* ================= PRINT OPTIMIZATION ================= */
 @media print {
-    .no-print {
-        display: none !important;
-    }
-
     body {
         font-size: 11pt;
     }

@@ -37,7 +37,6 @@ import {
   Save,
   XCircle,
   FileText,
-  UserCircle,
 } from 'lucide-react';
 import {
   Table,
@@ -54,6 +53,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ReportViewer from '@/components/report-viewer';
 
 
 const DetailItem = ({
@@ -65,13 +65,13 @@ const DetailItem = ({
   value: React.ReactNode;
   icon?: React.ElementType;
 }) => (
-  <div className="flex items-center gap-4">
+  <div className="flex items-start gap-4">
     {Icon && (
-      <div className="bg-muted rounded-full p-2">
+      <div className="bg-muted/50 rounded-full p-2">
         <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
     )}
-    <div>
+    <div className="grid gap-0.5">
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
         {label}
       </p>
@@ -91,6 +91,7 @@ export default function PatientDetailPage() {
   const [isNutritionModalOpen, setIsNutritionModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isClinicalModalOpen, setIsClinicalModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   
   const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 
@@ -150,7 +151,7 @@ export default function PatientDetailPage() {
                 </div>
                 <Dialog open={isVitalsModalOpen} onOpenChange={setIsVitalsModalOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setIsVitalsModalOpen(true)}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       {patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add Vitals'}
                     </Button>
@@ -201,7 +202,7 @@ export default function PatientDetailPage() {
                 </div>
                  <Dialog open={isNutritionModalOpen} onOpenChange={setIsNutritionModalOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setIsNutritionModalOpen(true)}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       {patient.nutrition && patient.nutrition.length > 0 ? 'Edit Assessment' : 'Add Assessment'}
                     </Button>
@@ -259,7 +260,7 @@ export default function PatientDetailPage() {
                 </div>
                  <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setIsGoalModalOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4"/>
                         {patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set Goal'}
                     </Button>
@@ -308,7 +309,7 @@ export default function PatientDetailPage() {
                 </div>
                  <Dialog open={isClinicalModalOpen} onOpenChange={setIsClinicalModalOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setIsClinicalModalOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4"/>
                         {patient.clinical && patient.clinical.length > 0 ? 'Edit Review' : 'Add Review'}
                     </Button>
@@ -351,7 +352,7 @@ export default function PatientDetailPage() {
               <CardHeader className="flex flex-col items-center text-center gap-4">
                 <Avatar className="w-24 h-24 border-4 border-background shadow-md">
                    {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={`${patient.first_name} ${patient.surname || ''}`} />}
-                  <AvatarFallback><UserCircle className="w-12 h-12" /></AvatarFallback>
+                  <AvatarFallback className="text-3xl">{`${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
                   <CardTitle className="text-2xl">{`${patient.first_name} ${
@@ -400,11 +401,9 @@ export default function PatientDetailPage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 <Button variant="outline">Edit Patient Details</Button>
-                 <Button asChild>
-                  <Link href={`/patient/${patient.id}/report`} target="_blank">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Generate PDF Report
-                  </Link>
+                <Button onClick={() => setIsReportModalOpen(true)}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate PDF Report
                 </Button>
                 <Button variant="destructive">Delete Patient Record</Button>
               </CardContent>
@@ -412,6 +411,14 @@ export default function PatientDetailPage() {
           </div>
         </div>
       </div>
+       {isReportModalOpen && (
+        <ReportViewer
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          patient={patient}
+          corporate={corporate}
+        />
+      )}
     </div>
   );
 }
