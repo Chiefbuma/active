@@ -1,0 +1,56 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+
+export async function GET() {
+  try {
+    const connection = await db.getConnection();
+    const [rows] = await connection.query(`
+        SELECT p.*, c.name as corporate_name, c.wellness_date 
+        FROM patients p
+        LEFT JOIN corporates c ON p.corporate_id = c.id
+        ORDER BY p.created_at DESC
+    `);
+    connection.release();
+    return NextResponse.json(rows);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: 'Error fetching patients' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+    try {
+        const body = await request.json();
+        const { first_name, middle_name, surname, dob, sex, phone, email, corporate_id } = body;
+
+        // Basic validation
+        if (!first_name || !surname || !dob || !sex) {
+            return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+        }
+
+        let age = null;
+        if (dob) {
+            const birthDate = new Date(dob);
+            const today = new Date();
+            age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+        }
+
+        const connection = await db.getConnection();
+        const [result] = await connection.query(
+            'INSERT INTO patients (first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id || null]
+        );
+        connection.release();
+
+        const insertId = (result as any).insertId;
+
+        return NextResponse.json({ message: 'Patient registered successfully', patientId: insertId }, { status: 201 });
+    } catch (error) {
+        console.error('Error creating patient:', error);
+        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    }
+}

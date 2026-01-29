@@ -1,16 +1,27 @@
 import type React from 'react';
 import Header from '@/components/header';
-import { mockData } from '@/lib/data';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { UserPlus } from 'lucide-react';
+import { placeholderImages } from '@/lib/placeholder-images';
+import type { User } from '@/lib/types';
+
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
+  const loggedInUser: User = {
+    id: 1,
+    name: 'Dr. Emily Carter',
+    email: 'emily.carter@taria.health',
+    role: 'physician',
+    avatarUrl: placeholderImages.find(p => p.id === 'user-avatar')?.imageUrl || '',
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -28,7 +39,7 @@ export default function DashboardLayout({
                   Register Patient
                 </Link>
               </Button>
-            <Header user={mockData.loggedInUser} />
+            <Header user={loggedInUser} />
           </div>
         </div>
       </header>
