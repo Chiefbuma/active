@@ -10,6 +10,15 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
@@ -27,6 +36,7 @@ import {
   PlusCircle,
   Save,
   XCircle,
+  FileText,
 } from 'lucide-react';
 import {
   Table,
@@ -59,43 +69,16 @@ const DetailItem = ({
   </div>
 );
 
-const FormCard = ({
-  title,
-  children,
-  onSubmit,
-  onCancel,
-}: {
-  title: string;
-  children: React.ReactNode;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-}) => (
-  <form
-    onSubmit={onSubmit}
-    className="p-4 mb-6 mt-4 space-y-4 border rounded-lg bg-muted/30"
-  >
-    <h4 className="font-semibold text-lg">{title}</h4>
-    {children}
-    <div className="flex justify-end gap-2">
-      <Button type="button" variant="outline" onClick={onCancel}>
-        <XCircle className="mr-2 h-4 w-4" /> Cancel
-      </Button>
-      <Button type="submit">
-        <Save className="mr-2 h-4 w-4" /> Save Record
-      </Button>
-    </div>
-  </form>
-);
-
 export default function PatientDetailPage({ params }: { params: { id: string } }) {
   const patientId = parseInt(params.id, 10);
   const patient = mockData.patients.find((p) => p.id === patientId);
   const corporates = mockData.corporates;
+  const { toast } = useToast();
 
-  const [showVitalsForm, setShowVitalsForm] = useState(false);
-  const [showNutritionForm, setShowNutritionForm] = useState(false);
-  const [showGoalForm, setShowGoalForm] = useState(false);
-  const [showClinicalForm, setShowClinicalForm] = useState(false);
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
+  const [isNutritionModalOpen, setIsNutritionModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isClinicalModalOpen, setIsClinicalModalOpen] = useState(false);
 
   if (!patient) {
     notFound();
@@ -105,97 +88,131 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
     ? corporates.find((c) => c.id === patient.corporate_id)
     : null;
 
-  const handleSave = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const handleSave = (setter: React.Dispatch<React.SetStateAction<boolean>>, section: string) => {
     // In a real app, you'd handle form submission here
-    console.log('Data saved (mock)');
+    console.log(`${section} data saved (mock)`);
+    toast({
+      title: `${section} Record Saved`,
+      description: `The patient's ${section.toLowerCase()} record has been updated.`,
+    });
     setter(false);
   };
 
   return (
     <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
             <Button asChild variant="outline" size="icon">
-                <Link href="/dashboard">
+              <Link href="/dashboard">
                 <ArrowLeft className="h-4 w-4" />
                 <span className="sr-only">Back to Dashboard</span>
-                </Link>
+              </Link>
             </Button>
             <div>
-                <h1 className="text-3xl font-bold font-headline tracking-tight">{`${
+              <h1 className="text-3xl font-bold font-headline tracking-tight">{`${
                 patient.first_name
-                } ${patient.surname || ''}`}</h1>
-                <p className="text-muted-foreground">Patient Assessment and Details</p>
+              } ${patient.surname || ''}`}</h1>
+              <p className="text-muted-foreground">
+                Patient Assessment and Details
+              </p>
             </div>
-            </div>
+          </div>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Vitals Section */}
             <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
+              <CardHeader className="flex flex-row items-start justify-between">
                 <div>
-                    <CardTitle className="flex items-center gap-3">
+                  <CardTitle className="flex items-center gap-3">
                     <HeartPulse className="w-6 h-6" />
                     <span>Vitals</span>
-                    </CardTitle>
-                    <CardDescription>Latest vital signs measurement.</CardDescription>
+                  </CardTitle>
+                  <CardDescription>
+                    Latest vital signs measurement.
+                  </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowVitalsForm(!showVitalsForm)}>
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    {showVitalsForm ? 'Cancel' : 'Add Vitals'}
-                </Button>
-                </CardHeader>
-                <CardContent>
-                {showVitalsForm && (
-                    <FormCard title="Add New Vitals" onCancel={() => setShowVitalsForm(false)} onSubmit={(e) => { e.preventDefault(); handleSave(setShowVitalsForm); }}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="grid gap-2"><Label htmlFor="bp_systolic">Systolic (mmHg)</Label><Input id="bp_systolic" type="number" placeholder="120" /></div>
-                        <div className="grid gap-2"><Label htmlFor="bp_diastolic">Diastolic (mmHg)</Label><Input id="bp_diastolic" type="number" placeholder="80" /></div>
-                        <div className="grid gap-2"><Label htmlFor="pulse">Pulse (bpm)</Label><Input id="pulse" type="number" placeholder="70" /></div>
-                        <div className="grid gap-2"><Label htmlFor="temp">Temp (°C)</Label><Input id="temp" type="number" step="0.1" placeholder="36.5" /></div>
-                        <div className="grid gap-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
+                <Dialog open={isVitalsModalOpen} onOpenChange={setIsVitalsModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      {patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add Vitals'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add New Vitals'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                      <div className="grid gap-2"><Label htmlFor="bp_systolic">Systolic (mmHg)</Label><Input id="bp_systolic" type="number" placeholder="120" /></div>
+                      <div className="grid gap-2"><Label htmlFor="bp_diastolic">Diastolic (mmHg)</Label><Input id="bp_diastolic" type="number" placeholder="80" /></div>
+                      <div className="grid gap-2"><Label htmlFor="pulse">Pulse (bpm)</Label><Input id="pulse" type="number" placeholder="70" /></div>
+                      <div className="grid gap-2"><Label htmlFor="temp">Temp (°C)</Label><Input id="temp" type="number" step="0.1" placeholder="36.5" /></div>
+                      <div className="grid gap-2"><Label htmlFor="rbs">RBS (mmol/L)</Label><Input id="rbs" placeholder="5.4" /></div>
                     </div>
-                    </FormCard>
-                )}
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={() => handleSave(setIsVitalsModalOpen, 'Vitals')}><Save className="mr-2 h-4 w-4" />Save Record</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
                 {patient.vitals && patient.vitals.length > 0 ? (
-                    <Table>
+                  <Table>
                     <TableHeader><TableRow><TableHead>Systolic (mmHg)</TableHead><TableHead>Diastolic (mmHg)</TableHead><TableHead>Pulse (bpm)</TableHead><TableHead>Temp (°C)</TableHead><TableHead>RBS (mmol/L)</TableHead></TableRow></TableHeader>
                     <TableBody>
-                        {patient.vitals.map((vital) => (
+                      {patient.vitals.map((vital) => (
                         <TableRow key={vital.id}><TableCell>{vital.bp_systolic || '-'}</TableCell><TableCell>{vital.bp_diastolic || '-'}</TableCell><TableCell>{vital.pulse || '-'}</TableCell><TableCell>{vital.temp || '-'}</TableCell><TableCell>{vital.rbs || '-'}</TableCell></TableRow>
-                        ))}
+                      ))}
                     </TableBody>
-                    </Table>
+                  </Table>
                 ) : ( <p className="text-muted-foreground text-center py-4">No vitals recorded.</p> )}
-                </CardContent>
+              </CardContent>
             </Card>
 
+            {/* Nutrition Section */}
             <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
+              <CardHeader className="flex flex-row items-start justify-between">
                 <div>
-                    <CardTitle className="flex items-center gap-3"><Scale className="w-6 h-6" /><span>Nutrition</span></CardTitle>
-                    <CardDescription>Latest nutrition assessment details.</CardDescription>
+                  <CardTitle className="flex items-center gap-3"><Scale className="w-6 h-6" /><span>Nutrition</span></CardTitle>
+                  <CardDescription>Latest nutrition assessment details.</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowNutritionForm(!showNutritionForm)}>
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    {showNutritionForm ? 'Cancel' : 'Add Assessment'}
-                </Button>
-                </CardHeader>
-                <CardContent>
-                {showNutritionForm && (
-                    <FormCard title="Add Nutrition Assessment" onCancel={() => setShowNutritionForm(false)} onSubmit={(e) => { e.preventDefault(); handleSave(setShowNutritionForm); }}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="grid gap-2"><Label htmlFor="height">Height (cm)</Label><Input id="height" type="number" placeholder="175" /></div>
-                        <div className="grid gap-2"><Label htmlFor="weight">Weight (kg)</Label><Input id="weight" type="number" step="0.1" placeholder="70.5" /></div>
-                        <div className="grid gap-2"><Label htmlFor="bmi">BMI</Label><Input id="bmi" type="number" step="0.1" placeholder="22.9" /></div>
-                        <div className="grid gap-2"><Label htmlFor="visceral_fat">Visceral Fat</Label><Input id="visceral_fat" type="number" placeholder="5" /></div>
-                        <div className="grid gap-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
+                 <Dialog open={isNutritionModalOpen} onOpenChange={setIsNutritionModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      {patient.nutrition && patient.nutrition.length > 0 ? 'Edit Assessment' : 'Add Assessment'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{patient.nutrition && patient.nutrition.length > 0 ? 'Edit Nutrition Assessment' : 'Add Nutrition Assessment'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid gap-2"><Label htmlFor="height">Height (cm)</Label><Input id="height" type="number" placeholder="175" /></div>
+                          <div className="grid gap-2"><Label htmlFor="weight">Weight (kg)</Label><Input id="weight" type="number" step="0.1" placeholder="70.5" /></div>
+                          <div className="grid gap-2"><Label htmlFor="bmi">BMI</Label><Input id="bmi" type="number" step="0.1" placeholder="22.9" /></div>
+                          <div className="grid gap-2"><Label htmlFor="visceral_fat">Visceral Fat</Label><Input id="visceral_fat" type="number" placeholder="5" /></div>
+                          <div className="grid gap-2"><Label htmlFor="body_fat_percent">Body Fat %</Label><Input id="body_fat_percent" type="number" step="0.1" placeholder="15.5" /></div>
+                      </div>
+                      <div className="grid gap-2"><Label htmlFor="notes_nutritionist">Nutritionist Notes</Label><Textarea id="notes_nutritionist" placeholder="Enter notes..." /></div>
                     </div>
-                    <div className="grid gap-2"><Label htmlFor="notes_nutritionist">Nutritionist Notes</Label><Textarea id="notes_nutritionist" placeholder="Enter notes..." /></div>
-                    </FormCard>
-                )}
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={() => handleSave(setIsNutritionModalOpen, 'Nutrition')}><Save className="mr-2 h-4 w-4" />Save Record</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
                 {patient.nutrition && patient.nutrition.length > 0 ? (
                     patient.nutrition.map((nutri) => (
                     <div key={nutri.id} className="space-y-4">
@@ -210,29 +227,41 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
                     </div>
                     ))
                 ) : ( <p className="text-muted-foreground text-center py-4">No nutrition assessment recorded.</p> )}
-                </CardContent>
+              </CardContent>
             </Card>
             
+            {/* Goals Section */}
             <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
+              <CardHeader className="flex flex-row items-start justify-between">
                 <div>
                     <CardTitle className="flex items-center gap-3"><Target className="w-6 h-6" /><span>Goals</span></CardTitle>
                     <CardDescription>Patient's health and wellness goals.</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowGoalForm(!showGoalForm)}>
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    {showGoalForm ? 'Cancel' : 'Set Goal'}
-                </Button>
-                </CardHeader>
-                <CardContent>
-                {showGoalForm && (
-                    <FormCard title="Set New Goal" onCancel={() => setShowGoalForm(false)} onSubmit={(e) => { e.preventDefault(); handleSave(setShowGoalForm); }}>
-                    <div className="space-y-4">
+                 <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        {patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set Goal'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set New Goal'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
                         <div className="grid gap-2"><Label htmlFor="discussion">Discussion</Label><Textarea id="discussion" placeholder="Notes from discussion with patient..." /></div>
                         <div className="grid gap-2"><Label htmlFor="goal">Goal</Label><Textarea id="goal" placeholder="Define a clear, actionable goal..." /></div>
                     </div>
-                    </FormCard>
-                )}
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={() => handleSave(setIsGoalModalOpen, 'Goal')}><Save className="mr-2 h-4 w-4" />Save Record</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
                 {patient.goals && patient.goals.length > 0 ? (
                     <div className="space-y-4">
                     {patient.goals.map((goal) => (
@@ -244,29 +273,41 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
                     ))}
                     </div>
                 ) : ( <p className="text-muted-foreground text-center py-4">No goals set.</p> )}
-                </CardContent>
+              </CardContent>
             </Card>
 
+            {/* Clinical Review Section */}
             <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
+              <CardHeader className="flex flex-row items-start justify-between">
                 <div>
                     <CardTitle className="flex items-center gap-3"><Stethoscope className="w-6 h-6" /><span>Clinical Review</span></CardTitle>
                     <CardDescription>Notes from clinical staff.</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowClinicalForm(!showClinicalForm)}>
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    {showClinicalForm ? 'Cancel' : 'Add Review'}
-                </Button>
-                </CardHeader>
-                <CardContent>
-                {showClinicalForm && (
-                    <FormCard title="Add Clinical Review" onCancel={() => setShowClinicalForm(false)} onSubmit={(e) => { e.preventDefault(); handleSave(setShowClinicalForm); }}>
-                    <div className="space-y-4">
+                 <Dialog open={isClinicalModalOpen} onOpenChange={setIsClinicalModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        {patient.clinical && patient.clinical.length > 0 ? 'Edit Review' : 'Add Review'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{patient.clinical && patient.clinical.length > 0 ? 'Edit Clinical Review' : 'Add Clinical Review'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
                         <div className="grid gap-2"><Label htmlFor="notes_doctor">Doctor's Notes</Label><Textarea id="notes_doctor" placeholder="Enter doctor's notes..."/></div>
                         <div className="grid gap-2"><Label htmlFor="notes_psychologist">Psychologist's Notes</Label><Textarea id="notes_psychologist" placeholder="Enter psychologist's notes..."/></div>
                     </div>
-                    </FormCard>
-                )}
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={() => handleSave(setIsClinicalModalOpen, 'Clinical Review')}><Save className="mr-2 h-4 w-4" />Save Record</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
                 {patient.clinical && patient.clinical.length > 0 ? (
                     <div className="space-y-6">
                     {patient.clinical.map((clinic) => (
@@ -278,55 +319,67 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
                     ))}
                     </div>
                 ) : ( <p className="text-muted-foreground text-center py-4">No clinical review found.</p> )}
-                </CardContent>
+              </CardContent>
             </Card>
-            </div>
+          </div>
 
-            <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6">
             <Card>
-                <CardHeader>
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                    <User className="w-6 h-6" />
-                    <span>Patient Information</span>
+                  <User className="w-6 h-6" />
+                  <span>Patient Information</span>
                 </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <DetailItem
-                    icon={User}
-                    label="Full Name"
-                    value={`${patient.first_name} ${patient.middle_name || ''} ${
-                        patient.surname || ''
-                    }`}
-                    />
-                    <DetailItem icon={Cake} label="Date of Birth" value={patient.dob} />
-                    <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
-                    <DetailItem icon={Phone} label="Phone" value={patient.phone} />
-                    <DetailItem icon={Mail} label="Email" value={patient.email} />
-                </CardContent>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <DetailItem
+                  icon={User}
+                  label="Full Name"
+                  value={`${patient.first_name} ${patient.middle_name || ''} ${
+                    patient.surname || ''
+                  }`}
+                />
+                <DetailItem icon={Cake} label="Date of Birth" value={patient.dob} />
+                <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
+                <DetailItem icon={Phone} label="Phone" value={patient.phone} />
+                <DetailItem icon={Mail} label="Email" value={patient.email} />
+              </CardContent>
             </Card>
             {corporate && (
-                <Card>
+              <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-3"><Building2 className="w-6 h-6" /><span>Corporate</span></CardTitle>
+                  <CardTitle className="flex items-center gap-3">
+                    <Building2 className="w-6 h-6" />
+                    <span>Corporate</span>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <DetailItem label="Company Name" value={corporate.name} />
-                    <DetailItem label="Wellness Date" value={new Date(corporate.wellness_date).toLocaleDateString()} />
+                  <DetailItem label="Company Name" value={corporate.name} />
+                  <DetailItem
+                    label="Wellness Date"
+                    value={new Date(corporate.wellness_date).toLocaleDateString()}
+                  />
                 </CardContent>
-                </Card>
+              </Card>
             )}
             <Card>
-                <CardHeader>
+              <CardHeader>
                 <CardTitle>Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-2">
-                    <Button variant="outline">Edit Patient Details</Button>
-                    <Button variant="destructive">Delete Patient Record</Button>
-                </CardContent>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <Button variant="outline">Edit Patient Details</Button>
+                 <Button asChild>
+                  <Link href={`/patient/${patient.id}/report`} target="_blank">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Generate PDF Report
+                  </Link>
+                </Button>
+                <Button variant="destructive">Delete Patient Record</Button>
+              </CardContent>
             </Card>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
     </div>
   );
 }
