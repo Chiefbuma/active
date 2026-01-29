@@ -16,6 +16,12 @@ import {
   HeartPulse,
   Scale,
   Target,
+  User,
+  Cake,
+  Phone,
+  Mail,
+  Building2,
+  Binary,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -27,6 +33,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+
+const DetailItem = ({ label, value, icon: Icon }: { label: string; value: React.ReactNode; icon?: React.ElementType }) => (
+  <div className="flex items-start gap-4 rounded-lg p-3 transition-colors hover:bg-muted/50">
+    {Icon && <Icon className="h-5 w-5 flex-shrink-0 text-primary" />}
+    <div className="flex-1">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="font-semibold text-foreground break-words">{value || '-'}</p>
+    </div>
+  </div>
+);
+
 
 export default function PatientDetailPage({ params }: { params: { id: string } }) {
   const patientId = parseInt(params.id, 10);
@@ -43,63 +60,67 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/dashboard">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Dashboard</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">{`${
-            patient.first_name
-          } ${patient.surname || ''}`}</h1>
-          <p className="text-muted-foreground">Patient Assessment and Details</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="icon">
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Dashboard</span>
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold font-headline tracking-tight">{`${
+              patient.first_name
+            } ${patient.surname || ''}`}</h1>
+            <p className="text-muted-foreground">Patient Assessment and Details</p>
+          </div>
         </div>
+         {corporate && (
+            <Badge variant="outline" className="hidden sm:flex text-base py-2 px-4">{corporate.name}</Badge>
+        )}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
+          <CardTitle className="flex items-center gap-3">
+            <User className="w-6 h-6" />
+            <span>Patient Information</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Name</dt>
-              <dd className="font-medium">{`${patient.first_name} ${
-                patient.middle_name || ''
-              } ${patient.surname || ''}`}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Age</dt>
-              <dd className="font-medium">{patient.age}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Sex</dt>
-              <dd className="font-medium">{patient.sex}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">DOB</dt>
-              <dd className="font-medium">{patient.dob}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Phone</dt>
-              <dd className="font-medium">{patient.phone}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd className="font-medium">{patient.email}</dd>
-            </div>
-            <div className="grid gap-1">
-              <dt className="text-muted-foreground">Corporate</dt>
-              <dd>
-                {corporate ? (
-                  <Badge variant="outline">{corporate.name}</Badge>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </dd>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
+            <DetailItem 
+              icon={User}
+              label="Full Name" 
+              value={`${patient.first_name} ${patient.middle_name || ''} ${patient.surname || ''}`} 
+            />
+            <DetailItem 
+              icon={Cake}
+              label="Date of Birth" 
+              value={patient.dob} 
+            />
+            <DetailItem 
+              icon={Binary}
+              label="Age / Sex" 
+              value={`${patient.age} / ${patient.sex}`} 
+            />
+            <DetailItem 
+              icon={Phone}
+              label="Phone" 
+              value={patient.phone} 
+            />
+            <DetailItem 
+              icon={Mail}
+              label="Email" 
+              value={patient.email} 
+            />
+            {corporate && (
+               <DetailItem 
+                icon={Building2}
+                label="Corporate" 
+                value={corporate.name} 
+              />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -123,6 +144,7 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
             Clinical Notes
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="vitals">
           <Card>
             <CardHeader>
@@ -174,39 +196,20 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
                 patient.nutrition.map((nutri) => (
                   <div key={nutri.id} className="space-y-4">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Height (cm)</p>
-                        <p className="font-medium">{nutri.height || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Weight (kg)</p>
-                        <p className="font-medium">{nutri.weight || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">BMI</p>
-                        <p className="font-medium">{nutri.bmi || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Visceral Fat</p>
-                        <p className="font-medium">
-                          {nutri.visceral_fat || '-'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Body Fat %</p>
-                        <p className="font-medium">
-                          {nutri.body_fat_percent || '-'}
-                        </p>
-                      </div>
+                      <DetailItem label="Height (cm)" value={nutri.height} />
+                      <DetailItem label="Weight (kg)" value={nutri.weight} />
+                      <DetailItem label="BMI" value={nutri.bmi} />
+                      <DetailItem label="Visceral Fat" value={nutri.visceral_fat} />
+                      <DetailItem label="Body Fat %" value={nutri.body_fat_percent} />
                     </div>
                     {nutri.notes_nutritionist && (
                       <>
                         <Separator />
-                        <div>
-                          <p className="text-muted-foreground">
+                        <div className="p-3">
+                          <p className="text-sm font-medium text-muted-foreground">
                             Nutritionist Notes
                           </p>
-                          <p className="font-medium">
+                          <p className="text-foreground mt-1">
                             {nutri.notes_nutritionist}
                           </p>
                         </div>
@@ -233,17 +236,17 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
             <CardContent className="space-y-4">
               {patient.goals && patient.goals.length > 0 ? (
                 patient.goals.map((goal) => (
-                  <div key={goal.id} className="space-y-4 p-4 border rounded-lg">
+                  <div key={goal.id} className="space-y-4 p-4 border rounded-xl bg-background/50">
                     <div>
                       <h4 className="font-semibold text-primary">Discussion</h4>
-                      <p className="text-foreground mt-1">
+                      <p className="text-foreground mt-1 text-sm">
                         {goal.discussion || '-'}
                       </p>
                     </div>
                     <Separator />
                     <div>
                       <h4 className="font-semibold text-primary">Goal</h4>
-                      <p className="text-foreground mt-1">{goal.goal || '-'}</p>
+                      <p className="text-foreground mt-1 text-sm">{goal.goal || '-'}</p>
                     </div>
                   </div>
                 ))
@@ -264,25 +267,25 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
                 patient.clinical.map((clinic) => (
                   <div key={clinic.id} className="space-y-6">
                     {clinic.notes_doctor && (
-                      <div className="p-4 border rounded-lg">
+                      <div className="p-4 border rounded-xl bg-background/50">
                         <h4 className="font-semibold text-primary">Doctor's Notes</h4>
-                        <p className="text-foreground mt-1">
+                        <p className="text-foreground mt-2 text-sm">
                           {clinic.notes_doctor}
                         </p>
                       </div>
                     )}
                     {clinic.notes_psychologist && (
-                      <div className="p-4 border rounded-lg">
+                      <div className="p-4 border rounded-xl bg-background/50">
                         <h4 className="font-semibold text-primary">
                           Psychologist's Notes
                         </h4>
-                        <p className="text-foreground mt-1">
+                        <p className="text-foreground mt-2 text-sm">
                           {clinic.notes_psychologist}
                         </p>
                       </div>
                     )}
                     {!clinic.notes_doctor && !clinic.notes_psychologist && (
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         No clinical notes recorded for this entry.
                       </p>
                     )}
