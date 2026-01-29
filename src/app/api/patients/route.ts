@@ -21,28 +21,17 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { first_name, middle_name, surname, dob, sex, phone, email, corporate_id } = body;
+        const { first_name, middle_name, surname, dob, age, sex, phone, email, corporate_id } = body;
 
         // Basic validation
-        if (!first_name || !surname || !dob || !sex) {
+        if (!first_name || !surname || !sex) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
-        }
-
-        let age = null;
-        if (dob) {
-            const birthDate = new Date(dob);
-            const today = new Date();
-            age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
         }
 
         const connection = await db.getConnection();
         const [result] = await connection.query(
             'INSERT INTO registrations (first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id || null]
+            [first_name, middle_name, surname, dob || null, sex, age || null, phone, email, corporate_id || null]
         );
         connection.release();
 

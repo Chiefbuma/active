@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import type { Corporate } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { differenceInYears } from 'date-fns';
 
 export default function RegisterPage() {
   const [corporates, setCorporates] = useState<Corporate[]>([]);
@@ -31,16 +30,17 @@ export default function RegisterPage() {
     middle_name: '',
     surname: '',
     dob: '',
+    age: '',
     sex: '',
     phone: '',
     email: '',
     corporate_id: '',
   });
-  const [age, setAge] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
+  const inputStyle = "border-0 border-b rounded-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0";
 
   useEffect(() => {
     fetch('/api/corporates')
@@ -48,24 +48,6 @@ export default function RegisterPage() {
       .then(data => setCorporates(data))
       .catch(err => console.error("Failed to fetch corporates", err));
   }, []);
-
-  useEffect(() => {
-    if (formData.dob) {
-      try {
-        const birthDate = new Date(formData.dob);
-        if (!isNaN(birthDate.getTime())) {
-          const calculatedAge = differenceInYears(new Date(), birthDate);
-          setAge(calculatedAge >= 0 ? calculatedAge : null);
-        } else {
-          setAge(null);
-        }
-      } catch (error) {
-        setAge(null);
-      }
-    } else {
-      setAge(null);
-    }
-  }, [formData.dob]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -79,9 +61,10 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
-    const { corporate_id, ...rest } = formData;
+    const { corporate_id, age, ...rest } = formData;
     const payload = {
         ...rest,
+        age: age ? parseInt(age, 10) : null,
         corporate_id: (corporate_id && corporate_id !== 'null') ? parseInt(corporate_id, 10) : null
     };
 
@@ -131,31 +114,31 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="first_name" className="text-foreground">First Name</Label>
-                  <Input id="first_name" placeholder="John" required onChange={handleInputChange} />
+                  <Input id="first_name" placeholder="John" required onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="middle_name" className="text-foreground">Middle Name (Optional)</Label>
-                  <Input id="middle_name" placeholder="Fitzgerald" onChange={handleInputChange} />
+                  <Input id="middle_name" placeholder="Fitzgerald" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="surname" className="text-foreground">Surname</Label>
-                  <Input id="surname" placeholder="Doe" required onChange={handleInputChange} />
+                  <Input id="surname" placeholder="Doe" required onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="dob" className="text-foreground">Date of Birth</Label>
-                  <Input id="dob" type="date" required onChange={handleInputChange} />
+                  <Label htmlFor="dob" className="text-foreground">Date of Birth (Optional)</Label>
+                  <Input id="dob" type="date" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="age" className="text-foreground">Age</Label>
-                    <Input id="age" type="number" placeholder="Calculated from DOB" disabled value={age ?? ''} />
+                    <Label htmlFor="age" className="text-foreground">Age (Optional)</Label>
+                    <Input id="age" type="number" placeholder="Enter age" onChange={handleInputChange} value={formData.age} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="sex" className="text-foreground">Sex</Label>
                   <Select required onValueChange={(value) => handleSelectChange('sex', value)}>
-                    <SelectTrigger id="sex">
+                    <SelectTrigger id="sex" className={inputStyle}>
                       <SelectValue placeholder="Select sex" />
                     </SelectTrigger>
                     <SelectContent>
@@ -170,18 +153,18 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+254 712 345 678" onChange={handleInputChange} />
+                  <Input id="phone" type="tel" placeholder="+254 712 345 678" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email" className="text-foreground">Email Address</Label>
-                  <Input id="email" type="email" placeholder="name@example.com" onChange={handleInputChange} />
+                  <Input id="email" type="email" placeholder="name@example.com" onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-2">
                 <Label htmlFor="corporate_id" className="text-foreground">Corporate (Optional)</Label>
                 <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
-                  <SelectTrigger id="corporate_id">
+                  <SelectTrigger id="corporate_id" className={inputStyle}>
                     <SelectValue placeholder="Select corporate" />
                   </SelectTrigger>
                   <SelectContent>
