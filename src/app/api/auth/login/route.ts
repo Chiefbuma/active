@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-// Changed import to require to troubleshoot module resolution issue
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +21,12 @@ export async function POST(request: Request) {
 
     const user = users[0];
     
-    // The hashes in the DB might be PHP's bcrypt ($2y$).
+    if (!user.password) {
+      console.error(`Authentication error: User ${email} found but has no password.`);
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // The hashes in the DB might be from PHP's bcrypt ($2y$).
     // bcryptjs should be able to handle '$2y$' prefix if we replace it with '$2a$'
     const hash = user.password.replace(/^\$2y\$/, '$2a\$');
 
