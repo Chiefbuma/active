@@ -54,3 +54,24 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
+
+
+export async function DELETE(request: Request) {
+    try {
+        const { ids } = await request.json();
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return NextResponse.json({ message: 'Patient IDs are required' }, { status: 400 });
+        }
+
+        const connection = await db.getConnection();
+        const query = 'DELETE FROM registrations WHERE id IN (?)';
+        await connection.query(query, [ids]);
+        connection.release();
+
+        return NextResponse.json({ message: 'Patients deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting patients:', error);
+        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    }
+}
