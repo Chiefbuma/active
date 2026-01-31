@@ -1,6 +1,5 @@
 import type { Patient, Corporate } from '@/lib/types';
 import { format } from 'date-fns';
-import Logo from './logo';
 
 type ReportProps = {
   patient: Patient;
@@ -58,13 +57,8 @@ export default function Report({ patient, corporate }: ReportProps) {
 
   return (
     <div className="report-body-container bg-white text-gray-800">
-      <div className="header no-print">
-         <div className="flex justify-center items-center gap-4 py-2 text-black">
-            <Logo className="h-10 w-10 text-black" />
-            <h1 className="text-3xl font-bold font-headline">
-              Taria Health
-            </h1>
-          </div>
+      <div className="header">
+          <img src="/images/taria-logo.png" alt="Taria Health Logo" className="logo" />
       </div>
       <div className="content-wrapper">
         <div className="content-area">
