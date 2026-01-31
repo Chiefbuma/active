@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import type { Patient, Corporate } from '@/lib/types';
+import type { Patient, Corporate, User } from '@/lib/types';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchPatients() {
@@ -65,5 +65,18 @@ export async function fetchCorporates() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch corporates.');
+  }
+}
+
+export async function fetchUsers() {
+  noStore();
+  try {
+    const connection = await db.getConnection();
+    const [rows] = await connection.query('SELECT id, name, email, role FROM users ORDER BY name ASC');
+    connection.release();
+    return rows as User[];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch users.');
   }
 }

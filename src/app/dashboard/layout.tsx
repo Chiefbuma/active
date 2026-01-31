@@ -7,7 +7,7 @@ import Header from '@/components/header';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { UserPlus, Building, Loader2 } from 'lucide-react';
+import { UserPlus, Building, Loader2, Users } from 'lucide-react';
 import type { User } from '@/lib/types';
 
 
@@ -72,6 +72,14 @@ export default function DashboardLayout({
                   Manage Corporates
                 </Link>
               </Button>
+              {user && user.role === 'admin' && (
+                <Button asChild variant="outline">
+                    <Link href="/dashboard/users">
+                        <Users className="mr-2 h-4 w-4" />
+                        Manage Users
+                    </Link>
+                </Button>
+             )}
             <Header user={user} />
           </div>
         </div>

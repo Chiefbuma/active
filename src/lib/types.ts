@@ -3,7 +3,7 @@ export type User = {
   name: string;
   email: string;
   role: 'admin' | 'staff' | 'navigator' | 'payer' | 'physician';
-  avatarUrl: string;
+  avatarUrl?: string;
 };
 
 export type Corporate = {
