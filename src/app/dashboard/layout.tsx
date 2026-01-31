@@ -4,9 +4,9 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
-import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { UserPlus, Building, Loader2, Users } from 'lucide-react';
 import type { User } from '@/lib/types';
 
@@ -54,7 +54,7 @@ export default function DashboardLayout({
       <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <Logo className="h-8 w-8 text-primary" />
+            <Image src="/images/logo.png" alt="Taria Health Logo" width={32} height={32} />
             <span className="hidden font-bold font-headline text-foreground sm:inline-block">
               Taria Health
             </span>

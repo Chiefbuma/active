@@ -59,7 +59,7 @@ export default function LoginPage() {
     <div className="w-full min-h-screen flex items-center justify-center p-4 bg-background">
        <div className="w-full max-w-md">
             <div className="flex justify-center items-center gap-4 mb-6">
-                <Image src="/images/taria-logo.png" alt="Taria Health Logo" width={40} height={40} className="h-10 w-10" />
+                <Image src="/images/logo.png" alt="Taria Health Logo" width={40} height={40} className="h-10 w-10" />
                 <h1 className="text-3xl font-bold font-headline">Taria Health Activation</h1>
             </div>
             <Card className="border">
