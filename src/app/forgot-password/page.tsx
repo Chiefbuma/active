@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Logo } from '@/components/logo';
+import Image from 'next/image';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
             <div className="flex justify-center items-center gap-4 mb-6">
-                <Logo className="h-10 w-auto" />
+                <Image src="/images/logo.png" alt="Taria Health Logo" width={150} height={40} className="h-10 w-auto" />
                 <h1 className="text-3xl font-bold font-headline">Taria Health Activation</h1>
             </div>
             <Card>

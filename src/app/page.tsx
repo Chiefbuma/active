@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { Logo } from '@/components/logo';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('admin@superadmin.com');
@@ -59,7 +59,7 @@ export default function LoginPage() {
     <div className="w-full min-h-screen flex items-center justify-center p-4 bg-background">
        <div className="w-full max-w-md">
             <div className="flex justify-center items-center gap-4 mb-6">
-                <Logo className="h-10 w-auto" />
+                <Image src="/images/logo.png" alt="Taria Health Logo" width={150} height={40} className="h-10 w-auto" />
                 <h1 className="text-3xl font-bold font-headline">Taria Health Activation</h1>
             </div>
             <Card className="border">
