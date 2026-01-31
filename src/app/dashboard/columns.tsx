@@ -76,14 +76,6 @@ export const columns: ColumnDef<Patient>[] = [
     },
   },
   {
-    accessorKey: 'email',
-    header: 'Email',
-  },
-  {
-    accessorKey: 'phone',
-    header: 'Phone',
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
       const patient = row.original

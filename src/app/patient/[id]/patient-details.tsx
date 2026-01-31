@@ -189,7 +189,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 </div>
                 <Dialog open={isVitalsModalOpen} onOpenChange={setIsVitalsModalOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                     <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
                       <PlusCircle className="mr-2 h-4 w-4" />
                       {patient.vitals && patient.vitals.length > 0 ? 'Edit Vitals' : 'Add Vitals'}
                     </Button>
@@ -210,7 +210,10 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                         <DialogClose asChild>
                           <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" disabled={isSubmitting}><Save className="mr-2 h-4 w-4" />{isSubmitting ? 'Saving...' : 'Save Record'}</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {isSubmitting ? 'Saving...' : 'Save Record'}
+                        </Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -243,7 +246,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 </div>
                  <Dialog open={isNutritionModalOpen} onOpenChange={setIsNutritionModalOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
                       <PlusCircle className="mr-2 h-4 w-4" />
                       {patient.nutrition && patient.nutrition.length > 0 ? 'Edit Assessment' : 'Add Assessment'}
                     </Button>
@@ -266,7 +269,10 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                           <DialogClose asChild>
                             <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
                           </DialogClose>
-                          <Button type="submit" disabled={isSubmitting}><Save className="mr-2 h-4 w-4" />{isSubmitting ? 'Saving...' : 'Save Record'}</Button>
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            {isSubmitting ? 'Saving...' : 'Save Record'}
+                          </Button>
                         </DialogFooter>
                     </form>
                   </DialogContent>
@@ -302,7 +308,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 </div>
                  <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
                         <PlusCircle className="mr-2 h-4 w-4"/>
                         {patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set Goal'}
                     </Button>
@@ -320,7 +326,10 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                         <DialogClose asChild>
                           <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" disabled={isSubmitting}><Save className="mr-2 h-4 w-4" />{isSubmitting ? 'Saving...' : 'Save Record'}</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {isSubmitting ? 'Saving...' : 'Save Record'}
+                        </Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -353,7 +362,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 </div>
                  <Dialog open={isClinicalModalOpen} onOpenChange={setIsClinicalModalOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
                         <PlusCircle className="mr-2 h-4 w-4"/>
                         {patient.clinicals && patient.clinicals.length > 0 ? 'Edit Review' : 'Add Review'}
                     </Button>
@@ -371,7 +380,10 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                         <DialogClose asChild>
                           <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" disabled={isSubmitting}><Save className="mr-2 h-4 w-4" />{isSubmitting ? 'Saving...' : 'Save Record'}</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {isSubmitting ? 'Saving...' : 'Save Record'}
+                        </Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>

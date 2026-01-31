@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,7 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCorporate, setEditingCorporate] = useState<Corporate | null>(null);
   const [formData, setFormData] = useState({ name: '', wellness_date: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const fetchCorporates = async () => {
@@ -68,6 +69,7 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const url = editingCorporate ? `/api/corporates/${editingCorporate.id}` : '/api/corporates';
     const method = editingCorporate ? 'PUT' : 'POST';
 
@@ -88,6 +90,8 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
       handleCloseModal();
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: (error as Error).message });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -235,7 +239,10 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
                 <DialogClose asChild>
                     <Button type="button" variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button type="submit">{editingCorporate ? 'Save Changes' : 'Create Corporate'}</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {editingCorporate ? 'Save Changes' : 'Create Corporate'}
+                </Button>
             </DialogFooter>
           </form>
         </DialogContent>
