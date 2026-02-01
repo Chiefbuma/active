@@ -23,6 +23,7 @@ export type Patient = {
   age?: number;
   phone?: string;
   email?: string;
+  wellness_date: string;
   user_id?: number;
   corporate_id?: number;
   created_at: string;
@@ -30,7 +31,6 @@ export type Patient = {
 
   // Joined data
   corporate_name?: string;
-  wellness_date?: string;
 
   // Relations
   vitals?: Vital[];

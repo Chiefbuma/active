@@ -34,6 +34,7 @@ export default function RegisterPage() {
     sex: '',
     phone: '',
     email: '',
+    wellness_date: '',
     corporate_id: '',
   });
   const [loading, setLoading] = useState(false);
@@ -160,23 +161,30 @@ export default function RegisterPage() {
                   <Input id="email" type="email" onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 gap-2">
-                <Label htmlFor="corporate_id" className="text-foreground">Corporate (Optional)</Label>
-                <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
-                  <SelectTrigger id="corporate_id" className={inputStyle}>
-                    <SelectValue placeholder="Select corporate" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="null">None</SelectItem>
-                    {corporates.map((corporate) => (
-                      <SelectItem key={corporate.id} value={String(corporate.id)}>
-                        {corporate.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="grid gap-2">
+                    <Label htmlFor="wellness_date" className="text-foreground">Wellness Date</Label>
+                    <Input id="wellness_date" type="date" required onChange={handleInputChange} className={inputStyle} />
+                 </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="corporate_id" className="text-foreground">Corporate (Optional)</Label>
+                    <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
+                    <SelectTrigger id="corporate_id" className={inputStyle}>
+                        <SelectValue placeholder="Select corporate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="null">None</SelectItem>
+                        {corporates.map((corporate) => (
+                        <SelectItem key={corporate.id} value={String(corporate.id)}>
+                            {corporate.name}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                </div>
               </div>
+
             </div>
             <div className="mt-8 flex justify-end gap-4">
               <Button variant="outline" asChild>

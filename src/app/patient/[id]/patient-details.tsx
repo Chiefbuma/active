@@ -38,6 +38,7 @@ import {
   XCircle,
   FileText,
   Loader2,
+  CalendarDays,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -429,7 +430,8 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                       patient.surname || ''
                     }`}
                   />
-                  <DetailItem icon={Cake} label="Date of Birth" value={new Date(patient.dob!).toLocaleDateString()} />
+                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : '-'} />
+                   <DetailItem icon={CalendarDays} label="Wellness Date" value={new Date(patient.wellness_date).toLocaleDateString()} />
                   <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
                   <DetailItem icon={Phone} label="Phone" value={patient.phone} />
                   <DetailItem icon={Mail} label="Email" value={patient.email} />
@@ -446,10 +448,6 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <DetailItem label="Company Name" value={patient.corporate_name} />
-                  <DetailItem
-                    label="Wellness Date"
-                    value={new Date(patient.wellness_date!).toLocaleDateString()}
-                  />
                 </CardContent>
               </Card>
             )}

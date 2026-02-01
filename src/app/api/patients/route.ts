@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const connection = await db.getConnection();
     const [rows] = await connection.query(`
-        SELECT p.*, c.name as corporate_name, c.wellness_date 
+        SELECT p.*, c.name as corporate_name
         FROM registrations p
         LEFT JOIN corporates c ON p.corporate_id = c.id
         ORDER BY p.created_at DESC
@@ -21,17 +21,17 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { first_name, middle_name, surname, dob, age, sex, phone, email, corporate_id } = body;
+        const { first_name, middle_name, surname, dob, age, sex, phone, email, wellness_date, corporate_id } = body;
 
         // Basic validation
-        if (!first_name || !surname || !sex) {
+        if (!first_name || !surname || !sex || !wellness_date) {
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
 
         const connection = await db.getConnection();
         const [result] = await connection.query(
-            'INSERT INTO registrations (first_name, middle_name, surname, dob, sex, age, phone, email, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [first_name, middle_name, surname, dob || null, sex, age || null, phone, email, corporate_id || null]
+            'INSERT INTO registrations (first_name, middle_name, surname, dob, sex, age, phone, email, wellness_date, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [first_name, middle_name, surname, dob || null, sex, age || null, phone, email, wellness_date, corporate_id || null]
         );
         connection.release();
 

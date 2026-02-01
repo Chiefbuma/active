@@ -6,7 +6,7 @@ async function getPatientWithRelations(patientId: string) {
   try {
     // Fetch patient with corporate info
     const [patientRows] = await connection.query(`
-      SELECT p.*, c.name as corporate_name, c.wellness_date 
+      SELECT p.*, c.name as corporate_name
       FROM registrations p
       LEFT JOIN corporates c ON p.corporate_id = c.id
       WHERE p.id = ?

@@ -99,6 +99,7 @@ CREATE TABLE `registrations` (
   `phone` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `corporate_id` int DEFAULT NULL,
+  `wellness_date` date DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -184,7 +185,6 @@ CREATE TABLE `clinicals` (
   CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
-
 ## Seed Data
 
 ```sql
@@ -210,12 +210,12 @@ INSERT INTO `corporates` (`id`, `name`, `wellness_date`) VALUES
 -- Dumping data for table `registrations`
 --
 
-INSERT INTO `registrations` (`id`, `first_name`, `middle_name`, `surname`, `sex`, `dob`, `age`, `phone`, `email`, `corporate_id`) VALUES
-(1, 'Sylvester', NULL, 'Musa', 'Male', '1997-01-01', 28, '743955149', 'musasylvester1065@gmail.com', 1),
-(2, 'Tom', 'Mbalala', 'Wawire', 'Male', '1970-01-01', 55, '729089363', 'tommbalala@20.com', 1),
-(3, 'Euticus', 'Matumbi', 'Muthuri', 'Male', '1991-01-01', 34, '742025594', 'matumbieutychus@gmail.com', NULL),
-(4, 'Paul', NULL, 'Ratemo', 'Male', '1985-01-01', 40, '743760460', 'paulratemo84@gmail.com', NULL),
-(5, 'Kingsley', NULL, 'Otieno', 'Male', '1976-01-01', 49, '724785997', 'nyakrojala@gmail.com', NULL);
+INSERT INTO `registrations` (`id`, `first_name`, `middle_name`, `surname`, `sex`, `dob`, `age`, `phone`, `email`, `corporate_id`, `wellness_date`) VALUES
+(1, 'Sylvester', NULL, 'Musa', 'Male', '1997-01-01', 28, '743955149', 'musasylvester1065@gmail.com', 1, '2025-09-29'),
+(2, 'Tom', 'Mbalala', 'Wawire', 'Male', '1970-01-01', 55, '729089363', 'tommbalala@20.com', 1, '2025-09-29'),
+(3, 'Euticus', 'Matumbi', 'Muthuri', 'Male', '1991-01-01', 34, '742025594', 'matumbieutychus@gmail.com', NULL, '2025-10-05'),
+(4, 'Paul', NULL, 'Ratemo', 'Male', '1985-01-01', 40, '743760460', 'paulratemo84@gmail.com', NULL, '2025-10-05'),
+(5, 'Kingsley', NULL, 'Otieno', 'Male', '1976-01-01', 49, '724785997', 'nyakrojala@gmail.com', NULL, '2025-10-06');
 
 --
 -- Dumping data for table `vitals`
@@ -253,4 +253,3 @@ INSERT INTO `goals` (`registration_id`, `user_id`, `discussion`, `goal`) VALUES
 INSERT INTO `clinicals` (`registration_id`, `user_id`, `notes_doctor`, `notes_psychologist`) VALUES
 (1, 1, 'Patient is in good health. Advised on consistent exercise and a balanced diet. Follow up in 6 months.', 'No immediate concerns. Patient seems well-adjusted and motivated.'),
 (2, 1, 'Diagnosed with Stage 1 Hypertension. Prescribed Lisinopril 10mg. Advised on lifestyle modifications, particularly diet and exercise. Follow up in 1 month to check BP.', 'Patient is showing signs of anxiety related to his new diagnosis. Provided resources for stress management.');
-```

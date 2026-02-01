@@ -7,7 +7,7 @@ export async function fetchPatients() {
   try {
     const connection = await db.getConnection();
     const [rows] = await connection.query(`
-        SELECT p.*, c.name as corporate_name, c.wellness_date
+        SELECT p.*, c.name as corporate_name
         FROM registrations p
         LEFT JOIN corporates c ON p.corporate_id = c.id
         ORDER BY p.created_at DESC
@@ -25,7 +25,7 @@ export async function fetchPatientById(id: string) {
   try {
     const connection = await db.getConnection();
     const [patientRows] = await connection.query(`
-      SELECT p.*, c.name as corporate_name, c.wellness_date
+      SELECT p.*, c.name as corporate_name
       FROM registrations p
       LEFT JOIN corporates c ON p.corporate_id = c.id
       WHERE p.id = ?
