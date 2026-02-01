@@ -281,6 +281,92 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 space-y-6">
+            <Card>
+              <CardHeader className="flex flex-col items-center text-center gap-4">
+                <Avatar className="w-24 h-24 border-4 border-background shadow-md">
+                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={`${patient.first_name} ${patient.surname || ''}`} />}
+                  <AvatarFallback className="text-3xl">{`${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`}</AvatarFallback>
+                </Avatar>
+                <div className="grid gap-1">
+                  <CardTitle className="text-2xl">{`${patient.first_name} ${
+                    patient.surname || ''
+                  }`}</CardTitle>
+                  <CardDescription>Patient ID: {patient.id}</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                 <Separator />
+                <div className="grid grid-cols-1 gap-4 pt-4">
+                  <DetailItem
+                    icon={UserIcon}
+                    label="Full Name"
+                    value={`${patient.first_name} ${patient.middle_name || ''} ${
+                      patient.surname || ''
+                    }`}
+                  />
+                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
+                   <DetailItem icon={CalendarDays} label="Wellness Date" value={patient.wellness_date ? new Date(patient.wellness_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
+                  <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
+                  <DetailItem icon={Phone} label="Phone" value={patient.phone} />
+                  <DetailItem icon={Mail} label="Email" value={patient.email} />
+                </div>
+              </CardContent>
+            </Card>
+            {patient.corporate_name && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Building2 className="w-6 h-6" />
+                    <span>Corporate</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <DetailItem label="Company Name" value={patient.corporate_name} />
+                </CardContent>
+              </Card>
+            )}
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <Button variant="outline" onClick={handleOpenEditModal}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Patient Details
+                </Button>
+                <Button onClick={() => setIsReportModalOpen(true)}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate PDF Report
+                </Button>
+                {currentUser?.role === 'admin' && (
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Patient Record
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete this patient's record and all associated assessments.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeletePatient} disabled={isDeleting}>
+                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Continue
+                            </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
+              </CardContent>
+            </Card>
+          </div>
           <div className="lg:col-span-2 space-y-6">
             {/* Vitals Section */}
             <Card>
@@ -511,93 +597,6 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
               </CardContent>
             </Card>
           </div>
-
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader className="flex flex-col items-center text-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-background shadow-md">
-                   {patientAvatar && <AvatarImage src={patientAvatar.imageUrl} alt={`${patient.first_name} ${patient.surname || ''}`} />}
-                  <AvatarFallback className="text-3xl">{`${patient.first_name[0]}${patient.surname ? patient.surname[0] : ''}`}</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <CardTitle className="text-2xl">{`${patient.first_name} ${
-                    patient.surname || ''
-                  }`}</CardTitle>
-                  <CardDescription>Patient ID: {patient.id}</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-4">
-                 <Separator />
-                <div className="grid grid-cols-1 gap-4 pt-4">
-                  <DetailItem
-                    icon={UserIcon}
-                    label="Full Name"
-                    value={`${patient.first_name} ${patient.middle_name || ''} ${
-                      patient.surname || ''
-                    }`}
-                  />
-                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
-                   <DetailItem icon={CalendarDays} label="Wellness Date" value={patient.wellness_date ? new Date(patient.wellness_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
-                  <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
-                  <DetailItem icon={Phone} label="Phone" value={patient.phone} />
-                  <DetailItem icon={Mail} label="Email" value={patient.email} />
-                </div>
-              </CardContent>
-            </Card>
-            {patient.corporate_name && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Building2 className="w-6 h-6" />
-                    <span>Corporate</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <DetailItem label="Company Name" value={patient.corporate_name} />
-                </CardContent>
-              </Card>
-            )}
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <Button variant="outline" onClick={handleOpenEditModal}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Patient Details
-                </Button>
-                <Button onClick={() => setIsReportModalOpen(true)}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Generate PDF Report
-                </Button>
-                {currentUser?.role === 'admin' && (
-                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Patient Record
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete this patient's record and all associated assessments.
-                            </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDeletePatient} disabled={isDeleting}>
-                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Continue
-                            </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
        {isReportModalOpen && (
@@ -687,3 +686,5 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
     </div>
   );
 }
+
+    
