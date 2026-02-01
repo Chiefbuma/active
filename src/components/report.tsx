@@ -29,14 +29,19 @@ export default function Report({ patient, corporate }: ReportProps) {
   const clinical = patient.clinicals?.[0];
   const goal = patient.goals?.[0];
 
-  const reportDate = new Date(patient.wellness_date);
+  const reportDate = patient.wellness_date ? new Date(patient.wellness_date) : null;
 
-  const day = reportDate.getDate();
-  const suffix = getDaySuffix(day);
-  const formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(
-    reportDate,
-    ' MMMM yyyy'
-  )}`;
+  let formattedDate: string;
+  if (reportDate && !isNaN(reportDate.getTime())) {
+    const day = reportDate.getDate();
+    const suffix = getDaySuffix(day);
+    formattedDate = `${format(reportDate, 'eeee, ')}${day}${suffix}${format(
+      reportDate,
+      ' MMMM yyyy'
+    )}`;
+  } else {
+    formattedDate = 'Date Not Available';
+  }
 
   const discussionParagraphs = [
     clinical?.notes_doctor,
