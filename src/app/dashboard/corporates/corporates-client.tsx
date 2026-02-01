@@ -192,17 +192,7 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">
-            Manage Corporates
-          </h1>
-          <p className="text-muted-foreground">
-            A list of all corporate partners in the system.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
        <DataTable 
         columns={columns} 
         data={corporates}

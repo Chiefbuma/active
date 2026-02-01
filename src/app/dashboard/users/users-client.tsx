@@ -226,17 +226,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-headline tracking-tight">
-            Manage Users
-          </h1>
-          <p className="text-muted-foreground">
-            A list of all staff members in the system.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
        <DataTable 
         columns={columns} 
         data={users}

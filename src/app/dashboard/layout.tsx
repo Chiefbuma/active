@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { UserPlus, Building, Loader2, Users } from 'lucide-react';
+import { UserPlus, Settings, Loader2 } from 'lucide-react';
 import type { User } from '@/lib/types';
 import Logo from '@/components/logo';
 
@@ -63,17 +63,11 @@ export default function DashboardLayout({
                   Register Patient
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/corporates">
-                  <Building className="mr-2 h-4 w-4" />
-                  Manage Corporates
-                </Link>
-              </Button>
               {user && user.role === 'admin' && (
                 <Button asChild variant="outline">
-                    <Link href="/dashboard/users">
-                        <Users className="mr-2 h-4 w-4" />
-                        Manage Users
+                    <Link href="/dashboard/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
                     </Link>
                 </Button>
              )}

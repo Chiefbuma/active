@@ -1,13 +1,13 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, ArrowUpRight } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { placeholderImages } from "@/lib/placeholder-images"
 import type { Patient } from "@/lib/types"
-import Link from "next/link"
+import { ViewPatientButton } from "./view-patient-button"
 
 const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 
@@ -81,11 +81,7 @@ export const columns: ColumnDef<Patient>[] = [
       const patient = row.original
       return (
         <div className="text-right">
-            <Button asChild size="sm" variant="outline">
-            <Link href={`/patient/${patient.id}`}>
-                View <ArrowUpRight className="h-4 w-4 ml-2" />
-            </Link>
-            </Button>
+           <ViewPatientButton patientId={patient.id} />
         </div>
       )
     },
