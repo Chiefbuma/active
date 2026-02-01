@@ -253,3 +253,5 @@ INSERT INTO `goals` (`registration_id`, `user_id`, `discussion`, `goal`) VALUES
 INSERT INTO `clinicals` (`registration_id`, `user_id`, `notes_doctor`, `notes_psychologist`) VALUES
 (1, 1, 'Patient is in good health. Advised on consistent exercise and a balanced diet. Follow up in 6 months.', 'No immediate concerns. Patient seems well-adjusted and motivated.'),
 (2, 1, 'Diagnosed with Stage 1 Hypertension. Prescribed Lisinopril 10mg. Advised on lifestyle modifications, particularly diet and exercise. Follow up in 1 month to check BP.', 'Patient is showing signs of anxiety related to his new diagnosis. Provided resources for stress management.');
+
+```
