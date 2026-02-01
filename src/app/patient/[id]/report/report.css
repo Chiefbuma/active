@@ -94,8 +94,6 @@ body {
 }
 
 .patient-info {
-    display: flex;
-    justify-content: space-between;
     margin-bottom: 20px;
     break-after: avoid;
 }

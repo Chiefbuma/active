@@ -29,16 +29,7 @@ export default function Report({ patient, corporate }: ReportProps) {
   const clinical = patient.clinicals?.[0];
   const goal = patient.goals?.[0];
 
-  let reportDate: Date;
-  if (corporate?.wellness_date) {
-    reportDate = new Date(corporate.wellness_date);
-  } else if (vitals?.measured_at) { // Prioritize measured_at if available
-    reportDate = new Date(vitals.measured_at);
-  } else if (patient.created_at) {
-    reportDate = new Date(patient.created_at);
-  } else {
-    reportDate = new Date();
-  }
+  const reportDate = new Date(patient.wellness_date);
 
   const day = reportDate.getDate();
   const suffix = getDaySuffix(day);
@@ -68,10 +59,10 @@ export default function Report({ patient, corporate }: ReportProps) {
           </div>
 
           <div className="patient-info keep-together">
-            <span className="patient-name">{`${patient.first_name} ${
-              patient.surname || ''
-            }`}</span>
-            <span className="patient-email">{patient.email}</span>
+            <span className="patient-name">
+              {`${patient.first_name} ${patient.surname || ''}`}
+              {patient.email && ` : ${patient.email}`}
+            </span>
           </div>
 
           <div className="section-heading min-space-before">
