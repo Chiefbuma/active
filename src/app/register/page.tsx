@@ -114,30 +114,30 @@ export default function RegisterPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="first_name" className="text-foreground">First Name</Label>
+                  <Label htmlFor="first_name">First Name</Label>
                   <Input id="first_name" required onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="middle_name" className="text-foreground">Middle Name (Optional)</Label>
+                  <Label htmlFor="middle_name">Middle Name (Optional)</Label>
                   <Input id="middle_name" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="surname" className="text-foreground">Surname</Label>
+                  <Label htmlFor="surname">Surname</Label>
                   <Input id="surname" required onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="dob" className="text-foreground">Date of Birth (Optional)</Label>
+                  <Label htmlFor="dob">Date of Birth (Optional)</Label>
                   <Input id="dob" type="date" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="age" className="text-foreground">Age (Optional)</Label>
+                    <Label htmlFor="age">Age (Optional)</Label>
                     <Input id="age" type="number" onChange={handleInputChange} value={formData.age} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="sex" className="text-foreground">Sex</Label>
+                  <Label htmlFor="sex">Sex</Label>
                   <Select required onValueChange={(value) => handleSelectChange('sex', value)}>
                     <SelectTrigger id="sex" className={inputStyle}>
                       <SelectValue placeholder="Select sex" />
@@ -153,22 +153,22 @@ export default function RegisterPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                  <Label htmlFor="phone">Phone Number</Label>
                   <Input id="phone" type="tel" onChange={handleInputChange} className={inputStyle} />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-foreground">Email Address</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input id="email" type="email" onChange={handleInputChange} className={inputStyle} />
                 </div>
               </div>
               
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="grid gap-2">
-                    <Label htmlFor="wellness_date" className="text-foreground">Wellness Date</Label>
+                    <Label htmlFor="wellness_date">Wellness Date</Label>
                     <Input id="wellness_date" type="date" required onChange={handleInputChange} className={inputStyle} />
                  </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="corporate_id" className="text-foreground">Corporate (Optional)</Label>
+                    <Label htmlFor="corporate_id">Corporate (Optional)</Label>
                     <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
                     <SelectTrigger id="corporate_id" className={inputStyle}>
                         <SelectValue placeholder="Select corporate" />
