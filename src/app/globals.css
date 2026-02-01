@@ -78,8 +78,26 @@
     --sidebar-ring: 173 70% 65%;
   }
 
-  .dark [role="dialog"] label {
+  .dark [role="dialog"] {
+    --input: hsl(var(--primary) / 0.4);
+  }
+
+  .dark [role="dialog"] label,
+  .dark [role="dialog"] h2,
+  .dark [role="dialog"] input,
+  .dark [role="dialog"] textarea,
+  .dark [role="dialog"] [role="combobox"] {
     color: hsl(var(--primary));
+  }
+
+  .dark [role="dialog"] input::placeholder,
+  .dark [role="dialog"] textarea::placeholder {
+      color: hsl(var(--primary) / 0.6);
+  }
+
+  .dark [role="dialog"] button.border-input:hover {
+      background-color: hsl(var(--primary) / 0.1);
+      color: hsl(var(--primary));
   }
 }
 
