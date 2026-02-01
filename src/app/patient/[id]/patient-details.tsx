@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { useParams, notFound } from 'next/navigation';
-import type { Patient } from '@/lib/types';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import type { Patient, Corporate, User } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -19,6 +19,17 @@ import {
   DialogClose,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
@@ -27,7 +38,7 @@ import {
   HeartPulse,
   Scale,
   Target,
-  User,
+  User as UserIcon,
   Cake,
   Phone,
   Mail,
@@ -39,11 +50,20 @@ import {
   FileText,
   Loader2,
   CalendarDays,
+  Trash2,
+  Edit
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -76,17 +96,21 @@ const DetailItem = ({
 export default function PatientDetails({ initialPatient }: { initialPatient: Patient }) {
   const params = useParams();
   const patientId = params.id as string;
-  
+  const router = useRouter();
+  const { toast } = useToast();
+
   const [patient, setPatient] = useState<Patient>(initialPatient);
   const [loading, setLoading] = useState(false);
-
-  const { toast } = useToast();
+  
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [corporates, setCorporates] = useState<Corporate[]>([]);
 
   const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
   const [isNutritionModalOpen, setIsNutritionModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isClinicalModalOpen, setIsClinicalModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const patientAvatar = placeholderImages.find(p => p.id === 'patient-avatar');
 
@@ -95,7 +119,29 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
   const [nutritionForm, setNutritionForm] = useState({ height: '', weight: '', visceral_fat: '', body_fat_percent: '', notes_nutritionist: '' });
   const [goalForm, setGoalForm] = useState({ discussion: '', goal: '' });
   const [clinicalForm, setClinicalForm] = useState({ notes_doctor: '', notes_psychologist: '' });
+  const [editFormData, setEditFormData] = useState<Partial<Patient>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+
+    const fetchCorporates = async () => {
+        try {
+            const res = await fetch('/api/corporates');
+            const data = await res.json();
+            setCorporates(data);
+        } catch (error) {
+            console.error("Failed to fetch corporates", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load corporate list.' });
+        }
+    };
+    fetchCorporates();
+  }, [toast]);
+
 
   const fetchPatient = async () => {
     setLoading(true);
@@ -147,9 +193,69 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
     }
   };
 
+  const handleOpenEditModal = () => {
+    setEditFormData({
+        ...patient,
+        dob: patient.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
+        wellness_date: patient.wellness_date ? new Date(patient.wellness_date).toISOString().split('T')[0] : '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdatePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+        const res = await fetch(`/api/patients/${patient.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editFormData),
+        });
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to update patient.');
+        }
+        const { patient: updatedPatient } = await res.json();
+        setPatient(updatedPatient);
+        toast({ title: 'Success!', description: 'Patient details updated.' });
+        setIsEditModalOpen(false);
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+  
+  const handleDeletePatient = async () => {
+    setIsDeleting(true);
+    try {
+        const res = await fetch(`/api/patients/${patient.id}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to delete patient.');
+        }
+        toast({ title: 'Success', description: 'Patient record deleted.' });
+        router.push('/dashboard');
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditFormData({ ...editFormData, [e.target.id]: e.target.value });
+  };
+  
+  const handleEditSelectChange = (name: string, value: string) => {
+    setEditFormData({ ...editFormData, [name]: value });
+  };
 
 
   return (
@@ -424,14 +530,14 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                  <Separator />
                 <div className="grid grid-cols-1 gap-4 pt-4">
                   <DetailItem
-                    icon={User}
+                    icon={UserIcon}
                     label="Full Name"
                     value={`${patient.first_name} ${patient.middle_name || ''} ${
                       patient.surname || ''
                     }`}
                   />
-                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString() : '-'} />
-                   <DetailItem icon={CalendarDays} label="Wellness Date" value={new Date(patient.wellness_date).toLocaleDateString()} />
+                  <DetailItem icon={Cake} label="Date of Birth" value={patient.dob ? new Date(patient.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
+                   <DetailItem icon={CalendarDays} label="Wellness Date" value={patient.wellness_date ? new Date(patient.wellness_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} />
                   <DetailItem icon={Binary} label="Age / Sex" value={`${patient.age} / ${patient.sex}`} />
                   <DetailItem icon={Phone} label="Phone" value={patient.phone} />
                   <DetailItem icon={Mail} label="Email" value={patient.email} />
@@ -456,12 +562,39 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Button variant="outline">Edit Patient Details</Button>
+                <Button variant="outline" onClick={handleOpenEditModal}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Patient Details
+                </Button>
                 <Button onClick={() => setIsReportModalOpen(true)}>
                   <FileText className="mr-2 h-4 w-4" />
                   Generate PDF Report
                 </Button>
-                <Button variant="destructive">Delete Patient Record</Button>
+                {currentUser?.role === 'admin' && (
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Patient Record
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete this patient's record and all associated assessments.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDeletePatient} disabled={isDeleting}>
+                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Continue
+                            </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -475,6 +608,82 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
           corporate={patient.corporate_id ? { id: patient.corporate_id, name: patient.corporate_name!, wellness_date: patient.wellness_date! } : null}
         />
       )}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+                <DialogTitle>Edit Patient Details</DialogTitle>
+                <CardDescription>Update the patient's registration information below.</CardDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdatePatient}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="first_name">First Name</Label>
+                        <Input id="first_name" value={editFormData.first_name || ''} onChange={handleEditFormChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="middle_name">Middle Name</Label>
+                        <Input id="middle_name" value={editFormData.middle_name || ''} onChange={handleEditFormChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="surname">Surname</Label>
+                        <Input id="surname" value={editFormData.surname || ''} onChange={handleEditFormChange} required />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="dob">Date of Birth</Label>
+                        <Input id="dob" type="date" value={editFormData.dob || ''} onChange={handleEditFormChange} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="age">Age</Label>
+                        <Input id="age" type="number" value={editFormData.age || ''} onChange={handleEditFormChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="sex">Sex</Label>
+                        <Select value={editFormData.sex || ''} onValueChange={(value) => handleEditSelectChange('sex', value)} required>
+                            <SelectTrigger id="sex"><SelectValue placeholder="Select sex" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Male">Male</SelectItem>
+                                <SelectItem value="Female">Female</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={editFormData.email || ''} onChange={handleEditFormChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input id="phone" type="tel" value={editFormData.phone || ''} onChange={handleEditFormChange} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="wellness_date">Wellness Date</Label>
+                        <Input id="wellness_date" type="date" value={editFormData.wellness_date || ''} onChange={handleEditFormChange} required />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="corporate_id">Corporate</Label>
+                        <Select value={String(editFormData.corporate_id || 'null')} onValueChange={(value) => handleEditSelectChange('corporate_id', value)}>
+                            <SelectTrigger id="corporate_id"><SelectValue placeholder="Select corporate" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="null">None</SelectItem>
+                                {corporates.map((corporate) => (
+                                    <SelectItem key={corporate.id} value={String(corporate.id)}>{corporate.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Changes
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

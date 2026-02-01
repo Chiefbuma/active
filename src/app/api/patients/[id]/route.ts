@@ -51,8 +51,65 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    // This would be for updating patient details, can be implemented later
-    return NextResponse.json({ message: 'Method not implemented' }, { status: 501 });
+    try {
+        const patientId = params.id;
+        const body = await request.json();
+        const {
+            first_name,
+            middle_name,
+            surname,
+            dob,
+            age,
+            sex,
+            phone,
+            email,
+            wellness_date,
+            corporate_id
+        } = body;
+
+        // Basic validation
+        if (!first_name || !surname || !sex || !wellness_date) {
+            return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+        }
+
+        const connection = await db.getConnection();
+        await connection.query(
+            `UPDATE registrations SET 
+                first_name = ?, 
+                middle_name = ?, 
+                surname = ?, 
+                dob = ?, 
+                age = ?, 
+                sex = ?, 
+                phone = ?, 
+                email = ?, 
+                wellness_date = ?, 
+                corporate_id = ?
+            WHERE id = ?`,
+            [
+                first_name,
+                middle_name || null,
+                surname,
+                dob || null,
+                age ? parseInt(age, 10) : null,
+                sex,
+                phone || null,
+                email || null,
+                wellness_date,
+                (corporate_id && corporate_id !== 'null' && corporate_id !== '') ? parseInt(corporate_id, 10) : null,
+                patientId
+            ]
+        );
+        connection.release();
+
+        const updatedPatient = await getPatientWithRelations(patientId);
+
+        return NextResponse.json({ message: 'Patient updated successfully', patient: updatedPatient });
+
+    } catch (error) {
+        console.error('Error updating patient:', error);
+        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
