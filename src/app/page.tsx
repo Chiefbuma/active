@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/logo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('admin@superadmin.com');
   const [password, setPassword] = useState('password');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -82,7 +83,7 @@ export default function LoginPage() {
                             disabled={loading}
                             />
                         </div>
-                        <div className="grid gap-2">
+                        <div className="grid gap-2 relative">
                             <div className="flex items-center">
                             <Label htmlFor="password">Password</Label>
                             <Link
@@ -94,12 +95,29 @@ export default function LoginPage() {
                             </div>
                             <Input 
                             id="password" 
-                            type="password" 
+                            type={showPassword ? 'text' : 'password'} 
                             required 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={loading}
                             />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute bottom-1 right-1 h-7 w-7"
+                              onClick={() => setShowPassword(!showPassword)}
+                              disabled={loading}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                              <span className="sr-only">
+                                {showPassword ? 'Hide password' : 'Show password'}
+                              </span>
+                            </Button>
                         </div>
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
