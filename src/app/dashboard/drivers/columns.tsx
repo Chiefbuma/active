@@ -69,7 +69,7 @@ export const getColumns = ({ onEdit, onDelete }: DriversColumnsProps): ColumnDef
     cell: ({ row }) => {
       const driver = row.original;
       const name = `${driver.first_name} ${driver.last_name}`;
-      const fallback = `${driver.first_name[0]}${driver.last_name[0]}`;
+      const fallback = `${driver.first_name?.[0] || ''}${driver.last_name?.[0] || ''}`;
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">

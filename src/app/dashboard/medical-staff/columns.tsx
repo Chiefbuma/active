@@ -69,7 +69,7 @@ export const getColumns = ({ onEdit, onDelete }: MedicalStaffColumnsProps): Colu
     cell: ({ row }) => {
       const staff = row.original;
       const name = `${staff.first_name} ${staff.last_name}`;
-      const fallback = `${staff.first_name[0]}${staff.last_name[0]}`;
+      const fallback = `${staff.first_name?.[0] || ''}${staff.last_name?.[0] || ''}`;
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
