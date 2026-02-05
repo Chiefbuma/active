@@ -95,7 +95,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
       total_till: '',
       fuel: String(ambulance.fuel_cost),
       operation: String(ambulance.operation_cost),
-      police: '',
       cash_deposited_by_staff: '',
   });
 
@@ -141,14 +140,13 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             target: ambulance.target,
             fuel: Number(transactionFormData.fuel),
             operation: Number(transactionFormData.operation),
-            police: Number(transactionFormData.police) || 0,
             cash_deposited_by_staff: Number(transactionFormData.cash_deposited_by_staff),
         };
 
         // This is simplified. In a real app, all calculated fields would be computed.
         const fullTransaction = {
             ...newTransaction,
-            operations_cost: newTransaction.fuel! + newTransaction.operation! + newTransaction.police!,
+            operations_cost: newTransaction.fuel! + newTransaction.operation!,
             amount_paid_to_the_till: 0,
             offload: 0,
             salary: 0,
@@ -173,7 +171,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             total_till: '',
             fuel: String(ambulance.fuel_cost),
             operation: String(ambulance.operation_cost),
-            police: '',
             cash_deposited_by_staff: '',
         });
     }, 500);
@@ -252,10 +249,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                  <div className="space-y-2">
                   <Label htmlFor="operation">Operation Cost (KES)</Label>
                   <Input id="operation" type="number" value={transactionFormData.operation} onChange={(e) => setTransactionFormData({...transactionFormData, operation: e.target.value})} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="police">Police Payments (KES)</Label>
-                  <Input id="police" type="number" value={transactionFormData.police} onChange={(e) => setTransactionFormData({...transactionFormData, police: e.target.value})} />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="cash_deposited_by_staff">Cash Deposited (KES)</Label>

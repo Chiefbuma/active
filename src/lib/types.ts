@@ -38,7 +38,6 @@ export type Transaction = {
     target: number;
     fuel: number;
     operation: number;
-    police: number;
     cash_deposited_by_staff: number;
     // Calculated fields
     amount_paid_to_the_till: number;

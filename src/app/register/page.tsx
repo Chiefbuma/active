@@ -42,7 +42,6 @@ export default function RegisterPage() {
     target: '',
     fuel: '',
     operation: '',
-    police: '',
     cash_deposited_by_staff: '',
   });
   const [loading, setLoading] = useState(false);
@@ -196,10 +195,6 @@ export default function RegisterPage() {
                  <div className="grid gap-2">
                   <Label htmlFor="operation">Operation Cost (KES)</Label>
                   <Input id="operation" type="number" value={formData.operation} required onChange={handleInputChange} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="police">Police Payments (KES)</Label>
-                  <Input id="police" type="number" required onChange={handleInputChange} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="cash_deposited_by_staff">Cash Deposited (KES)</Label>

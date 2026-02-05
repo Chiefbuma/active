@@ -34,7 +34,6 @@ const generateTransactions = (): Transaction[] => {
       target: 15000,
       fuel: 5000,
       operation: 2000,
-      police: 500,
       cash_deposited_by_staff: 8500,
     },
     {
@@ -46,7 +45,6 @@ const generateTransactions = (): Transaction[] => {
       target: 18000,
       fuel: 5500,
       operation: 2200,
-      police: 0,
       cash_deposited_by_staff: 9800,
     },
      {
@@ -58,7 +56,6 @@ const generateTransactions = (): Transaction[] => {
       target: 14000,
       fuel: 4800,
       operation: 1900,
-      police: 200,
       cash_deposited_by_staff: 7600,
     },
      {
@@ -70,13 +67,12 @@ const generateTransactions = (): Transaction[] => {
       target: 15000,
       fuel: 5000,
       operation: 2000,
-      police: 0,
       cash_deposited_by_staff: 6000,
     },
   ];
 
   return data.map((t, index) => {
-    const operations_cost = t.fuel + t.operation + t.police;
+    const operations_cost = t.fuel + t.operation;
     const amount_paid_to_the_till = t.total_till - operations_cost;
     const offload = t.total_till < t.target ? t.target - t.total_till : 0;
     const surplus = t.total_till > t.target ? t.total_till - t.target : 0;
@@ -102,3 +98,41 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
+
+export const parameters = [
+    {
+        id: 1,
+        name: "Blood Pressure (Systolic)",
+        type: "numerical",
+        unit: "mmHg",
+        description: "The pressure in your arteries when your heart beats."
+    },
+    {
+        id: 2,
+        name: "Daily Steps",
+        type: "numerical",
+        unit: "steps",
+        description: "The number of steps you take per day."
+    },
+    {
+        id: 3,
+        name: "Smoking Status",
+        type: "choice",
+        choices: ["Non-smoker", "Former smoker", "Current smoker"],
+        description: "Your current smoking habits."
+    },
+    {
+        id: 4,
+        name: "Weight",
+        type: "numerical",
+        unit: "kg",
+        description: "Your body weight."
+    },
+    {
+        id: 5,
+        name: "Sleep Duration",
+        type: "numerical",
+        unit: "hours",
+        description: "Average hours of sleep per night."
+    }
+]
