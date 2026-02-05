@@ -4,8 +4,8 @@ import {Toaster} from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Taria Health Activation',
-  description: 'Health Activation Campaign App',
+  title: 'Radiant Hospital Ambulance Management',
+  description: 'Ambulance Fleet & Revenue Management',
 };
 
 export default function RootLayout({

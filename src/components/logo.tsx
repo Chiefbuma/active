@@ -3,7 +3,7 @@ import type React from 'react';
 const Logo = ({ className = '', ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 200 50"
+    viewBox="0 0 260 50"
     className={className}
     {...props}
   >
@@ -35,7 +35,7 @@ const Logo = ({ className = '', ...props }: React.SVGProps<SVGSVGElement>) => (
         fontSize="24"
         className="logo-text logo-text-fill"
       >
-        Taria Health
+        Radiant Hospital
       </text>
     </g>
   </svg>
