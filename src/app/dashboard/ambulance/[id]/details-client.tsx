@@ -18,6 +18,14 @@ import {
   DialogClose,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
@@ -48,8 +56,6 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getDrivers, getEmergencyTechnicians } from '@/lib/data';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const DetailItem = ({
   label,
@@ -86,7 +92,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
   
-  const [isTechnicianPopoverOpen, setIsTechnicianPopoverOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [transactionFormData, setTransactionFormData] = useState({
@@ -137,7 +142,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         const target = ambulance.target || 0;
         const cashDeposited = Number(transactionFormData.cash_deposited_by_staff) || 0;
 
-        // Business logic from PHP model
+        // Business logic
         const amount_paid_to_the_till = totalTill - cashDeposited;
         const offload = totalTill - fuel - operation;
         const salary = (offload - target) >= 0 ? (offload - target) : 0;
@@ -226,29 +231,29 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                 </div>
                 <div className="space-y-2">
                     <Label>Emergency Technicians</Label>
-                     <Popover open={isTechnicianPopoverOpen} onOpenChange={setIsTechnicianPopoverOpen}>
-                        <PopoverTrigger asChild>
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-full justify-start font-normal">
                                 <Users className="mr-2 h-4 w-4" />
                                 <span>{transactionFormData.emergency_technician_ids.length > 0 ? `${transactionFormData.emergency_technician_ids.length} selected` : 'Select Technicians'}</span>
                                 <ChevronDown className="ml-auto h-4 w-4 opacity-50"/>
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0" align="start">
-                            <div className="p-4 space-y-2">
-                                {emergencyTechnicians.map(tech => (
-                                    <div key={tech.id} className="flex items-center space-x-2">
-                                        <Checkbox 
-                                            id={`tech-${tech.id}`}
-                                            checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
-                                            onCheckedChange={() => handleTechnicianSelection(tech.id)}
-                                        />
-                                        <Label htmlFor={`tech-${tech.id}`} className="font-normal">{tech.name}</Label>
-                                    </div>
-                                ))}
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]" align="start">
+                             <DropdownMenuLabel>Select Technicians</DropdownMenuLabel>
+                             <DropdownMenuSeparator />
+                            {emergencyTechnicians.map(tech => (
+                                <DropdownMenuCheckboxItem
+                                    key={tech.id}
+                                    checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
+                                    onCheckedChange={() => handleTechnicianSelection(tech.id)}
+                                    onSelect={(e) => e.preventDefault()}
+                                >
+                                    {tech.name}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                  <div className="space-y-2">
                   <Label htmlFor="total_till">Total Till (KES)</Label>

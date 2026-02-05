@@ -24,15 +24,20 @@ import type { Ambulance, Driver, EmergencyTechnician } from '@/lib/types';
 import { getAmbulances, getDrivers, getEmergencyTechnicians } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, Loader2, Users } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 
 export default function RegisterPage() {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
-  const [isTechnicianPopoverOpen, setIsTechnicianPopoverOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -154,29 +159,29 @@ export default function RegisterPage() {
                 </div>
                 <div className="space-y-2">
                     <Label>Emergency Technicians</Label>
-                     <Popover open={isTechnicianPopoverOpen} onOpenChange={setIsTechnicianPopoverOpen}>
-                        <PopoverTrigger asChild>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="w-full justify-start font-normal">
                                 <Users className="mr-2 h-4 w-4" />
                                 <span>{formData.emergency_technician_ids.length > 0 ? `${formData.emergency_technician_ids.length} selected` : 'Select Technicians'}</span>
                                 <ChevronDown className="ml-auto h-4 w-4 opacity-50"/>
                             </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0" align="start">
-                            <div className="p-4 space-y-2">
-                                {emergencyTechnicians.map(tech => (
-                                    <div key={tech.id} className="flex items-center space-x-2">
-                                        <Checkbox 
-                                            id={`reg-tech-${tech.id}`}
-                                            checked={formData.emergency_technician_ids.includes(tech.id)}
-                                            onCheckedChange={() => handleTechnicianSelection(tech.id)}
-                                        />
-                                        <Label htmlFor={`reg-tech-${tech.id}`} className="font-normal">{tech.name}</Label>
-                                    </div>
-                                ))}
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]" align="start">
+                             <DropdownMenuLabel>Select Technicians</DropdownMenuLabel>
+                             <DropdownMenuSeparator />
+                            {emergencyTechnicians.map(tech => (
+                                <DropdownMenuCheckboxItem
+                                    key={tech.id}
+                                    checked={formData.emergency_technician_ids.includes(tech.id)}
+                                    onCheckedChange={() => handleTechnicianSelection(tech.id)}
+                                    onSelect={(e) => e.preventDefault()}
+                                >
+                                    {tech.name}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
               </div>
 
