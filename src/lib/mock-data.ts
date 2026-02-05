@@ -30,7 +30,7 @@ const generateTransactions = (): Transaction[] => {
       ambulance: ambulances[0],
       driver: drivers[0],
       emergency_technicians: [emergencyTechnicians[0]],
-      total_till: 16000,
+      total_till: 22000,
       target: 15000,
       fuel: 5000,
       operation: 2000,
@@ -52,7 +52,7 @@ const generateTransactions = (): Transaction[] => {
       ambulance: ambulances[2],
       driver: drivers[2],
       emergency_technicians: [emergencyTechnicians[2]],
-      total_till: 14500,
+      total_till: 18000,
       target: 14000,
       fuel: 4800,
       operation: 1900,
@@ -72,15 +72,21 @@ const generateTransactions = (): Transaction[] => {
   ];
 
   return data.map((t, index) => {
-    const operations_cost = t.fuel + t.operation;
-    const amount_paid_to_the_till = t.total_till - operations_cost;
-    const offload = t.total_till < t.target ? t.target - t.total_till : 0;
-    const surplus = t.total_till > t.target ? t.total_till - t.target : 0;
-    const salary = surplus * 0.4;
-    const net_banked = t.total_till - (operations_cost + salary);
-    const deficit = net_banked > 0 ? 0 : amount_paid_to_the_till - t.cash_deposited_by_staff;
-    const performance = t.target > 0 ? t.total_till / t.target : 0;
-    const fuel_revenue_ratio = t.total_till > 0 ? t.fuel / t.total_till : 0;
+    const totalTill = t.total_till || 0;
+    const fuel = t.fuel || 0;
+    const operation = t.operation || 0;
+    const target = t.target || 0;
+    const cashDeposited = t.cash_deposited_by_staff || 0;
+
+    // Business logic from PHP model
+    const amount_paid_to_the_till = totalTill - cashDeposited;
+    const offload = totalTill - fuel - operation;
+    const salary = (offload - target) >= 0 ? (offload - target) : 0;
+    const operations_cost = operation + salary;
+    const net_banked = totalTill - fuel - operation - salary;
+    const deficit = target - net_banked;
+    const performance = target > 0 ? net_banked / target : 0;
+    const fuel_revenue_ratio = totalTill > 0 ? fuel / totalTill : 0;
 
     return {
       ...t,
@@ -98,41 +104,3 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
-
-export const parameters = [
-    {
-        id: 1,
-        name: "Blood Pressure (Systolic)",
-        type: "numerical",
-        unit: "mmHg",
-        description: "The pressure in your arteries when your heart beats."
-    },
-    {
-        id: 2,
-        name: "Daily Steps",
-        type: "numerical",
-        unit: "steps",
-        description: "The number of steps you take per day."
-    },
-    {
-        id: 3,
-        name: "Smoking Status",
-        type: "choice",
-        choices: ["Non-smoker", "Former smoker", "Current smoker"],
-        description: "Your current smoking habits."
-    },
-    {
-        id: 4,
-        name: "Weight",
-        type: "numerical",
-        unit: "kg",
-        description: "Your body weight."
-    },
-    {
-        id: 5,
-        name: "Sleep Duration",
-        type: "numerical",
-        unit: "hours",
-        description: "Average hours of sleep per night."
-    }
-]

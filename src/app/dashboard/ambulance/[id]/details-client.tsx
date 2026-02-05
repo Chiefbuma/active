@@ -130,33 +130,44 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             return;
         }
 
-        const newTransaction: Partial<Transaction> = {
+        const totalTill = Number(transactionFormData.total_till) || 0;
+        const fuel = Number(transactionFormData.fuel) || 0;
+        const operation = Number(transactionFormData.operation) || 0;
+        const target = ambulance.target || 0;
+        const cashDeposited = Number(transactionFormData.cash_deposited_by_staff) || 0;
+
+        // Business logic from PHP model
+        const amount_paid_to_the_till = totalTill - cashDeposited;
+        const offload = totalTill - fuel - operation;
+        const salary = (offload - target) >= 0 ? (offload - target) : 0;
+        const operations_cost = operation + salary;
+        const net_banked = totalTill - fuel - operation - salary;
+        const deficit = target - net_banked;
+        const performance = target > 0 ? net_banked / target : 0;
+        const fuel_revenue_ratio = totalTill > 0 ? fuel / totalTill : 0;
+
+        const newTransaction: Transaction = {
             id: Math.random(),
             date: transactionFormData.date,
             ambulance: ambulance,
             driver: selectedDriver,
             emergency_technicians: selectedTechnicians,
-            total_till: Number(transactionFormData.total_till),
-            target: ambulance.target,
-            fuel: Number(transactionFormData.fuel),
-            operation: Number(transactionFormData.operation),
-            cash_deposited_by_staff: Number(transactionFormData.cash_deposited_by_staff),
+            total_till: totalTill,
+            target: target,
+            fuel: fuel,
+            operation: operation,
+            cash_deposited_by_staff: cashDeposited,
+            operations_cost,
+            amount_paid_to_the_till,
+            offload,
+            salary,
+            net_banked,
+            deficit,
+            performance,
+            fuel_revenue_ratio,
         };
 
-        // This is simplified. In a real app, all calculated fields would be computed.
-        const fullTransaction = {
-            ...newTransaction,
-            operations_cost: newTransaction.fuel! + newTransaction.operation!,
-            amount_paid_to_the_till: 0,
-            offload: 0,
-            salary: 0,
-            net_banked: 0,
-            deficit: 0,
-            performance: newTransaction.total_till! / newTransaction.target!,
-            fuel_revenue_ratio: 0,
-        } as Transaction;
-
-        setTransactions([fullTransaction, ...transactions]);
+        setTransactions([newTransaction, ...transactions]);
         setIsSubmitting(false);
         setIsTransactionModalOpen(false);
         toast({
@@ -274,9 +285,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button asChild variant="outline" size="icon">
-              <Link href="/dashboard">
+              <Link href="/dashboard/ambulances">
                 <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back to Dashboard</span>
+                <span className="sr-only">Back to Ambulances</span>
               </Link>
             </Button>
             <div>
