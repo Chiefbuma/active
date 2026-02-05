@@ -49,3 +49,29 @@ export type Transaction = {
     fuel_revenue_ratio: number;
     performance: number;
 }
+
+export type AmbulancePerformanceData = {
+    ambulanceId: number;
+    reg_no: string;
+    total_target: number;
+    total_net_banked: number;
+    avg_performance: number;
+}
+
+export type PeriodComparisonData = {
+    net_banked: number;
+    deficit: number;
+}
+
+export type AdminDashboardData = {
+    total_target: number;
+    total_net_banked: number;
+    total_till: number;
+    total_deficit: number;
+    overall_performance: number;
+    ambulance_performance: AmbulancePerformanceData[];
+    period_comparison: {
+        current: PeriodComparisonData;
+        previous: PeriodComparisonData;
+    };
+};

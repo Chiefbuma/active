@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { User, Settings, Loader2, UserPlus, Truck } from 'lucide-react';
+import { Settings, Loader2, Truck, LayoutDashboard } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
 
@@ -47,6 +47,14 @@ export default function DashboardLayout({
             <Logo className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-4">
+             {user && user.role === 'admin' && (
+               <Button asChild variant="outline">
+                  <Link href="/dashboard/admin">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Admin Dashboard
+                  </Link>
+              </Button>
+             )}
              <Button asChild variant="outline">
                 <Link href="/dashboard">
                   <Truck className="mr-2 h-4 w-4" />
