@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -92,14 +93,22 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
 
     useEffect(() => {
         setLoading(true);
-        const data = calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
-        setDashboardData(data);
+        if (dateRange.from && dateRange.to) {
+            const data = calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
+            setDashboardData(data);
+        }
         setLoading(false);
     }, [dateRange, initialTransactions, initialAmbulances, calculateDashboardData]);
 
-    const handleDateChange = (range: { from?: Date, to?: Date }) => {
-        if (range.from && range.to) {
-            setDateRange({ from: range.from, to: range.to });
+    const handleStartDateChange = (date: Date | undefined) => {
+        if (date) {
+            setDateRange(prev => ({ ...prev, from: date }));
+        }
+    };
+    
+    const handleEndDateChange = (date: Date | undefined) => {
+        if (date) {
+            setDateRange(prev => ({ ...prev, to: date }));
         }
     };
     
@@ -116,29 +125,55 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     <h1 className="text-3xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
                     <p className="text-muted-foreground">High-level overview of fleet performance.</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                id="date"
-                                variant={"outline"}
-                                className={cn("w-[300px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="end">
-                            <Calendar
-                                initialFocus
-                                mode="range"
-                                defaultMonth={dateRange.from}
-                                selected={dateRange}
-                                onSelect={(range) => handleDateChange(range || {})}
-                                numberOfMonths={2}
-                            />
-                        </PopoverContent>
-                    </Popover>
+                <div className="flex items-end gap-4">
+                    <div className="grid gap-1">
+                        <Label>Start Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    id="start_date"
+                                    variant={"outline"}
+                                    className={cn("w-[180px] justify-start text-left font-normal")}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {format(dateRange.from, "LLL dd, y")}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    initialFocus
+                                    mode="single"
+                                    selected={dateRange.from}
+                                    onSelect={handleStartDateChange}
+                                    disabled={{ after: dateRange.to }}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                     <div className="grid gap-1">
+                        <Label>End Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    id="end_date"
+                                    variant={"outline"}
+                                    className={cn("w-[180px] justify-start text-left font-normal")}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {format(dateRange.to, "LLL dd, y")}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    initialFocus
+                                    mode="single"
+                                    selected={dateRange.to}
+                                    onSelect={handleEndDateChange}
+                                    disabled={{ before: dateRange.from }}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
             </div>
 
@@ -147,7 +182,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     <CardHeader>
                         <CardTitle>Overall Performance</CardTitle>
                         <CardDescription>
-                            Net Banked vs Target for the selected period.
+                            Net Banked vs Target for {format(dateRange.from, "LLL d")} - {format(dateRange.to, "LLL d, y")}.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center">
