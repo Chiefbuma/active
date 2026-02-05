@@ -18,27 +18,14 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      // For security, we show a generic message whether the email exists or not.
+    // Mock functionality
+    setTimeout(() => {
       toast({
         title: 'Check your email',
         description: 'If an account exists for this email, we have sent a password reset link.',
       });
-    } catch (error) {
-       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
-      });
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (

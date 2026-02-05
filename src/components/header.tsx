@@ -58,9 +58,9 @@ export default function Header({ user }: { user: User }) {
           </DropdownMenuItem>
           {user.role === 'admin' && (
             <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/dashboard/settings">
+                <Link href="/dashboard/users">
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                    <span>App Users</span>
                 </Link>
             </DropdownMenuItem>
           )}

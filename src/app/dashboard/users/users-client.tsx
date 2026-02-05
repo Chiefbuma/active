@@ -85,7 +85,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
         return;
     }
 
-    const body = { ...formData };
+    const body: Partial<User> & {password?: string} = { ...formData };
     if (editingUser && !body.password) {
         delete body.password;
     }
@@ -93,9 +93,9 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     // Mock API Call
     setTimeout(() => {
         if (editingUser) {
-            setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...body } : u));
+            setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...body, id: editingUser.id } : u));
         } else {
-            setUsers([...users, { ...body, id: Math.random() }]);
+            setUsers([...users, { ...body, id: Math.random(), name: body.name!, email: body.email!, role: body.role! }]);
         }
         toast({
             title: "Success",

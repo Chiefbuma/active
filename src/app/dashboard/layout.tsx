@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { User, Settings, Loader2, Truck, UserPlus, Ambulance } from 'lucide-react';
+import { User, Settings, Loader2, UserPlus, Ambulance, PlusCircle } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
 
@@ -93,7 +93,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-// Need to import placeholderImages to use it
-import { placeholderImages } from '@/lib/placeholder-images';
-import { PlusCircle } from 'lucide-react';

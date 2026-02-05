@@ -31,45 +31,22 @@ export default function ProfilePage() {
     if (!user) return;
     setIsSubmitting(true);
 
-    const url = `/api/users/${user.id}`;
-    const method = 'PUT';
-
-    const body: any = {
-        name: formData.name,
-        email: formData.email,
-        role: user.role, // role is not editable by the user
-    };
-    if (formData.password) {
-        body.password = formData.password;
-    }
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      const updatedUser = await res.json();
-
-      // Update localStorage
-      localStorage.setItem('loggedInUser', JSON.stringify({ ...user, ...updatedUser.user }));
-
-      toast({
-        title: "Success",
-        description: "Your profile has been updated successfully.",
-      });
-      setFormData(prev => ({ ...prev, password: '' })); // Clear password field
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: (error as Error).message });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Mock update
+    setTimeout(() => {
+        const updatedUser = { ...user, name: formData.name, email: formData.email };
+        // In a real app, you would also handle password change logic
+        
+        // Update localStorage
+        localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+        setUser(updatedUser); // update state to reflect change on page
+        
+        toast({
+            title: "Success",
+            description: "Your profile has been updated successfully.",
+        });
+        setFormData(prev => ({ ...prev, password: '' })); // Clear password field
+        setIsSubmitting(false);
+    }, 500);
   };
 
   if (loading) {

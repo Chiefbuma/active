@@ -1,4 +1,4 @@
-import type { Transaction, Ambulance, Driver, MedicalStaff, User } from './types';
+import type { Transaction, Ambulance, Driver, MedicalStaff, User, Parameter } from './types';
 
 export const ambulances: Ambulance[] = [
   { id: 1, reg_no: 'KDJ 456A', fuel_cost: 5000, operation_cost: 2000, target: 15000 },
@@ -21,7 +21,7 @@ export const medicalStaff: MedicalStaff[] = [
 export const users: User[] = [
     { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin', avatarUrl: 'https://picsum.photos/seed/user1/200/200' },
     { id: 2, name: 'Staff User', email: 'staff@example.com', role: 'staff', avatarUrl: 'https://picsum.photos/seed/user2/200/200' }
-]
+];
 
 const generateTransactions = (): Transaction[] => {
   const data: Omit<Transaction, 'id' | 'amount_paid_to_the_till' | 'offload' | 'salary' | 'operations_cost' | 'net_banked' | 'deficit' | 'performance' | 'fuel_revenue_ratio'>[] = [
@@ -82,7 +82,7 @@ const generateTransactions = (): Transaction[] => {
     const surplus = t.total_till > t.target ? t.total_till - t.target : 0;
     const salary = surplus * 0.4;
     const net_banked = t.total_till - (operations_cost + salary);
-    const deficit = net_banked < t.target ? t.target - net_banked : 0;
+    const deficit = net_banked > 0 ? 0 : amount_paid_to_the_till - t.cash_deposited_by_staff;
     const performance = t.target > 0 ? t.total_till / t.target : 0;
     const fuel_revenue_ratio = t.total_till > 0 ? t.fuel / t.total_till : 0;
 
@@ -102,3 +102,11 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
+
+export const parameters: Parameter[] = [
+  { id: 1, name: 'Weight', type: 'numerical', unit: 'kg' },
+  { id: 2, name: 'Blood Pressure (Systolic)', type: 'numerical', unit: 'mmHg' },
+  { id: 3, name: 'Daily Steps', type: 'numerical', unit: 'steps' },
+  { id: 4, name: 'Smoking Status', type: 'choice', choices: ['Non-smoker', 'Former smoker', 'Current smoker'] },
+  { id: 5, name: 'Alcohol Consumption', type: 'choice', choices: ['Abstinent', 'Occasional', 'Regular'] },
+];
