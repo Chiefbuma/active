@@ -12,6 +12,8 @@ export type Ambulance = {
   fuel_cost: number;
   operation_cost: number;
   target: number;
+  last_driven_by?: string;
+  last_driven_on?: string;
 };
 
 export type Driver = {

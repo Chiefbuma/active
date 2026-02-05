@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Ambulance, Transaction } from '@/lib/types';
+import Image from 'next/image';
 import {
   Card,
   CardContent,
@@ -29,12 +30,15 @@ import {
   DollarSign,
   Fuel,
   Wrench,
+  User,
+  CalendarDays,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './transactions-columns';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { placeholderImages } from '@/lib/placeholder-images';
 
 const DetailItem = ({
   label,
@@ -65,6 +69,7 @@ const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style
 
 export default function AmbulanceDetailsClient({ initialAmbulance, initialTransactions }: { initialAmbulance: Ambulance, initialTransactions: Transaction[] }) {
   const { toast } = useToast();
+  const ambulanceImage = placeholderImages.find(p => p.id === 'ambulance-image');
 
   const [ambulance] = useState<Ambulance>(initialAmbulance);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
@@ -213,12 +218,24 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-6">
             <Card>
+                {ambulanceImage && (
+                    <div className="relative">
+                        <Image
+                            src={ambulanceImage.imageUrl}
+                            alt={ambulanceImage.description}
+                            data-ai-hint={ambulanceImage.imageHint}
+                            width={600}
+                            height={400}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                        />
+                    </div>
+                )}
               <CardHeader>
                   <CardTitle className="text-2xl">{ambulance.reg_no}</CardTitle>
                   <CardDescription>Ambulance Details</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
-                <div className="grid grid-cols-1 gap-4 pt-4">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
                   <DetailItem
                     icon={DollarSign}
                     label="Daily Target"
@@ -233,6 +250,16 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                     icon={Wrench} 
                     label="Default Operation Cost" 
                     value={formatCurrency(ambulance.operation_cost)}
+                  />
+                   <DetailItem 
+                    icon={User} 
+                    label="Last Driven By" 
+                    value={ambulance.last_driven_by}
+                  />
+                   <DetailItem 
+                    icon={CalendarDays} 
+                    label="Last Driven On" 
+                    value={ambulance.last_driven_on}
                   />
                 </div>
               </CardContent>

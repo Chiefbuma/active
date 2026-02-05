@@ -11,6 +11,13 @@ export default async function AmbulanceDetailsPage({ params }: { params: { id: s
   }
   
   const transactions = await getTransactionsByAmbulanceId(ambulanceId);
+  const latestTransaction = transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-  return <AmbulanceDetailsClient initialAmbulance={ambulance} initialTransactions={transactions} />;
+  const ambulanceData = {
+    ...ambulance,
+    last_driven_by: latestTransaction ? `${latestTransaction.driver.first_name} ${latestTransaction.driver.last_name}` : 'N/A',
+    last_driven_on: latestTransaction ? new Date(latestTransaction.date).toLocaleDateString() : 'N/A',
+  }
+
+  return <AmbulanceDetailsClient initialAmbulance={ambulanceData} initialTransactions={transactions} />;
 }
