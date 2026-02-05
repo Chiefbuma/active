@@ -23,13 +23,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown, MoreHorizontal, Edit, Trash2 } from "lucide-react"
 import type { Ambulance } from "@/lib/types"
+import { ViewAmbulanceButton } from "../view-ambulance-button"
 
 interface AmbulancesColumnsProps {
   onEdit: (ambulance: Ambulance) => void
   onDelete: (id: number) => void
 }
-
-const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KES' }).format(value);
 
 export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): ColumnDef<Ambulance>[] => [
   {
@@ -70,35 +69,20 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
     cell: ({ row }) => <div className="font-medium">{row.getValue("reg_no")}</div>,
   },
   {
-    accessorKey: "fuel_cost",
-    header: "Fuel Cost",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("fuel_cost"))
-      return <div className="font-medium">{formatCurrency(amount)}</div>
-    },
+    accessorKey: "last_driven_by",
+    header: "Last Driven By",
   },
   {
-    accessorKey: "operation_cost",
-    header: "Operation Cost",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("operation_cost"))
-      return <div className="font-medium">{formatCurrency(amount)}</div>
-    },
-  },
-    {
-    accessorKey: "target",
-    header: "Target",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("target"))
-      return <div className="font-medium">{formatCurrency(amount)}</div>
-    },
+    accessorKey: "last_driven_on",
+    header: "Last Driven On",
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const ambulance = row.original
       return (
-        <div className="text-right">
+        <div className="text-right flex items-center justify-end gap-2">
+            <ViewAmbulanceButton ambulanceId={ambulance.id} />
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
