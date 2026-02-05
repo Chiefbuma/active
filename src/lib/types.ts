@@ -8,7 +8,7 @@ export type User = {
 
 export type Corporate = {
   id: number;
-  name: string;
+  name:string;
   wellness_date: string;
 };
 
@@ -63,12 +63,25 @@ export type Nutrition = {
   user_id?: number;
 };
 
+export type Parameter = {
+  id: number;
+  name: string;
+  type: 'numerical' | 'choice';
+  choices?: string[];
+  unit?: string;
+};
+
 export type Goal = {
   id: number;
   patient_id: number; // Mapped from registration_id
   user_id: number;
   discussion?: string;
   goal?: string;
+  parameter_id?: number;
+  target_value?: string;
+  operator?: 'at_or_below' | 'at_or_above' | 'exactly';
+  deadline?: string;
+  notes?: string;
 };
 
 export type Clinical = {

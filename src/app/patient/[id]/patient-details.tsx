@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import type { Patient, Corporate, User } from '@/lib/types';
+import type { Patient, Corporate, User, Parameter } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -64,10 +64,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from '@/hooks/use-toast';
 import { placeholderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ReportViewer from '@/components/report-viewer';
+import { parameters } from '@/lib/mock-data';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const DetailItem = ({
   label,
@@ -117,7 +126,14 @@ export default function PatientDetails() {
   // Form states
   const [vitalsForm, setVitalsForm] = useState({ bp_systolic: '', bp_diastolic: '', pulse: '', temp: '', rbs: '' });
   const [nutritionForm, setNutritionForm] = useState({ height: '', weight: '', visceral_fat: '', body_fat_percent: '', notes_nutritionist: '' });
-  const [goalForm, setGoalForm] = useState({ discussion: '', goal: '' });
+  const [goalForm, setGoalForm] = useState({
+    parameterId: '',
+    targetValue: '',
+    operator: 'at_or_below',
+    deadline: '',
+    notes: '',
+  });
+  const [selectedParameter, setSelectedParameter] = useState<Parameter | null>(null);
   const [clinicalForm, setClinicalForm] = useState({ notes_doctor: '', notes_psychologist: '' });
   const [editFormData, setEditFormData] = useState<Partial<Patient>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -260,6 +276,16 @@ export default function PatientDetails() {
   
   const handleEditSelectChange = (name: string, value: string) => {
     setEditFormData({ ...editFormData, [name]: value });
+  };
+
+  const handleParameterChange = (parameterId: string) => {
+    const newSelectedParam = parameters.find(p => p.id === parseInt(parameterId, 10)) || null;
+    setSelectedParameter(newSelectedParam);
+    setGoalForm({
+        ...goalForm,
+        parameterId: parameterId,
+        targetValue: '', // Reset target value when parameter changes
+    });
   };
 
   if (loading || !patient) {
@@ -508,32 +534,130 @@ export default function PatientDetails() {
                   </div>
                 </div>
                  <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
-                        <PlusCircle className="mr-2 h-4 w-4"/>
-                        {patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set Goal'}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{patient.goals && patient.goals.length > 0 ? 'Edit Goal' : 'Set New Goal'}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit('goals', goalForm, setIsGoalModalOpen, 'Goal'); }}>
-                      <div className="space-y-6 py-4">
-                          <div className="space-y-2"><Label htmlFor="discussion">Discussion</Label><Textarea id="discussion" value={goalForm.discussion} onChange={(e) => setGoalForm({...goalForm, discussion: e.target.value})} /></div>
-                          <div className="space-y-2"><Label htmlFor="goal">Goal</Label><Textarea id="goal" value={goalForm.goal} onChange={(e) => setGoalForm({...goalForm, goal: e.target.value})} /></div>
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={isSubmitting}>
-                          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                          {isSubmitting ? 'Saving...' : 'Save Record'}
+                    <DialogTrigger asChild>
+                        <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                            <PlusCircle className="mr-2 h-4 w-4"/>
+                            Set Goal
                         </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Add New Goal</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={(e) => e.preventDefault()}>
+                            <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="parameterId">Parameter</Label>
+                                    <Select onValueChange={handleParameterChange}>
+                                        <SelectTrigger id="parameterId">
+                                            <SelectValue placeholder="Select a parameter" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {parameters.map((param) => (
+                                                <SelectItem key={param.id} value={String(param.id)}>
+                                                    {param.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {selectedParameter && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="targetValue">Target Value {selectedParameter.unit ? `(${selectedParameter.unit})` : ''}</Label>
+                                        {selectedParameter.type === 'numerical' && (
+                                            <Input
+                                                id="targetValue"
+                                                type="number"
+                                                placeholder={`e.g., ${selectedParameter.unit === 'mmHg' ? '120' : '10000'}`}
+                                                value={goalForm.targetValue}
+                                                onChange={(e) => setGoalForm({ ...goalForm, targetValue: e.target.value })}
+                                            />
+                                        )}
+                                        {selectedParameter.type === 'choice' && (
+                                            <Select
+                                                value={goalForm.targetValue}
+                                                onValueChange={(value) => setGoalForm({ ...goalForm, targetValue: value })}
+                                            >
+                                                <SelectTrigger id="targetValue">
+                                                    <SelectValue placeholder="Select a value" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {selectedParameter.choices?.map((choice) => (
+                                                        <SelectItem key={choice} value={choice}>
+                                                            {choice}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                <div className="space-y-2">
+                                    <Label htmlFor="operator">Operator</Label>
+                                    <Select
+                                        value={goalForm.operator}
+                                        onValueChange={(value) => setGoalForm({ ...goalForm, operator: value })}
+                                    >
+                                        <SelectTrigger id="operator">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="at_or_below">At or below</SelectItem>
+                                            <SelectItem value="at_or_above">At or above</SelectItem>
+                                            <SelectItem value="exactly">Exactly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="deadline">Deadline</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !goalForm.deadline && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarDays className="mr-2 h-4 w-4" />
+                                                {goalForm.deadline ? format(new Date(goalForm.deadline), "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={goalForm.deadline ? new Date(goalForm.deadline) : undefined}
+                                                onSelect={(date) => setGoalForm({...goalForm, deadline: date ? date.toISOString().split('T')[0] : ''})}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                    <Label htmlFor="notes">Notes</Label>
+                                    <Textarea
+                                        id="notes"
+                                        placeholder="Additional notes..."
+                                        value={goalForm.notes}
+                                        onChange={(e) => setGoalForm({ ...goalForm, notes: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" disabled>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Save Goal
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
                 </Dialog>
               </CardHeader>
               <CardContent>
@@ -694,5 +818,3 @@ export default function PatientDetails() {
     </div>
   );
 }
-
-    
