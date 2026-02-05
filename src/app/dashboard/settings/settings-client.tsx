@@ -1,9 +1,8 @@
 'use client';
 
-import type { User } from '@/lib/types';
 import UsersClient from '@/app/dashboard/users/users-client';
 
-export default function SettingsClient({ initialUsers }: { initialUsers: User[] }) {
+export default function SettingsClient() {
 
   return (
     <div className="flex flex-col gap-8">
@@ -17,7 +16,7 @@ export default function SettingsClient({ initialUsers }: { initialUsers: User[] 
             </p>
             </div>
         </div>
-        <UsersClient initialUsers={initialUsers} />
+        <UsersClient />
     </div>
   );
 }

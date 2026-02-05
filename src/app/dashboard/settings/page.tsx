@@ -1,14 +1,11 @@
-import { fetchUsers } from '@/lib/data';
 import SettingsClient from './settings-client';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default async function SettingsPage() {
-  const users = await fetchUsers();
-
+export default function SettingsPage() {
   return (
     <Card>
       <CardContent className="pt-6">
-        <SettingsClient initialUsers={users} />
+        <SettingsClient />
       </CardContent>
     </Card>
   )

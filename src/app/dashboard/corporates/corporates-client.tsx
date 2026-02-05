@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Corporate } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -29,8 +29,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function CorporatesClient({ initialCorporates }: { initialCorporates: Corporate[] }) {
-  const [corporates, setCorporates] = useState<Corporate[]>(initialCorporates);
+export default function CorporatesClient() {
+  const [corporates, setCorporates] = useState<Corporate[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCorporate, setEditingCorporate] = useState<Corporate | null>(null);
   const [formData, setFormData] = useState({ name: '', wellness_date: '' });
@@ -38,6 +39,7 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
   const { toast } = useToast();
 
   const fetchCorporates = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/corporates');
       const data = await res.json();
@@ -48,8 +50,14 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
         title: "Error",
         description: "Failed to fetch corporates.",
       });
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCorporates();
+  }, []);
 
   const handleOpenModal = (corporate: Corporate | null) => {
     setEditingCorporate(corporate);
@@ -188,6 +196,14 @@ export default function CorporatesClient({ initialCorporates }: { initialCorpora
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
     );
   }
 

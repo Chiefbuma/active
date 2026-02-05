@@ -93,14 +93,14 @@ const DetailItem = ({
   </div>
 );
 
-export default function PatientDetails({ initialPatient }: { initialPatient: Patient }) {
+export default function PatientDetails() {
   const params = useParams();
   const patientId = params.id as string;
   const router = useRouter();
   const { toast } = useToast();
 
-  const [patient, setPatient] = useState<Patient>(initialPatient);
-  const [loading, setLoading] = useState(false);
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [corporates, setCorporates] = useState<Corporate[]>([]);
@@ -123,7 +123,28 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const fetchPatient = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/patients/${patientId}`);
+      if (!res.ok) {
+        throw new Error('Patient not found');
+      }
+      const data = await res.json();
+      setPatient(data);
+    } catch (error) {
+      setPatient(null);
+      toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
+      router.push('/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    if (patientId) {
+      fetchPatient();
+    }
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
@@ -140,27 +161,12 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
         }
     };
     fetchCorporates();
-  }, [toast]);
+  }, [patientId, toast, router]);
 
 
-  const fetchPatient = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/patients/${patientId}`);
-      if (!res.ok) {
-        throw new Error('Patient not found');
-      }
-      const data = await res.json();
-      setPatient(data);
-    } catch (error) {
-      setPatient(initialPatient); // Revert to initial on error
-      toast({ variant: 'destructive', title: 'Error', description: (error as Error).message });
-    } finally {
-      setLoading(false);
-    }
-  };
   
   const handleFormSubmit = async (endpoint: string, body: object, modalSetter: React.Dispatch<React.SetStateAction<boolean>>, sectionName: string) => {
+    if (!patient) return;
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/patients/${patient.id}/${endpoint}`, {
@@ -194,6 +200,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
   };
 
   const handleOpenEditModal = () => {
+    if (!patient) return;
     setEditFormData({
         ...patient,
         dob: patient.dob ? new Date(patient.dob).toISOString().split('T')[0] : '',
@@ -203,6 +210,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
   };
 
   const handleUpdatePatient = async (e: React.FormEvent) => {
+    if (!patient) return;
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -227,6 +235,7 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
   }
   
   const handleDeletePatient = async () => {
+    if (!patient) return;
     setIsDeleting(true);
     try {
         const res = await fetch(`/api/patients/${patient.id}`, {
@@ -245,10 +254,6 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
     }
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
-
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditFormData({ ...editFormData, [e.target.id]: e.target.value });
   };
@@ -257,6 +262,9 @@ export default function PatientDetails({ initialPatient }: { initialPatient: Pat
     setEditFormData({ ...editFormData, [name]: value });
   };
 
+  if (loading || !patient) {
+    return <div className="flex items-center justify-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="container mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">

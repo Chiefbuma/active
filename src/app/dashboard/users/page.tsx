@@ -1,10 +1,7 @@
-import { fetchUsers } from '@/lib/data';
 import UsersClient from './users-client';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default async function UsersPage() {
-  const users = await fetchUsers();
-
+export default function UsersPage() {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -19,7 +16,7 @@ export default async function UsersPage() {
                 </p>
                 </div>
             </div>
-            <UsersClient initialUsers={users} />
+            <UsersClient />
         </div>
       </CardContent>
     </Card>

@@ -43,8 +43,9 @@ type UserFormData = {
     password?: string;
 }
 
-export default function UsersClient({ initialUsers }: { initialUsers: User[] }) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+export default function UsersClient() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UserFormData>({ name: '', email: '', role: 'staff', password: '' });
@@ -57,9 +58,11 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
     }
+    fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/users');
       if (!res.ok) throw new Error('Failed to fetch users');
@@ -71,6 +74,8 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
         title: "Error",
         description: "Failed to fetch users.",
       });
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -223,6 +228,14 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
             </AlertDialogContent>
         </AlertDialog>
     );
+  }
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    )
   }
 
   return (

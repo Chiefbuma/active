@@ -1,11 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Patient } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { columns } from './columns';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,11 +18,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function DashboardClient({ initialPatients }: { initialPatients: Patient[] }) {
-    const [patients, setPatients] = useState<Patient[]>(initialPatients);
+export default function DashboardClient() {
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
     const fetchPatients = async () => {
+        setLoading(true);
         try {
             const res = await fetch('/api/patients');
             const data = await res.json();
@@ -33,8 +35,14 @@ export default function DashboardClient({ initialPatients }: { initialPatients: 
                 title: "Error",
                 description: "Failed to fetch patients.",
             });
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchPatients();
+    }, []);
 
     const handleBulkDelete = async (ids: number[]) => {
         if (ids.length === 0) return;
@@ -93,6 +101,14 @@ export default function DashboardClient({ initialPatients }: { initialPatients: 
             </AlertDialog>
         );
       }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
+    }
 
     return (
         <DataTable

@@ -5,12 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { fetchPatients } from '@/lib/data';
 import DashboardClient from './dashboard-client';
 
-export default async function DashboardPage() {
-  const patients = await fetchPatients();
-
+export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -30,7 +27,7 @@ export default async function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <DashboardClient initialPatients={patients} />
+          <DashboardClient />
         </CardContent>
       </Card>
     </div>
