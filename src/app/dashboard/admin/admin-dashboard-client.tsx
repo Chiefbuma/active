@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import type { DateRange } from 'react-day-picker';
 import type { Transaction, Ambulance, AdminDashboardData, AmbulancePerformanceData } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,14 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
         from: startOfMonth(today),
         to: endOfMonth(today),
     });
+    
+    // State for the popover calendar
+    const [pickerRange, setPickerRange] = useState<DateRange | undefined>({
+        from: dateRange.from,
+        to: dateRange.to,
+    });
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+
     const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -100,15 +109,10 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
         setLoading(false);
     }, [dateRange, initialTransactions, initialAmbulances, calculateDashboardData]);
 
-    const handleStartDateChange = (date: Date | undefined) => {
-        if (date) {
-            setDateRange(prev => ({ ...prev, from: date }));
-        }
-    };
-    
-    const handleEndDateChange = (date: Date | undefined) => {
-        if (date) {
-            setDateRange(prev => ({ ...prev, to: date }));
+    const handleSetDateRange = () => {
+        if (pickerRange?.from && pickerRange?.to) {
+            setDateRange({ from: pickerRange.from, to: pickerRange.to });
+            setIsPickerOpen(false);
         }
     };
     
@@ -125,52 +129,45 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     <h1 className="text-3xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
                     <p className="text-muted-foreground">High-level overview of fleet performance.</p>
                 </div>
-                <div className="flex items-end gap-4">
+                 <div className="flex items-end gap-4">
                     <div className="grid gap-1">
-                        <Label>Start Date</Label>
-                        <Popover>
+                        <Label>Date Range</Label>
+                        <Popover open={isPickerOpen} onOpenChange={setIsPickerOpen}>
                             <PopoverTrigger asChild>
                                 <Button
-                                    id="start_date"
+                                    id="date"
                                     variant={"outline"}
-                                    className={cn("w-[180px] justify-start text-left font-normal")}
+                                    className={cn(
+                                        "w-[260px] justify-start text-left font-normal"
+                                    )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {format(dateRange.from, "LLL dd, y")}
+                                    {dateRange.from ? (
+                                        dateRange.to ? (
+                                            <>
+                                                {format(dateRange.from, "LLL dd, y")} -{" "}
+                                                {format(dateRange.to, "LLL dd, y")}
+                                            </>
+                                        ) : (
+                                            format(dateRange.from, "LLL dd, y")
+                                        )
+                                    ) : (
+                                        <span>Pick a date range</span>
+                                    )}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0" align="end">
                                 <Calendar
                                     initialFocus
-                                    mode="single"
-                                    selected={dateRange.from}
-                                    onSelect={handleStartDateChange}
-                                    disabled={{ after: dateRange.to }}
+                                    mode="range"
+                                    defaultMonth={pickerRange?.from}
+                                    selected={pickerRange}
+                                    onSelect={setPickerRange}
+                                    numberOfMonths={1}
                                 />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                     <div className="grid gap-1">
-                        <Label>End Date</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    id="end_date"
-                                    variant={"outline"}
-                                    className={cn("w-[180px] justify-start text-left font-normal")}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {format(dateRange.to, "LLL dd, y")}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    initialFocus
-                                    mode="single"
-                                    selected={dateRange.to}
-                                    onSelect={handleEndDateChange}
-                                    disabled={{ before: dateRange.from }}
-                                />
+                                <div className="p-4 border-t">
+                                    <Button onClick={handleSetDateRange} className="w-full">Set Date</Button>
+                                </div>
                             </PopoverContent>
                         </Popover>
                     </div>
