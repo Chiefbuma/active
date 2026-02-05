@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Patient } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { columns } from './columns';
@@ -18,9 +18,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function DashboardClient() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function DashboardClient({ initialPatients }: { initialPatients: Patient[] }) {
+    const [patients, setPatients] = useState<Patient[]>(initialPatients);
+    const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
     const fetchPatients = async () => {
@@ -39,10 +39,6 @@ export default function DashboardClient() {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchPatients();
-    }, []);
 
     const handleBulkDelete = async (ids: number[]) => {
         if (ids.length === 0) return;

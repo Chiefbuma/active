@@ -1,7 +1,9 @@
 import CorporatesClient from './corporates-client';
 import { Card, CardContent } from '@/components/ui/card';
+import { fetchCorporates } from '@/lib/data';
 
-export default function CorporatesPage() {
+export default async function CorporatesPage() {
+  const corporates = await fetchCorporates();
   return (
     <Card>
       <CardContent className="pt-6">
@@ -16,7 +18,7 @@ export default function CorporatesPage() {
                 </p>
                 </div>
             </div>
-            <CorporatesClient />
+            <CorporatesClient initialCorporates={corporates} />
         </div>
       </CardContent>
     </Card>

@@ -43,9 +43,9 @@ type UserFormData = {
     password?: string;
 }
 
-export default function UsersClient() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function UsersClient({ initialUsers }: { initialUsers: User[] }) {
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UserFormData>({ name: '', email: '', role: 'staff', password: '' });
@@ -58,7 +58,6 @@ export default function UsersClient() {
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
     }
-    fetchUsers();
   }, []);
 
   const fetchUsers = async () => {

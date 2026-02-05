@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Corporate } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -29,9 +29,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function CorporatesClient() {
-  const [corporates, setCorporates] = useState<Corporate[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function CorporatesClient({ initialCorporates }: { initialCorporates: Corporate[] }) {
+  const [corporates, setCorporates] = useState<Corporate[]>(initialCorporates);
+  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCorporate, setEditingCorporate] = useState<Corporate | null>(null);
   const [formData, setFormData] = useState({ name: '', wellness_date: '' });
@@ -54,10 +54,6 @@ export default function CorporatesClient() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchCorporates();
-  }, []);
 
   const handleOpenModal = (corporate: Corporate | null) => {
     setEditingCorporate(corporate);
