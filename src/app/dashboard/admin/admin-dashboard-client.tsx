@@ -107,7 +107,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
         return <div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
-    const { total_till, total_target, total_net_banked, total_deficit, overall_performance, ambulance_performance, period_comparison } = dashboardData;
+    const { overall_performance, ambulance_performance, period_comparison } = dashboardData;
 
     return (
         <div className="flex flex-col gap-6">
@@ -140,25 +140,6 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                         </PopoverContent>
                     </Popover>
                 </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader><CardTitle>Total Till</CardTitle></CardHeader>
-                    <CardContent><p className="text-2xl font-bold">{formatCurrency(total_till)}</p></CardContent>
-                </Card>
-                <Card>
-                    <CardHeader><CardTitle>Total Target</CardTitle></CardHeader>
-                    <CardContent><p className="text-2xl font-bold">{formatCurrency(total_target)}</p></CardContent>
-                </Card>
-                <Card>
-                    <CardHeader><CardTitle>Total Net Banked</CardTitle></CardHeader>
-                    <CardContent><p className="text-2xl font-bold">{formatCurrency(total_net_banked)}</p></CardContent>
-                </Card>
-                <Card>
-                    <CardHeader><CardTitle>Total Deficit</CardTitle></CardHeader>
-                    <CardContent><p className="text-2xl font-bold text-red-500">{formatCurrency(total_deficit)}</p></CardContent>
-                </Card>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
