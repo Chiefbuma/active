@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { UserPlus, Settings, Loader2, Building2 } from 'lucide-react';
-import type { User } from '@/lib/types';
+import { User, Settings, Loader2, Truck, UserPlus, Ambulance } from 'lucide-react';
+import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
 
 
@@ -16,7 +16,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -24,17 +24,7 @@ export default function DashboardLayout({
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-       // Create a user object that matches the type, using a placeholder for avatarUrl
-      const userForState: User = {
-        ...parsedUser,
-        avatarUrl: '', // Will be set from placeholder if available
-      };
-      
-      const userAvatar = placeholderImages.find(p => p.id === 'user-avatar');
-      if (userAvatar) {
-        userForState.avatarUrl = userAvatar.imageUrl;
-      }
-      setUser(userForState);
+      setUser(parsedUser);
     } else {
       router.push('/'); // Redirect to login if no user is found
     }
@@ -59,23 +49,37 @@ export default function DashboardLayout({
           <div className="flex items-center gap-4">
              <Button asChild>
                 <Link href="/register">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Register Patient
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Transaction
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/dashboard/corporates">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Manage Corporates
+                <Link href="/dashboard/ambulances">
+                    <Ambulance className="mr-2 h-4 w-4" />
+                    Manage Ambulances
                 </Link>
               </Button>
               {user && user.role === 'admin' && (
+                <>
                 <Button asChild variant="outline">
-                    <Link href="/dashboard/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
+                    <Link href="/dashboard/drivers">
+                        <User className="mr-2 h-4 w-4" />
+                        Manage Drivers
                     </Link>
                 </Button>
+                <Button asChild variant="outline">
+                    <Link href="/dashboard/medical-staff">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Manage Medical Staff
+                    </Link>
+                </Button>
+                <Button asChild variant="outline">
+                    <Link href="/dashboard/users">
+                        <Settings className="mr-2 h-4 w-4" />
+                        App Users
+                    </Link>
+                </Button>
+                </>
              )}
             <Header user={user} />
           </div>
@@ -92,3 +96,4 @@ export default function DashboardLayout({
 
 // Need to import placeholderImages to use it
 import { placeholderImages } from '@/lib/placeholder-images';
+import { PlusCircle } from 'lucide-react';

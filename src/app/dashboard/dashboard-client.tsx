@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import type { Patient } from '@/lib/types';
+import type { Transaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { columns } from './columns';
 import { DataTable } from '@/components/ui/data-table';
@@ -18,48 +18,20 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function DashboardClient({ initialPatients }: { initialPatients: Patient[] }) {
-    const [patients, setPatients] = useState<Patient[]>(initialPatients);
-    const [loading, setLoading] = useState(false);
+export default function DashboardClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
+    const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
     const { toast } = useToast();
-
-    const fetchPatients = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/patients');
-            const data = await res.json();
-            setPatients(data);
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to fetch patients.",
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleBulkDelete = async (ids: number[]) => {
         if (ids.length === 0) return;
-        try {
-            const res = await fetch(`/api/patients`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ids }),
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || 'Failed to delete patients');
-            }
+        // Mock API call
+        setTimeout(() => {
+            setTransactions(transactions.filter(t => !ids.includes(t.id)));
             toast({
                 title: "Success",
-                description: `${ids.length} patient(s) deleted successfully.`,
+                description: `${ids.length} transaction(s) deleted successfully.`,
             });
-            await fetchPatients();
-        } catch (error) {
-            toast({ variant: "destructive", title: "Error", description: (error as Error).message });
-        }
+        }, 500);
     };
 
     const BulkActions = (table: any) => {
@@ -78,7 +50,7 @@ export default function DashboardClient({ initialPatients }: { initialPatients: 
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the selected patients and all their associated data.
+                            This action cannot be undone. This will permanently delete the selected transactions.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -98,18 +70,10 @@ export default function DashboardClient({ initialPatients }: { initialPatients: 
         );
       }
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        )
-    }
-
     return (
         <DataTable
             columns={columns}
-            data={patients}
+            data={transactions}
             bulkActions={BulkActions}
         />
     );

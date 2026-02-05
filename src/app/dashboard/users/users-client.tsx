@@ -45,7 +45,6 @@ type UserFormData = {
 
 export default function UsersClient({ initialUsers }: { initialUsers: User[] }) {
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UserFormData>({ name: '', email: '', role: 'staff', password: '' });
@@ -59,24 +58,6 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
       setCurrentUser(JSON.parse(storedUser));
     }
   }, []);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/users');
-      if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
-      setUsers(data);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch users.",
-      });
-    } finally {
-        setLoading(false);
-    }
-  };
 
   const handleOpenModal = (user: User | null) => {
     setEditingUser(user);
@@ -98,10 +79,6 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     e.preventDefault();
     setIsSubmitting(true);
     
-    const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
-    const method = editingUser ? 'PUT' : 'POST';
-
-    // For new users, password is required. For existing, it's optional.
     if (!editingUser && !formData.password) {
         toast({ variant: "destructive", title: "Error", description: "Password is required for new users." });
         setIsSubmitting(false);
@@ -109,34 +86,24 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     }
 
     const body = { ...formData };
-    // Don't send an empty password string for updates
     if (editingUser && !body.password) {
         delete body.password;
     }
 
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || `Failed to ${editingUser ? 'update' : 'create'} user`);
-      }
-
-      toast({
-        title: "Success",
-        description: `User ${editingUser ? 'updated' : 'created'} successfully.`,
-      });
-      await fetchUsers();
-      handleCloseModal();
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: (error as Error).message });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Mock API Call
+    setTimeout(() => {
+        if (editingUser) {
+            setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...body } : u));
+        } else {
+            setUsers([...users, { ...body, id: Math.random() }]);
+        }
+        toast({
+            title: "Success",
+            description: `User ${editingUser ? 'updated' : 'created'} successfully.`,
+        });
+        setIsSubmitting(false);
+        handleCloseModal();
+    }, 500);
   };
   
   const handleSingleDelete = async (id: number) => {
@@ -144,40 +111,25 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
         toast({ variant: "destructive", title: "Error", description: "You cannot delete your own account." });
         return;
     }
-    try {
-        const res = await fetch(`/api/users/${id}`, {
-            method: 'DELETE',
-        });
-        if (!res.ok) throw new Error('Failed to delete user');
+    setTimeout(() => {
+        setUsers(users.filter(u => u.id !== id));
         toast({ title: "Success", description: "User deleted successfully." });
-        await fetchUsers();
-    } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: (error as Error).message });
-    }
+    }, 500);
   };
 
   const handleBulkDelete = async (ids: number[]) => {
     if (ids.length === 0) return;
 
-    // Prevent admin from deleting themselves in a bulk operation
     const filteredIds = ids.filter(id => id !== currentUser?.id);
     if (filteredIds.length < ids.length) {
         toast({ title: "Warning", description: "You cannot delete your own account. It has been excluded from the deletion." });
     }
     if (filteredIds.length === 0) return;
 
-    try {
-        const res = await fetch(`/api/users`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: filteredIds }),
-        });
-        if (!res.ok) throw new Error('Failed to delete users');
+    setTimeout(() => {
+        setUsers(users.filter(u => !filteredIds.includes(u.id)));
         toast({ title: "Success", description: `${filteredIds.length} user(s) deleted successfully.` });
-        await fetchUsers();
-    } catch (error) {
-        toast({ variant: "destructive", title: "Error", description: (error as Error).message });
-    }
+    }, 500);
   };
   
   const columns = getColumns({
@@ -229,14 +181,6 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     );
   }
 
-  if (loading) {
-    return (
-        <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-4">
        <DataTable 
@@ -269,9 +213,6 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="staff">Staff</SelectItem>
-                      <SelectItem value="navigator">Navigator</SelectItem>
-                      <SelectItem value="payer">Payer</SelectItem>
-                      <SelectItem value="physician">Physician</SelectItem>
                     </SelectContent>
                   </Select>
               </div>

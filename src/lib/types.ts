@@ -2,98 +2,51 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'staff' | 'navigator' | 'payer' | 'physician';
+  role: 'admin' | 'staff';
   avatarUrl?: string;
 };
 
-export type Corporate = {
+export type Ambulance = {
   id: number;
-  name:string;
-  wellness_date: string;
+  reg_no: string;
+  fuel_cost: number;
+  operation_cost: number;
+  target: number;
 };
 
-// This represents a row in the `registrations` table
-export type Patient = {
+export type Driver = {
   id: number;
   first_name: string;
-  middle_name?: string;
-  surname?: string;
-  sex?: 'Male' | 'Female' | 'Other';
-  dob?: string;
-  age?: number;
-  phone?: string;
-  email?: string;
-  wellness_date: string;
-  user_id?: number;
-  corporate_id?: number;
-  created_at: string;
-  updated_at?: string;
+  last_name: string;
+  avatarUrl?: string;
+}
 
-  // Joined data
-  corporate_name?: string;
-
-  // Relations
-  vitals?: Vital[];
-  nutrition?: Nutrition[];
-  goals?: Goal[];
-  clinicals?: Clinical[];
-};
-
-export type Vital = {
+export type MedicalStaff = {
   id: number;
-  patient_id: number; // Mapped from registration_id
-  bp_systolic?: number;
-  bp_diastolic?: number;
-  pulse?: number;
-  temp?: number;
-  rbs?: string;
-  user_id?: number;
-  measured_at?: string;
-};
+  first_name: string;
+  last_name: string;
+  avatarUrl?: string;
+}
 
-export type Nutrition = {
-  id: number;
-  patient_id: number; // Mapped from registration_id
-  height?: number;
-  weight?: number;
-  bmi?: number;
-  visceral_fat?: number;
-  body_fat_percent?: number;
-  notes_nutritionist?: string;
-  user_id?: number;
-};
-
-export type Parameter = {
-  id: number;
-  name: string;
-  type: 'numerical' | 'choice';
-  choices?: string[];
-  unit?: string;
-};
-
-export type Goal = {
-  id: number;
-  patient_id: number; // Mapped from registration_id
-  user_id: number;
-  discussion?: string;
-  goal?: string;
-  parameter_id?: number;
-  target_value?: string;
-  operator?: 'at_or_below' | 'at_or_above' | 'exactly';
-  deadline?: string;
-  notes?: string;
-};
-
-export type Clinical = {
-  id: number;
-  patient_id: number; // Mapped from registration_id
-  notes_psychologist?: string;
-  notes_doctor?: string;
-  user_id?: number;
-};
-
-export type AppData = {
-  loggedInUser: User;
-  patients: Patient[];
-  corporates: Corporate[];
-};
+export type Transaction = {
+    id: number;
+    date: string;
+    ambulance: Ambulance;
+    driver: Driver;
+    medical_staff: MedicalStaff;
+    total_till: number;
+    target: number;
+    fuel: number;
+    operation: number;
+    police: number;
+    cash_deposited_by_staff: number;
+    // Calculated fields
+    amount_paid_to_the_till: number;
+    offload: number;
+    salary: number;
+    operations_cost: number;
+    net_banked: number;
+    deficit: number;
+    fuel_revenue_ratio: number;
+    performance: number;
+}

@@ -20,34 +20,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Corporate } from '@/lib/types';
+import type { Ambulance, Driver, MedicalStaff } from '@/lib/types';
+import { getAmbulances, getDrivers, getMedicalStaff } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
-  const [corporates, setCorporates] = useState<Corporate[]>([]);
+  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [medicalStaff, setMedicalStaff] = useState<MedicalStaff[]>([]);
+
   const [formData, setFormData] = useState({
-    first_name: '',
-    middle_name: '',
-    surname: '',
-    dob: '',
-    age: '',
-    sex: '',
-    phone: '',
-    email: '',
-    wellness_date: '',
-    corporate_id: '',
+    date: new Date().toISOString().split('T')[0],
+    ambulance_id: '',
+    driver_id: '',
+    medical_staff_id: '',
+    total_till: '',
+    target: '',
+    fuel: '',
+    operation: '',
+    police: '',
+    cash_deposited_by_staff: '',
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
-  const inputStyle = "border-0 border-b rounded-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0";
-
   useEffect(() => {
-    fetch('/api/corporates')
-      .then(res => res.json())
-      .then(data => setCorporates(data))
-      .catch(err => console.error("Failed to fetch corporates", err));
+    // Fetch mock data
+    Promise.all([getAmbulances(), getDrivers(), getMedicalStaff()]).then(
+      ([ambulanceData, driverData, staffData]) => {
+        setAmbulances(ambulanceData);
+        setDrivers(driverData);
+        setMedicalStaff(staffData);
+      }
+    );
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,132 +63,125 @@ export default function RegisterPage() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
+
+    if (name === 'ambulance_id') {
+        const selectedAmbulance = ambulances.find(a => a.id === Number(value));
+        if (selectedAmbulance) {
+            setFormData(prev => ({
+                ...prev,
+                fuel: String(selectedAmbulance.fuel_cost),
+                operation: String(selectedAmbulance.operation_cost),
+                target: String(selectedAmbulance.target),
+            }));
+        }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { corporate_id, age, ...rest } = formData;
-    const payload = {
-        ...rest,
-        age: age ? parseInt(age, 10) : null,
-        corporate_id: (corporate_id && corporate_id !== 'null') ? parseInt(corporate_id, 10) : null
-    };
+    console.log("Submitting form data:", formData);
 
-    try {
-        const res = await fetch('/api/patients', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Failed to register patient.');
-        }
-
-        const data = await res.json();
-        toast({
-            title: 'Success!',
-            description: 'Patient registered successfully.',
-        });
-        router.push(`/patient/${data.patientId}`);
-
-    } catch (error) {
-        toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: (error as Error).message,
-        });
-    } finally {
-        setLoading(false);
-    }
+    // Mock submission
+    setTimeout(() => {
+      toast({
+        title: 'Success!',
+        description: 'Transaction logged successfully.',
+      });
+      setLoading(false);
+      router.push('/dashboard');
+    }, 1000);
   }
 
   return (
     <div className="flex justify-center items-start py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <CardTitle>New Patient Registration</CardTitle>
+          <CardTitle>Add Daily Transaction</CardTitle>
           <CardDescription>
-            Fill in the form below to register a new patient for the campaign.
+            Fill in the form below to log a new financial record for an ambulance.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="space-y-8">
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-8">
                 <div className="grid gap-2">
-                  <Label htmlFor="first_name">First Name</Label>
-                  <Input id="first_name" required onChange={handleInputChange} className={inputStyle} />
+                    <Label htmlFor="date">Transaction Date</Label>
+                    <Input id="date" type="date" value={formData.date} onChange={handleInputChange} required />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="middle_name">Middle Name (Optional)</Label>
-                  <Input id="middle_name" onChange={handleInputChange} className={inputStyle} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="surname">Surname</Label>
-                  <Input id="surname" required onChange={handleInputChange} className={inputStyle} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="dob">Date of Birth (Optional)</Label>
-                  <Input id="dob" type="date" onChange={handleInputChange} className={inputStyle} />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="age">Age (Optional)</Label>
-                    <Input id="age" type="number" onChange={handleInputChange} value={formData.age} className={inputStyle} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="sex">Sex</Label>
-                  <Select required onValueChange={(value) => handleSelectChange('sex', value)}>
-                    <SelectTrigger id="sex" className={inputStyle}>
-                      <SelectValue placeholder="Select sex" />
+                  <Label htmlFor="ambulance_id">Ambulance</Label>
+                  <Select required onValueChange={(value) => handleSelectChange('ambulance_id', value)}>
+                    <SelectTrigger id="ambulance_id">
+                      <SelectValue placeholder="Select Ambulance" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Male">Male</SelectItem>
-                      <SelectItem value="Female">Female</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                      {ambulances.map((ambulance) => (
+                        <SelectItem key={ambulance.id} value={String(ambulance.id)}>
+                          {ambulance.reg_no}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="driver_id">Driver</Label>
+                  <Select required onValueChange={(value) => handleSelectChange('driver_id', value)}>
+                    <SelectTrigger id="driver_id">
+                      <SelectValue placeholder="Select Driver" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drivers.map((driver) => (
+                        <SelectItem key={driver.id} value={String(driver.id)}>
+                          {`${driver.first_name} ${driver.last_name}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="medical_staff_id">Medical Staff</Label>
+                  <Select required onValueChange={(value) => handleSelectChange('medical_staff_id', value)}>
+                    <SelectTrigger id="medical_staff_id">
+                      <SelectValue placeholder="Select Medical Staff" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {medicalStaff.map((staff) => (
+                        <SelectItem key={staff.id} value={String(staff.id)}>
+                          {`${staff.first_name} ${staff.last_name}`}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" onChange={handleInputChange} className={inputStyle} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" onChange={handleInputChange} className={inputStyle} />
-                </div>
-              </div>
-              
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div className="grid gap-2">
-                    <Label htmlFor="wellness_date">Wellness Date</Label>
-                    <Input id="wellness_date" type="date" required onChange={handleInputChange} className={inputStyle} />
-                 </div>
+                  <Label htmlFor="total_till">Total Till (KES)</Label>
+                  <Input id="total_till" type="number" required onChange={handleInputChange} />
+                </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="corporate_id">Corporate (Optional)</Label>
-                    <Select onValueChange={(value) => handleSelectChange('corporate_id', value)}>
-                    <SelectTrigger id="corporate_id" className={inputStyle}>
-                        <SelectValue placeholder="Select corporate" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="null">None</SelectItem>
-                        {corporates.map((corporate) => (
-                        <SelectItem key={corporate.id} value={String(corporate.id)}>
-                            {corporate.name}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                    </Select>
+                  <Label htmlFor="target">Target (KES)</Label>
+                  <Input id="target" type="number" value={formData.target} required onChange={handleInputChange} />
+                </div>
+                 <div className="grid gap-2">
+                  <Label htmlFor="fuel">Fuel Cost (KES)</Label>
+                  <Input id="fuel" type="number" value={formData.fuel} required onChange={handleInputChange} />
+                </div>
+                 <div className="grid gap-2">
+                  <Label htmlFor="operation">Operation Cost (KES)</Label>
+                  <Input id="operation" type="number" value={formData.operation} required onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="police">Police Payments (KES)</Label>
+                  <Input id="police" type="number" required onChange={handleInputChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="cash_deposited_by_staff">Cash Deposited (KES)</Label>
+                  <Input id="cash_deposited_by_staff" type="number" required onChange={handleInputChange} />
                 </div>
               </div>
 
@@ -190,7 +190,10 @@ export default function RegisterPage() {
               <Button variant="outline" asChild>
                 <Link href="/dashboard">Cancel</Link>
               </Button>
-              <Button type="submit" disabled={loading}>{loading ? 'Registering...' : 'Register Patient'}</Button>
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? 'Saving...' : 'Save Transaction'}
+              </Button>
             </div>
           </form>
         </CardContent>

@@ -1,9 +1,9 @@
-import UsersClient from './users-client';
+import MedicalStaffClient from './medical-staff-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { getUsers } from '@/lib/data';
+import { getMedicalStaff } from '@/lib/data';
 
-export default async function UsersPage() {
-  const users = await getUsers();
+export default async function MedicalStaffPage() {
+  const medicalStaff = await getMedicalStaff();
   return (
     <Card>
       <CardContent className="pt-6">
@@ -11,14 +11,14 @@ export default async function UsersPage() {
             <div className="flex items-center justify-between">
                 <div>
                 <h1 className="text-3xl font-bold font-headline tracking-tight">
-                    Manage App Users
+                    Manage Medical Staff
                 </h1>
                 <p className="text-muted-foreground">
-                    A list of all administrators and staff in the system.
+                    A list of all medical staff in your team.
                 </p>
                 </div>
             </div>
-            <UsersClient initialUsers={users} />
+            <MedicalStaffClient initialMedicalStaff={medicalStaff} />
         </div>
       </CardContent>
     </Card>

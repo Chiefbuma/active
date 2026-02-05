@@ -1,9 +1,9 @@
-import UsersClient from './users-client';
+import AmbulancesClient from './ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { getUsers } from '@/lib/data';
+import { getAmbulances } from '@/lib/data';
 
-export default async function UsersPage() {
-  const users = await getUsers();
+export default async function AmbulancesPage() {
+  const ambulances = await getAmbulances();
   return (
     <Card>
       <CardContent className="pt-6">
@@ -11,14 +11,14 @@ export default async function UsersPage() {
             <div className="flex items-center justify-between">
                 <div>
                 <h1 className="text-3xl font-bold font-headline tracking-tight">
-                    Manage App Users
+                    Manage Ambulances
                 </h1>
                 <p className="text-muted-foreground">
-                    A list of all administrators and staff in the system.
+                    A list of all ambulances in your fleet.
                 </p>
                 </div>
             </div>
-            <UsersClient initialUsers={users} />
+            <AmbulancesClient initialAmbulances={ambulances} />
         </div>
       </CardContent>
     </Card>
