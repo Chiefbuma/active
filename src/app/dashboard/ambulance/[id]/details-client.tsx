@@ -125,8 +125,8 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         const selectedDriver = drivers.find(d => d.id === Number(transactionFormData.driver_id));
         const selectedTechnicians = emergencyTechnicians.filter(t => transactionFormData.emergency_technician_ids.includes(t.id));
 
-        if (!selectedDriver || selectedTechnicians.length === 0) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please select a driver and at least one technician.'});
+        if (!selectedDriver) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Please select a driver.'});
             setIsSubmitting(false);
             return;
         }
@@ -209,7 +209,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                         <SelectContent>
                         {drivers.map((driver) => (
                             <SelectItem key={driver.id} value={String(driver.id)}>
-                            {`${driver.first_name} ${driver.last_name}`}
+                            {driver.name}
                             </SelectItem>
                         ))}
                         </SelectContent>
@@ -234,7 +234,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                                             checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
                                             onCheckedChange={() => handleTechnicianSelection(tech.id)}
                                         />
-                                        <Label htmlFor={`tech-${tech.id}`} className="font-normal">{tech.first_name} {tech.last_name}</Label>
+                                        <Label htmlFor={`tech-${tech.id}`} className="font-normal">{tech.name}</Label>
                                     </div>
                                 ))}
                             </div>

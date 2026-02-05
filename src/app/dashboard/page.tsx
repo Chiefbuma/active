@@ -14,7 +14,7 @@ export default async function DashboardPage() {
 
     return {
       ...ambulance,
-      last_driven_by: latestTransaction ? `${latestTransaction.driver.first_name} ${latestTransaction.driver.last_name}` : 'N/A',
+      last_driven_by: latestTransaction ? latestTransaction.driver.name : 'N/A',
       last_driven_on: latestTransaction ? new Date(latestTransaction.date).toLocaleDateString() : 'N/A',
     }
   }) as Ambulance[];

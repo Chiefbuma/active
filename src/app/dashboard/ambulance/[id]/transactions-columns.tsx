@@ -47,7 +47,7 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
     header: "Driver",
     cell: ({ row }) => {
       const driver = row.original.driver
-      return <div>{`${driver.first_name} ${driver.last_name}`}</div>
+      return <div>{driver.name}</div>
     }
   },
   {
@@ -56,7 +56,7 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
     cell: ({ row }) => {
       const technicians = row.original.emergency_technicians
       if (!technicians || technicians.length === 0) return '-';
-      return <div className="truncate max-w-xs">{technicians.map(t => `${t.first_name} ${t.last_name}`).join(', ')}</div>
+      return <div className="truncate max-w-xs">{technicians.map(t => t.name).join(', ')}</div>
     }
   },
   {

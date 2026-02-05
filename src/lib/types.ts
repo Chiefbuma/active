@@ -18,15 +18,13 @@ export type Ambulance = {
 
 export type Driver = {
   id: number;
-  first_name: string;
-  last_name: string;
+  name: string;
   avatarUrl?: string;
 }
 
 export type EmergencyTechnician = {
   id: number;
-  first_name: string;
-  last_name: string;
+  name: string;
   avatarUrl?: string;
 }
 

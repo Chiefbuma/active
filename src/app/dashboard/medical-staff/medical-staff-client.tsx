@@ -33,16 +33,16 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
   const [medicalStaff, setMedicalStaff] = useState<EmergencyTechnician[]>(initialMedicalStaff);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<EmergencyTechnician | null>(null);
-  const [formData, setFormData] = useState({ first_name: '', last_name: '' });
+  const [formData, setFormData] = useState({ name: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleOpenModal = (staff: EmergencyTechnician | null) => {
     setEditingStaff(staff);
     if (staff) {
-      setFormData({ first_name: staff.first_name, last_name: staff.last_name });
+      setFormData({ name: staff.name });
     } else {
-      setFormData({ first_name: '', last_name: '' });
+      setFormData({ name: '' });
     }
     setIsModalOpen(true);
   };
@@ -50,7 +50,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingStaff(null);
-    setFormData({ first_name: '', last_name: '' });
+    setFormData({ name: '' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -157,20 +157,11 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">First Name</Label>
+                <Label htmlFor="name">Full Name</Label>
                 <Input
-                  id="first_name"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name</Label>
-                <Input
-                  id="last_name"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>

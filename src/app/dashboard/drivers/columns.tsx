@@ -54,7 +54,7 @@ export const getColumns = ({ onEdit, onDelete }: DriversColumnsProps): ColumnDef
     enableHiding: false,
   },
   {
-    accessorKey: "first_name",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
@@ -68,8 +68,8 @@ export const getColumns = ({ onEdit, onDelete }: DriversColumnsProps): ColumnDef
     },
     cell: ({ row }) => {
       const driver = row.original;
-      const name = `${driver.first_name} ${driver.last_name}`;
-      const fallback = `${driver.first_name?.[0] || ''}${driver.last_name?.[0] || ''}`;
+      const name = driver.name;
+      const fallback = name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '';
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">

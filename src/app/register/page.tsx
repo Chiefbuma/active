@@ -146,7 +146,7 @@ export default function RegisterPage() {
                     <SelectContent>
                       {drivers.map((driver) => (
                         <SelectItem key={driver.id} value={String(driver.id)}>
-                          {`${driver.first_name} ${driver.last_name}`}
+                          {driver.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -171,7 +171,7 @@ export default function RegisterPage() {
                                             checked={formData.emergency_technician_ids.includes(tech.id)}
                                             onCheckedChange={() => handleTechnicianSelection(tech.id)}
                                         />
-                                        <Label htmlFor={`reg-tech-${tech.id}`} className="font-normal">{tech.first_name} {tech.last_name}</Label>
+                                        <Label htmlFor={`reg-tech-${tech.id}`} className="font-normal">{tech.name}</Label>
                                     </div>
                                 ))}
                             </div>

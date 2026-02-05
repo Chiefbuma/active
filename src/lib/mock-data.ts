@@ -7,15 +7,15 @@ export const ambulances: Ambulance[] = [
 ];
 
 export const drivers: Driver[] = [
-  { id: 1, first_name: 'John', last_name: 'Doe', avatarUrl: 'https://picsum.photos/seed/driver1/200/200' },
-  { id: 2, first_name: 'Peter', last_name: 'Jones', avatarUrl: 'https://picsum.photos/seed/driver2/200/200' },
-  { id: 3, first_name: 'Mary', last_name: 'Jane', avatarUrl: 'https://picsum.photos/seed/driver3/200/200' },
+  { id: 1, name: 'John Doe', avatarUrl: 'https://picsum.photos/seed/driver1/200/200' },
+  { id: 2, name: 'Peter Jones', avatarUrl: 'https://picsum.photos/seed/driver2/200/200' },
+  { id: 3, name: 'Mary Jane', avatarUrl: 'https://picsum.photos/seed/driver3/200/200' },
 ];
 
 export const emergencyTechnicians: EmergencyTechnician[] = [
-  { id: 1, first_name: 'Susan', last_name: 'Smith', avatarUrl: 'https://picsum.photos/seed/staff1/200/200' },
-  { id: 2, first_name: 'Anne', last_name: 'Williams', avatarUrl: 'https://picsum.photos/seed/staff2/200/200' },
-  { id: 3, first_name: 'Mike', last_name: 'Brown', avatarUrl: 'https://picsum.photos/seed/staff3/200/200' },
+  { id: 1, name: 'Susan Smith', avatarUrl: 'https://picsum.photos/seed/staff1/200/200' },
+  { id: 2, name: 'Anne Williams', avatarUrl: 'https://picsum.photos/seed/staff2/200/200' },
+  { id: 3, name: 'Mike Brown', avatarUrl: 'https://picsum.photos/seed/staff3/200/200' },
 ];
 
 export const users: User[] = [
@@ -102,11 +102,3 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
-
-export const parameters = [
-    { id: 1, name: "Blood Pressure", unit: "mmHg", type: "numerical" },
-    { id: 2, name: "Weight", unit: "kg", type: "numerical" },
-    { id: 3, name: "Daily Steps", unit: "steps", type: "numerical" },
-    { id: 4, name: "Smoking Status", unit: null, type: "choice", choices: ["Non-smoker", "Former smoker", "Current smoker"] },
-    { id: 5, name: "Alcohol Consumption", unit: "servings/week", type: "numerical" },
-];
