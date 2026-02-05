@@ -86,6 +86,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
   
+  const [isTechnicianPopoverOpen, setIsTechnicianPopoverOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [transactionFormData, setTransactionFormData] = useState({
@@ -225,7 +226,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                 </div>
                 <div className="space-y-2">
                     <Label>Emergency Technicians</Label>
-                     <Popover>
+                     <Popover open={isTechnicianPopoverOpen} onOpenChange={setIsTechnicianPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className="w-full justify-start font-normal">
                                 <Users className="mr-2 h-4 w-4" />

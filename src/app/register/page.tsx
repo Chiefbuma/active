@@ -32,6 +32,7 @@ export default function RegisterPage() {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
+  const [isTechnicianPopoverOpen, setIsTechnicianPopoverOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -153,7 +154,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="space-y-2">
                     <Label>Emergency Technicians</Label>
-                     <Popover>
+                     <Popover open={isTechnicianPopoverOpen} onOpenChange={setIsTechnicianPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className="w-full justify-start font-normal">
                                 <Users className="mr-2 h-4 w-4" />
