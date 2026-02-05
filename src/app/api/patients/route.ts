@@ -31,7 +31,18 @@ export async function POST(request: Request) {
         const connection = await db.getConnection();
         const [result] = await connection.query(
             'INSERT INTO registrations (first_name, middle_name, surname, dob, sex, age, phone, email, wellness_date, corporate_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [first_name, middle_name, surname, dob || null, sex, age || null, phone, email, wellness_date, corporate_id || null]
+            [
+                first_name, 
+                middle_name || null, 
+                surname, 
+                dob || null, 
+                sex, 
+                age || null, 
+                phone || null, 
+                email || null, 
+                wellness_date, 
+                corporate_id || null
+            ]
         );
         connection.release();
 
