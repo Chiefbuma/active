@@ -288,11 +288,11 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1 space-y-6">
              <Card>
                 <CardHeader className="flex flex-col items-center text-center gap-4">
-                    <Avatar className="w-24 h-24 border-4 border-background shadow-md">
+                    <Avatar className="w-28 h-28 border-4 border-background shadow-md">
                         <AvatarFallback className="text-3xl bg-muted text-muted-foreground">
                             {ambulance.reg_no.substring(0, 3)}
                         </AvatarFallback>
@@ -333,7 +333,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
               </CardContent>
             </Card>
           </div>
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Transactions</CardTitle>

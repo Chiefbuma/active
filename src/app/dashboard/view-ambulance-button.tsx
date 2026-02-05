@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, Loader2 } from 'lucide-react';
+import { DollarSign, Loader2 } from 'lucide-react';
 
-export function ViewAmbulanceButton({ ambulanceId }: { ambulanceId: number }) {
+export function TransactButton({ ambulanceId }: { ambulanceId: number }) {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -14,7 +14,7 @@ export function ViewAmbulanceButton({ ambulanceId }: { ambulanceId: number }) {
     };
 
     return (
-        <Button onClick={handleClick} disabled={isLoading} size="sm" variant="outline">
+        <Button onClick={handleClick} disabled={isLoading} size="sm">
             {isLoading ? (
                 <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -22,7 +22,7 @@ export function ViewAmbulanceButton({ ambulanceId }: { ambulanceId: number }) {
                 </>
             ) : (
                 <>
-                    View Dashboard <ArrowUpRight className="h-4 w-4 ml-2" />
+                    <DollarSign className="h-4 w-4 mr-2" /> Transact
                 </>
             )}
         </Button>

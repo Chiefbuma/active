@@ -52,6 +52,11 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
@@ -106,35 +111,51 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
     }, 500);
   };
   
-  const handleSingleDelete = async (id: number) => {
-    if (id === currentUser?.id) {
+  const handleOpenDeleteDialog = (user: User) => {
+    if (user.id === currentUser?.id) {
         toast({ variant: "destructive", title: "Error", description: "You cannot delete your own account." });
         return;
     }
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
     setTimeout(() => {
-        setUsers(users.filter(u => u.id !== id));
+        setUsers(users.filter(u => u.id !== userToDelete.id));
         toast({ title: "Success", description: "User deleted successfully." });
+        setIsDeleting(false);
+        setIsDeleteDialogOpen(false);
+        setUserToDelete(null);
     }, 500);
   };
 
-  const handleBulkDelete = async (ids: number[]) => {
+  const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
 
     const filteredIds = ids.filter(id => id !== currentUser?.id);
     if (filteredIds.length < ids.length) {
         toast({ title: "Warning", description: "You cannot delete your own account. It has been excluded from the deletion." });
     }
-    if (filteredIds.length === 0) return;
+    if (filteredIds.length === 0) {
+      onDone();
+      return;
+    };
 
+    setIsBulkDeleting(true);
     setTimeout(() => {
         setUsers(users.filter(u => !filteredIds.includes(u.id)));
         toast({ title: "Success", description: `${filteredIds.length} user(s) deleted successfully.` });
+        setIsBulkDeleting(false);
+        onDone();
     }, 500);
   };
   
   const columns = getColumns({
     onEdit: handleOpenModal,
-    onDelete: handleSingleDelete,
+    onDelete: handleOpenDeleteDialog,
     currentUserId: currentUser?.id
   });
 
@@ -167,12 +188,13 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={async () => {
+                        onClick={() => {
                             const idsToDelete = selectedRows.map((row: any) => row.original.id);
-                            await handleBulkDelete(idsToDelete);
-                            table.toggleAllPageRowsSelected(false);
+                            handleConfirmBulkDelete(idsToDelete, () => table.toggleAllPageRowsSelected(false));
                         }}
+                        disabled={isBulkDeleting}
                     >
+                        {isBulkDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Continue
                     </AlertDialogAction>
                 </AlertDialogFooter>
@@ -233,6 +255,23 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the user account.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setUserToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Continue
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }

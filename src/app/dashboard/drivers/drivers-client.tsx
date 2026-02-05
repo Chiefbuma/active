@@ -37,6 +37,11 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   const handleOpenModal = (driver: Driver | null) => {
     setEditingDriver(driver);
     if (driver) {
@@ -72,30 +77,43 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
     }, 500);
   };
   
-  const handleSingleDelete = async (id: number) => {
+  const handleOpenDeleteDialog = (driver: Driver) => {
+    setDriverToDelete(driver);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!driverToDelete) return;
+    setIsDeleting(true);
      setTimeout(() => {
-      setDrivers(drivers.filter(d => d.id !== id));
+      setDrivers(drivers.filter(d => d.id !== driverToDelete.id));
       toast({
           title: "Success",
           description: "Driver deleted successfully.",
       });
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setDriverToDelete(null);
     }, 500);
   };
 
-  const handleBulkDelete = async (ids: number[]) => {
+  const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
+    setIsBulkDeleting(true);
     setTimeout(() => {
         setDrivers(drivers.filter(d => !ids.includes(d.id)));
         toast({
             title: "Success",
             description: `${ids.length} driver(s) deleted successfully.`,
         });
+        setIsBulkDeleting(false);
+        onDone();
     }, 500);
   };
   
   const columns = getColumns({
     onEdit: handleOpenModal,
-    onDelete: handleSingleDelete,
+    onDelete: handleOpenDeleteDialog,
   });
 
   const CustomToolbarActions = (
@@ -127,12 +145,13 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={async () => {
+                        onClick={() => {
                             const idsToDelete = selectedRows.map((row: any) => row.original.id);
-                            await handleBulkDelete(idsToDelete);
-                            table.toggleAllPageRowsSelected(false);
+                            handleConfirmBulkDelete(idsToDelete, () => table.toggleAllPageRowsSelected(false));
                         }}
+                        disabled={isBulkDeleting}
                     >
+                        {isBulkDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Continue
                     </AlertDialogAction>
                 </AlertDialogFooter>
@@ -178,6 +197,23 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the driver.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDriverToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Continue
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }

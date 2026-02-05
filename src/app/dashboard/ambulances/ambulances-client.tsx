@@ -37,6 +37,11 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [ambulanceToDelete, setAmbulanceToDelete] = useState<Ambulance | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   const handleOpenModal = (ambulance: Ambulance | null) => {
     setEditingAmbulance(ambulance);
     if (ambulance) {
@@ -71,31 +76,44 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
       handleCloseModal();
     }, 500);
   };
+
+  const handleOpenDeleteDialog = (ambulance: Ambulance) => {
+    setAmbulanceToDelete(ambulance);
+    setIsDeleteDialogOpen(true);
+  };
   
-  const handleSingleDelete = async (id: number) => {
+  const handleConfirmDelete = async () => {
+     if (!ambulanceToDelete) return;
+     setIsDeleting(true);
      setTimeout(() => {
-      setAmbulances(ambulances.filter(a => a.id !== id));
+      setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
       toast({
           title: "Success",
           description: "Ambulance deleted successfully.",
       });
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setAmbulanceToDelete(null);
     }, 500);
   };
 
-  const handleBulkDelete = async (ids: number[]) => {
+  const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
+    setIsBulkDeleting(true);
     setTimeout(() => {
         setAmbulances(ambulances.filter(a => !ids.includes(a.id)));
         toast({
             title: "Success",
             description: `${ids.length} ambulance(s) deleted successfully.`,
         });
+        setIsBulkDeleting(false);
+        onDone();
     }, 500);
   };
   
   const columns = getColumns({
     onEdit: handleOpenModal,
-    onDelete: handleSingleDelete,
+    onDelete: handleOpenDeleteDialog,
   });
 
   const CustomToolbarActions = (
@@ -127,12 +145,13 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={async () => {
+                        onClick={() => {
                             const idsToDelete = selectedRows.map((row: any) => row.original.id);
-                            await handleBulkDelete(idsToDelete);
-                            table.toggleAllPageRowsSelected(false);
+                            handleConfirmBulkDelete(idsToDelete, () => table.toggleAllPageRowsSelected(false));
                         }}
+                        disabled={isBulkDeleting}
                     >
+                        {isBulkDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Continue
                     </AlertDialogAction>
                 </AlertDialogFooter>
@@ -208,6 +227,24 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the ambulance.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setAmbulanceToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Continue
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }

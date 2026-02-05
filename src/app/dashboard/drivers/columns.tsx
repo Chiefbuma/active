@@ -1,17 +1,6 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -27,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface DriversColumnsProps {
   onEdit: (driver: Driver) => void
-  onDelete: (id: number) => void
+  onDelete: (driver: Driver) => void
 }
 
 export const getColumns = ({ onEdit, onDelete }: DriversColumnsProps): ColumnDef<Driver>[] => [
@@ -100,26 +89,10 @@ export const getColumns = ({ onEdit, onDelete }: DriversColumnsProps): ColumnDef
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                 </DropdownMenuItem>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                         <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-red-500 hover:text-red-600">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the driver.
-                        </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(driver.id)}>Continue</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenuItem onClick={() => onDelete(driver)} className="cursor-pointer text-red-600 focus:text-red-600">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                </DropdownMenuItem>
             </DropdownMenuContent>
             </DropdownMenu>
         </div>

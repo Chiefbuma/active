@@ -1,17 +1,6 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -27,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 
 interface UsersColumnsProps {
   onEdit: (user: User) => void
-  onDelete: (id: number) => void
+  onDelete: (user: User) => void
   currentUserId?: number
 }
 
@@ -101,26 +90,14 @@ export const getColumns = ({ onEdit, onDelete, currentUserId }: UsersColumnsProp
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                 </DropdownMenuItem>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild disabled={isCurrentUser}>
-                         <div className={`relative flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${isCurrentUser ? 'text-muted-foreground' : 'text-red-500 hover:text-red-600 cursor-pointer focus:bg-accent focus:text-accent-foreground'}`}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the user account.
-                        </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(user.id)}>Continue</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenuItem 
+                  onClick={() => onDelete(user)} 
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  disabled={isCurrentUser}
+                >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                </DropdownMenuItem>
             </DropdownMenuContent>
             </DropdownMenu>
         </div>
