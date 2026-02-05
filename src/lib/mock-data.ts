@@ -1,4 +1,4 @@
-import type { Transaction, Ambulance, Driver, MedicalStaff, User, Parameter } from './types';
+import type { Transaction, Ambulance, Driver, MedicalStaff, User } from './types';
 
 export const ambulances: Ambulance[] = [
   { id: 1, reg_no: 'KDJ 456A', fuel_cost: 5000, operation_cost: 2000, target: 15000 },
@@ -102,11 +102,3 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
-
-export const parameters: Parameter[] = [
-  { id: 1, name: 'Weight', type: 'numerical', unit: 'kg' },
-  { id: 2, name: 'Blood Pressure (Systolic)', type: 'numerical', unit: 'mmHg' },
-  { id: 3, name: 'Daily Steps', type: 'numerical', unit: 'steps' },
-  { id: 4, name: 'Smoking Status', type: 'choice', choices: ['Non-smoker', 'Former smoker', 'Current smoker'] },
-  { id: 5, name: 'Alcohol Consumption', type: 'choice', choices: ['Abstinent', 'Occasional', 'Regular'] },
-];

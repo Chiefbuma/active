@@ -1,132 +1,69 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import type { Transaction } from "@/lib/types"
-import { Badge } from "@/components/ui/badge"
+import { ArrowUpDown, Eye } from "lucide-react"
+import type { Ambulance } from "@/lib/types"
+import Link from "next/link"
 
-const formatCurrency = (value: number) => {
-    if (typeof value !== 'number') return '-';
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'KES',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(value);
-};
+const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KES' }).format(value);
 
-const formatPercentage = (value: number) => {
-    if (typeof value !== 'number') return '-';
-    return `${(value * 100).toFixed(0)}%`;
-}
-
-export const columns: ColumnDef<Transaction>[] = [
+export const columns: ColumnDef<Ambulance>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "date",
+    accessorKey: "reg_no",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Date
+          Registration No.
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => {
-        const date = row.getValue("date") as string | null;
-        if (!date) return <span className="text-muted-foreground">-</span>
-        return <div>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-    },
-  },
-  {
-    accessorKey: "ambulance",
-    header: "Ambulance",
-    cell: ({ row }) => {
-      const ambulance = row.original.ambulance
-      return <div className="font-medium">{ambulance.reg_no}</div>
-    }
-  },
-  {
-    accessorKey: "driver",
-    header: "Driver",
-    cell: ({ row }) => {
-      const driver = row.original.driver
-      return <div>{`${driver.first_name} ${driver.last_name}`}</div>
-    }
-  },
-  {
-    accessorKey: "medical_staff",
-    header: "Medical Staff",
-    cell: ({ row }) => {
-      const staff = row.original.medical_staff
-      return <div>{`${staff.first_name} ${staff.last_name}`}</div>
-    }
-  },
-  {
-    accessorKey: "total_till",
-    header: "Total Till",
-    cell: ({row}) => formatCurrency(row.getValue("total_till"))
+    cell: ({ row }) => <div className="font-medium">{row.getValue("reg_no")}</div>,
   },
   {
     accessorKey: "target",
-    header: "Target",
-    cell: ({row}) => formatCurrency(row.getValue("target"))
+    header: "Daily Target",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("target"))
+      return <div className="font-medium">{formatCurrency(amount)}</div>
+    },
+  },
+    {
+    accessorKey: "fuel_cost",
+    header: "Default Fuel Cost",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("fuel_cost"))
+      return <div className="font-medium">{formatCurrency(amount)}</div>
+    },
   },
   {
-    accessorKey: "performance",
-    header: "Performance",
-    cell: ({row}) => {
-      const performance = row.original.performance;
-      return <Badge variant={performance >= 1 ? "secondary" : "destructive"}>{formatPercentage(performance)}</Badge>
-    }
+    accessorKey: "operation_cost",
+    header: "Default Operation Cost",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("operation_cost"))
+      return <div className="font-medium">{formatCurrency(amount)}</div>
+    },
   },
   {
-    accessorKey: "net_banked",
-    header: "Net Banked",
-    cell: ({row}) => formatCurrency(row.getValue("net_banked"))
-  },
-  {
-    accessorKey: "deficit",
-    header: "Deficit",
-    cell: ({row}) => {
-      const deficit = row.original.deficit;
-      return <span className={deficit > 0 ? 'text-red-500 font-medium' : ''}>{formatCurrency(deficit)}</span>
-    }
-  },
-  {
-    accessorKey: "fuel",
-    header: "Fuel",
-    cell: ({row}) => formatCurrency(row.getValue("fuel"))
-  },
-  {
-    accessorKey: "operation",
-    header: "Operation",
-    cell: ({row}) => formatCurrency(row.getValue("operation"))
+    id: "actions",
+    cell: ({ row }) => {
+      const ambulance = row.original
+      return (
+        <div className="text-right">
+            <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard/ambulance/${ambulance.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Dashboard
+                </Link>
+            </Button>
+        </div>
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
   },
 ]

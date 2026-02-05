@@ -14,6 +14,16 @@ export async function getAmbulances(): Promise<Ambulance[]> {
   return ambulances;
 }
 
+export async function getAmbulanceById(id: number): Promise<Ambulance | undefined> {
+    await delay(100);
+    return ambulances.find(a => a.id === id);
+}
+
+export async function getTransactionsByAmbulanceId(ambulanceId: number): Promise<Transaction[]> {
+    await delay(200);
+    return transactions.filter(t => t.ambulance.id === ambulanceId);
+}
+
 export async function getDrivers(): Promise<Driver[]> {
   await delay(300);
   return drivers;

@@ -50,11 +50,3 @@ export type Transaction = {
     fuel_revenue_ratio: number;
     performance: number;
 }
-
-export type Parameter = {
-    id: number;
-    name: string;
-    type: 'numerical' | 'choice';
-    unit?: string;
-    choices?: string[];
-};
