@@ -51,11 +51,12 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
     }
   },
   {
-    accessorKey: "medical_staff",
-    header: "Medical Staff",
+    accessorKey: "emergency_technicians",
+    header: "Technicians",
     cell: ({ row }) => {
-      const staff = row.original.medical_staff
-      return <div>{`${staff.first_name} ${staff.last_name}`}</div>
+      const technicians = row.original.emergency_technicians
+      if (!technicians || technicians.length === 0) return '-';
+      return <div className="truncate max-w-xs">{technicians.map(t => `${t.first_name} ${t.last_name}`).join(', ')}</div>
     }
   },
   {

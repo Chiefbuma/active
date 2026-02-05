@@ -23,7 +23,7 @@ export type Driver = {
   avatarUrl?: string;
 }
 
-export type MedicalStaff = {
+export type EmergencyTechnician = {
   id: number;
   first_name: string;
   last_name: string;
@@ -35,7 +35,7 @@ export type Transaction = {
     date: string;
     ambulance: Ambulance;
     driver: Driver;
-    medical_staff: MedicalStaff;
+    emergency_technicians: EmergencyTechnician[];
     total_till: number;
     target: number;
     fuel: number;

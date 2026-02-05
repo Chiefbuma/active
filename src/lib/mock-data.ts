@@ -1,4 +1,4 @@
-import type { Transaction, Ambulance, Driver, MedicalStaff, User } from './types';
+import type { Transaction, Ambulance, Driver, EmergencyTechnician, User } from './types';
 
 export const ambulances: Ambulance[] = [
   { id: 1, reg_no: 'KDJ 456A', fuel_cost: 5000, operation_cost: 2000, target: 15000 },
@@ -12,7 +12,7 @@ export const drivers: Driver[] = [
   { id: 3, first_name: 'Mary', last_name: 'Jane', avatarUrl: 'https://picsum.photos/seed/driver3/200/200' },
 ];
 
-export const medicalStaff: MedicalStaff[] = [
+export const emergencyTechnicians: EmergencyTechnician[] = [
   { id: 1, first_name: 'Susan', last_name: 'Smith', avatarUrl: 'https://picsum.photos/seed/staff1/200/200' },
   { id: 2, first_name: 'Anne', last_name: 'Williams', avatarUrl: 'https://picsum.photos/seed/staff2/200/200' },
   { id: 3, first_name: 'Mike', last_name: 'Brown', avatarUrl: 'https://picsum.photos/seed/staff3/200/200' },
@@ -29,7 +29,7 @@ const generateTransactions = (): Transaction[] => {
       date: '2024-07-28',
       ambulance: ambulances[0],
       driver: drivers[0],
-      medical_staff: medicalStaff[0],
+      emergency_technicians: [emergencyTechnicians[0]],
       total_till: 16000,
       target: 15000,
       fuel: 5000,
@@ -41,7 +41,7 @@ const generateTransactions = (): Transaction[] => {
       date: '2024-07-28',
       ambulance: ambulances[1],
       driver: drivers[1],
-      medical_staff: medicalStaff[1],
+      emergency_technicians: [emergencyTechnicians[1]],
       total_till: 17500,
       target: 18000,
       fuel: 5500,
@@ -53,7 +53,7 @@ const generateTransactions = (): Transaction[] => {
       date: '2024-07-27',
       ambulance: ambulances[2],
       driver: drivers[2],
-      medical_staff: medicalStaff[2],
+      emergency_technicians: [emergencyTechnicians[2]],
       total_till: 14500,
       target: 14000,
       fuel: 4800,
@@ -65,7 +65,7 @@ const generateTransactions = (): Transaction[] => {
       date: '2024-07-27',
       ambulance: ambulances[0],
       driver: drivers[0],
-      medical_staff: medicalStaff[1],
+      emergency_technicians: [emergencyTechnicians[1], emergencyTechnicians[2]],
       total_till: 13000,
       target: 15000,
       fuel: 5000,
@@ -102,3 +102,11 @@ const generateTransactions = (): Transaction[] => {
 };
 
 export const transactions: Transaction[] = generateTransactions();
+
+export const parameters = [
+    { id: 1, name: "Blood Pressure", unit: "mmHg", type: "numerical" },
+    { id: 2, name: "Weight", unit: "kg", type: "numerical" },
+    { id: 3, name: "Daily Steps", unit: "steps", type: "numerical" },
+    { id: 4, name: "Smoking Status", unit: null, type: "choice", choices: ["Non-smoker", "Former smoker", "Current smoker"] },
+    { id: 5, name: "Alcohol Consumption", unit: "servings/week", type: "numerical" },
+];

@@ -20,21 +20,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Ambulance, Driver, MedicalStaff } from '@/lib/types';
-import { getAmbulances, getDrivers, getMedicalStaff } from '@/lib/data';
+import type { Ambulance, Driver, EmergencyTechnician } from '@/lib/types';
+import { getAmbulances, getDrivers, getEmergencyTechnicians } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2, Users } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 export default function RegisterPage() {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [medicalStaff, setMedicalStaff] = useState<MedicalStaff[]>([]);
+  const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     ambulance_id: '',
     driver_id: '',
-    medical_staff_id: '',
+    emergency_technician_ids: [] as number[],
     total_till: '',
     target: '',
     fuel: '',
@@ -47,12 +50,11 @@ export default function RegisterPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch mock data
-    Promise.all([getAmbulances(), getDrivers(), getMedicalStaff()]).then(
+    Promise.all([getAmbulances(), getDrivers(), getEmergencyTechnicians()]).then(
       ([ambulanceData, driverData, staffData]) => {
         setAmbulances(ambulanceData);
         setDrivers(driverData);
-        setMedicalStaff(staffData);
+        setEmergencyTechnicians(staffData);
       }
     );
   }, []);
@@ -76,6 +78,15 @@ export default function RegisterPage() {
         }
     }
   };
+
+    const handleTechnicianSelection = (technicianId: number) => {
+        setFormData(prev => {
+            const newIds = prev.emergency_technician_ids.includes(technicianId)
+                ? prev.emergency_technician_ids.filter(id => id !== technicianId)
+                : [...prev.emergency_technician_ids, technicianId];
+            return {...prev, emergency_technician_ids: newIds };
+        })
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,20 +152,31 @@ export default function RegisterPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="medical_staff_id">Medical Staff</Label>
-                  <Select required onValueChange={(value) => handleSelectChange('medical_staff_id', value)}>
-                    <SelectTrigger id="medical_staff_id">
-                      <SelectValue placeholder="Select Medical Staff" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {medicalStaff.map((staff) => (
-                        <SelectItem key={staff.id} value={String(staff.id)}>
-                          {`${staff.first_name} ${staff.last_name}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-2">
+                    <Label>Emergency Technicians</Label>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start font-normal">
+                                <Users className="mr-2 h-4 w-4" />
+                                <span>{formData.emergency_technician_ids.length > 0 ? `${formData.emergency_technician_ids.length} selected` : 'Select Technicians'}</span>
+                                <ChevronDown className="ml-auto h-4 w-4 opacity-50"/>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0" align="start">
+                            <div className="p-4 space-y-2">
+                                {emergencyTechnicians.map(tech => (
+                                    <div key={tech.id} className="flex items-center space-x-2">
+                                        <Checkbox 
+                                            id={`reg-tech-${tech.id}`}
+                                            checked={formData.emergency_technician_ids.includes(tech.id)}
+                                            onCheckedChange={() => handleTechnicianSelection(tech.id)}
+                                        />
+                                        <Label htmlFor={`reg-tech-${tech.id}`} className="font-normal">{tech.first_name} {tech.last_name}</Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
               </div>
 

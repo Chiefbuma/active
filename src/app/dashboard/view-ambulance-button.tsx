@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Eye, Loader2 } from 'lucide-react';
+import { DollarSign, Loader2 } from 'lucide-react';
 
-export function ViewAmbulanceButton({ ambulanceId }: { ambulanceId: number }) {
+export function TransactButton({ ambulanceId }: { ambulanceId: number }) {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -22,8 +22,8 @@ export function ViewAmbulanceButton({ ambulanceId }: { ambulanceId: number }) {
                 </>
             ) : (
                 <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Dashboard
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Transact
                 </>
             )}
         </Button>

@@ -1,4 +1,4 @@
-import AmbulancesClient from './ambulances-client';
+import AmbulancesClient from './ambulances/ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { getAmbulances, getTransactions } from '@/lib/data';
 import type { Ambulance } from '@/lib/types';

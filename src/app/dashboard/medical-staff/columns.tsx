@@ -22,15 +22,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ArrowUpDown, MoreHorizontal, Edit, Trash2 } from "lucide-react"
-import type { MedicalStaff } from "@/lib/types"
+import type { EmergencyTechnician } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface MedicalStaffColumnsProps {
-  onEdit: (staff: MedicalStaff) => void
+  onEdit: (staff: EmergencyTechnician) => void
   onDelete: (id: number) => void
 }
 
-export const getColumns = ({ onEdit, onDelete }: MedicalStaffColumnsProps): ColumnDef<MedicalStaff>[] => [
+export const getColumns = ({ onEdit, onDelete }: MedicalStaffColumnsProps): ColumnDef<EmergencyTechnician>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -111,7 +111,7 @@ export const getColumns = ({ onEdit, onDelete }: MedicalStaffColumnsProps): Colu
                         <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the medical staff member.
+                            This action cannot be undone. This will permanently delete the emergency technician.
                         </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

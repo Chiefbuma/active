@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown } from "lucide-react"
 import type { Ambulance } from "@/lib/types"
-import { ViewAmbulanceButton } from './view-ambulance-button'
+import { TransactButton } from './view-ambulance-button'
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   AlertDialog,
@@ -83,7 +83,7 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
       const ambulance = row.original
       return (
         <div className="text-right flex items-center justify-end gap-2">
-            <ViewAmbulanceButton ambulanceId={ambulance.id} />
+            <TransactButton ambulanceId={ambulance.id} />
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">

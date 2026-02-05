@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { MedicalStaff } from '@/lib/types';
+import type { EmergencyTechnician } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
 import { DataTable } from '@/components/ui/data-table';
@@ -29,15 +29,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-export default function MedicalStaffClient({ initialMedicalStaff }: { initialMedicalStaff: MedicalStaff[] }) {
-  const [medicalStaff, setMedicalStaff] = useState<MedicalStaff[]>(initialMedicalStaff);
+export default function MedicalStaffClient({ initialMedicalStaff }: { initialMedicalStaff: EmergencyTechnician[] }) {
+  const [medicalStaff, setMedicalStaff] = useState<EmergencyTechnician[]>(initialMedicalStaff);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingStaff, setEditingStaff] = useState<MedicalStaff | null>(null);
+  const [editingStaff, setEditingStaff] = useState<EmergencyTechnician | null>(null);
   const [formData, setFormData] = useState({ first_name: '', last_name: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleOpenModal = (staff: MedicalStaff | null) => {
+  const handleOpenModal = (staff: EmergencyTechnician | null) => {
     setEditingStaff(staff);
     if (staff) {
       setFormData({ first_name: staff.first_name, last_name: staff.last_name });
@@ -65,7 +65,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
       }
       toast({
         title: "Success",
-        description: `Medical Staff ${editingStaff ? 'updated' : 'created'} successfully.`,
+        description: `Emergency Technician ${editingStaff ? 'updated' : 'created'} successfully.`,
       });
       setIsSubmitting(false);
       handleCloseModal();
@@ -77,7 +77,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
       setMedicalStaff(medicalStaff.filter(d => d.id !== id));
       toast({
           title: "Success",
-          description: "Medical Staff member deleted successfully.",
+          description: "Emergency Technician deleted successfully.",
       });
     }, 500);
   };
@@ -88,7 +88,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
         setMedicalStaff(medicalStaff.filter(d => !ids.includes(d.id)));
         toast({
             title: "Success",
-            description: `${ids.length} medical staff member(s) deleted successfully.`,
+            description: `${ids.length} technician(s) deleted successfully.`,
         });
     }, 500);
   };
@@ -101,7 +101,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
   const CustomToolbarActions = (
     <Button onClick={() => handleOpenModal(null)}>
       <PlusCircle className="mr-2 h-4 w-4" />
-      Add Medical Staff
+      Add Technician
     </Button>
   );
 
@@ -121,7 +121,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the selected medical staff members.
+                        This action cannot be undone. This will permanently delete the selected technicians.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -152,7 +152,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent className="sm:max-w-[425px]">
            <DialogHeader>
-            <DialogTitle>{editingStaff ? 'Edit Medical Staff' : 'Add New Medical Staff'}</DialogTitle>
+            <DialogTitle>{editingStaff ? 'Edit Technician' : 'Add New Technician'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
@@ -181,7 +181,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
                 </DialogClose>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {editingStaff ? 'Save Changes' : 'Create Medical Staff'}
+                  {editingStaff ? 'Save Changes' : 'Create Technician'}
                 </Button>
             </DialogFooter>
           </form>

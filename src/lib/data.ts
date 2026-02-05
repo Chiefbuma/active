@@ -1,5 +1,5 @@
-import { transactions, ambulances, drivers, medicalStaff, users } from '@/lib/mock-data';
-import type { Transaction, Ambulance, Driver, MedicalStaff, User } from '@/lib/types';
+import { transactions, ambulances, drivers, emergencyTechnicians, users } from '@/lib/mock-data';
+import type { Transaction, Ambulance, Driver, EmergencyTechnician, User } from '@/lib/types';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -29,9 +29,9 @@ export async function getDrivers(): Promise<Driver[]> {
   return drivers;
 }
 
-export async function getMedicalStaff(): Promise<MedicalStaff[]> {
+export async function getEmergencyTechnicians(): Promise<EmergencyTechnician[]> {
   await delay(300);
-  return medicalStaff;
+  return emergencyTechnicians;
 }
 
 export async function getUsers(): Promise<User[]> {

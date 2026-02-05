@@ -1,4 +1,4 @@
-import { getUsers, getDrivers, getMedicalStaff } from '@/lib/data';
+import { getUsers, getDrivers, getEmergencyTechnicians } from '@/lib/data';
 import UsersClient from '@/app/dashboard/users/users-client';
 import DriversClient from '@/app/dashboard/drivers/drivers-client';
 import MedicalStaffClient from '@/app/dashboard/medical-staff/medical-staff-client';
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default async function SettingsPage() {
   const users = await getUsers();
   const drivers = await getDrivers();
-  const medicalStaff = await getMedicalStaff();
+  const emergencyTechnicians = await getEmergencyTechnicians();
 
   return (
     <div className="flex flex-col gap-8">
@@ -24,7 +24,7 @@ export default async function SettingsPage() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="users">App Users</TabsTrigger>
           <TabsTrigger value="drivers">Drivers</TabsTrigger>
-          <TabsTrigger value="medical-staff">Medical Staff</TabsTrigger>
+          <TabsTrigger value="emergency-technicians">Emergency Technicians</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
           <Card>
@@ -48,14 +48,14 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="medical-staff">
+        <TabsContent value="emergency-technicians">
           <Card>
             <CardHeader>
-              <CardTitle>Manage Medical Staff</CardTitle>
-              <CardDescription>A list of all medical staff in your team.</CardDescription>
+              <CardTitle>Manage Emergency Technicians</CardTitle>
+              <CardDescription>A list of all emergency technicians in your team.</CardDescription>
             </CardHeader>
             <CardContent>
-              <MedicalStaffClient initialMedicalStaff={medicalStaff} />
+              <MedicalStaffClient initialMedicalStaff={emergencyTechnicians} />
             </CardContent>
           </Card>
         </TabsContent>
