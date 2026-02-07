@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import type { Ambulance } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -28,12 +28,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 export default function AmbulancesClient({ initialAmbulances }: { initialAmbulances: Ambulance[] }) {
   const [ambulances, setAmbulances] = useState<Ambulance[]>(initialAmbulances);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAmbulance, setEditingAmbulance] = useState<Ambulance | null>(null);
-  const [formData, setFormData] = useState({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0 });
+  const [formData, setFormData] = useState({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0, status: 'active' as 'active' | 'inactive' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -47,7 +55,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     if (ambulance) {
       setFormData(ambulance);
     } else {
-      setFormData({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0 });
+      setFormData({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0, status: 'active' });
     }
     setIsModalOpen(true);
   };
@@ -55,7 +63,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingAmbulance(null);
-    setFormData({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0 });
+    setFormData({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0, status: 'active' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -214,6 +222,21 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
                 <DialogClose asChild>
@@ -248,3 +271,4 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     </div>
   );
 }
+''

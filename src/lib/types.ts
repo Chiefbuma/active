@@ -14,6 +14,7 @@ export type Ambulance = {
   target: number;
   last_driven_by?: string;
   last_driven_on?: string;
+  status: "active" | "inactive";
 };
 
 export type Driver = {

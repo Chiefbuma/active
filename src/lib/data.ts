@@ -1,40 +1,39 @@
-import { transactions, ambulances, drivers, emergencyTechnicians, users } from '@/lib/mock-data';
 import type { Transaction, Ambulance, Driver, EmergencyTechnician, User } from '@/lib/types';
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+async function fetchFromAPI(endpoint: string) {
+  const res = await fetch(`${API_URL}/${endpoint}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${endpoint}`);
+  }
+  return res.json();
+}
 
 export async function getTransactions(): Promise<Transaction[]> {
-  await delay(300);
-  return transactions;
+  return fetchFromAPI('transactions');
 }
 
 export async function getAmbulances(): Promise<Ambulance[]> {
-  await delay(300);
-  return ambulances;
+  return fetchFromAPI('ambulances');
 }
 
 export async function getAmbulanceById(id: number): Promise<Ambulance | undefined> {
-    await delay(100);
-    return ambulances.find(a => a.id === id);
+  return fetchFromAPI(`ambulances/${id}`);
 }
 
 export async function getTransactionsByAmbulanceId(ambulanceId: number): Promise<Transaction[]> {
-    await delay(200);
-    return transactions.filter(t => t.ambulance.id === ambulanceId);
+  return fetchFromAPI(`transactions?ambulanceId=${ambulanceId}`);
 }
 
 export async function getDrivers(): Promise<Driver[]> {
-  await delay(300);
-  return drivers;
+  return fetchFromAPI('drivers');
 }
 
 export async function getEmergencyTechnicians(): Promise<EmergencyTechnician[]> {
-  await delay(300);
-  return emergencyTechnicians;
+  return fetchFromAPI('emergency-technicians');
 }
 
 export async function getUsers(): Promise<User[]> {
-  await delay(300);
-  return users;
+  return fetchFromAPI('users');
 }

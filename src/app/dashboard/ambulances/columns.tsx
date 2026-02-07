@@ -66,6 +66,20 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
     header: "Last Driven On",
   },
   {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const ambulance = row.original
