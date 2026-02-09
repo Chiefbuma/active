@@ -1,8 +1,19 @@
 import type { Transaction, Ambulance, Driver, EmergencyTechnician, User } from '@/lib/types';
 
-// This is a placeholder for a real API URL.
-// In a real app, you'd set this in your environment variables.
-const API_URL = '/api';
+// Get the API URL based on environment
+// On the server: use full URL, on the client: use relative path
+const getApiUrl = () => {
+  if (typeof window === 'undefined') {
+    // Server-side
+    const host = process.env.VERCEL_URL || 'localhost:3000';
+    const protocol = process.env.VERCEL_URL ? 'https' : 'http';
+    return `${protocol}://${host}/api`;
+  }
+  // Client-side
+  return '/api';
+};
+
+const API_URL = getApiUrl();
 
 async function fetchFromAPI(endpoint: string, options?: RequestInit) {
   try {

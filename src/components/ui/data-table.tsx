@@ -5,7 +5,6 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -18,20 +17,10 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ListFilter,
   X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -81,36 +70,6 @@ export function DataTableToolbar<TData>({
             </div>
             <div className="flex items-center space-x-2">
                 {customActions}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
-                        <ListFilter className="mr-2 h-4 w-4" />
-                        View
-                    </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[150px]">
-                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {table
-                        .getAllColumns()
-                        .filter(
-                        (column) =>
-                            typeof column.accessorFn !== "undefined" && column.getCanHide()
-                        )
-                        .map((column) => {
-                        return (
-                            <DropdownMenuCheckboxItem
-                            key={column.id}
-                            className="capitalize"
-                            checked={column.getIsVisible()}
-                            onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                            >
-                            {column.id.replace(/_/g, ' ')}
-                            </DropdownMenuCheckboxItem>
-                        )
-                        })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
         </div>
     )
@@ -211,8 +170,6 @@ export function DataTable<TData, TValue>({
   bulkActions,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
@@ -229,7 +186,6 @@ export function DataTable<TData, TValue>({
     },
     state: {
       sorting,
-      columnVisibility,
       rowSelection,
       columnFilters,
       globalFilter,
@@ -238,7 +194,6 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
