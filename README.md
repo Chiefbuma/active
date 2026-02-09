@@ -1,14 +1,5 @@
 # Radiant Hospital Ambulance Management
 
-<<<<<<< HEAD
-This is a Next.js application for managing the Radiant Hospital's ambulance fleet. It provides features for tracking ambulances, managing drivers and emergency technicians, and recording transactions.
-
-## Getting Started
-
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-=======
 This is a comprehensive, full-stack web application designed for managing health activation campaigns. It provides a robust platform for healthcare staff to register patients, track health assessments, manage corporate partnerships, and generate detailed wellness reports. The application is built with a modern tech stack and leverages server-side rendering for optimal performance.
 
 ## Key Features
@@ -20,6 +11,7 @@ This is a comprehensive, full-stack web application designed for managing health
 -   **Corporate Partner Management**: Full CRUD (Create, Read, Update, Delete) functionality for managing corporate partners.
 -   **User Management**: An admin-only interface to manage staff user accounts.
 -   **Dynamic PDF Reporting**: On-the-fly generation of a printable wellness report for each patient, summarizing all their assessment data.
+-   **Ambulance Fleet Management**: Features for tracking ambulances, managing drivers and emergency technicians, and recording financial transactions.
 
 ## Tech Stack
 
@@ -38,19 +30,30 @@ This project is fully containerized with Docker, making local setup straightforw
 
 -   [Docker](https://docs.docker.com/get-docker/)
 -   [Docker Compose](https://docs.docker.com/compose/install/)
+-   [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
 ### Running the Application
 
-1.  **Environment Configuration**: The project includes a `.env` file which is pre-configured for the Docker environment. No changes are needed to get started.
+1.  **Clone the Repository**
+    ```sh
+    git clone https://github.com/your_username_/Project-Name.git
+    ```
 
-2.  **Build and Run Services**: Open your terminal in the project root and run the following command. This will build the Next.js app image and start all the necessary services (app, database, phpMyAdmin).
+2.  **Install Dependencies**
+    ```sh
+    npm install
+    ```
+
+3.  **Environment Configuration**: The project includes a `.env` file which is pre-configured for the Docker environment. No changes are needed to get started.
+
+4.  **Build and Run Services**: Open your terminal in the project root and run the following command. This will build the Next.js app image and start all the necessary services (app, database, phpMyAdmin).
 
     ```bash
     docker-compose up --build
     ```
-    The database will be created, but it will be empty. The schema is provided below for reference. To use the application, you will need to manually create the tables and insert the initial seed data using a tool like phpMyAdmin.
+    The database will be created, but it will be empty. To use the application, you will need to manually create the tables and insert the initial seed data using a tool like phpMyAdmin. The full database schema is provided below for reference.
 
-3.  **Access the Services**:
+5.  **Access the Services**:
     -   **Web Application**: [http://localhost:3000](http://localhost:3000)
     -   **Database Admin (phpMyAdmin)**: [http://localhost:8080](http://localhost:8080)
 
@@ -59,49 +62,11 @@ This project is fully containerized with Docker, making local setup straightforw
 After seeding the database, you can log in with:
 -   **Email**: `admin@superadmin.com`
 -   **Password**: `password`
->>>>>>> d35e48d (update the readme)
 
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+## Database Schema
 
-<<<<<<< HEAD
-### Installation
-=======
 Below is the SQL schema for the application.
->>>>>>> d35e48d (update the readme)
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-
-### Usage
-
-To start the development server, run:
-
-<<<<<<< HEAD
-```sh
-  npm run dev
-```
-
-This will start the application on http://localhost:3000.
-
-### Database
-
-The application uses a MySQL database. The schema and sample data can be found in the `database.sql` file.
-
-To import the database, run the following command:
-
-```sh
-  mysql -u your_username -p your_database_name < database.sql
-```
-=======
 --
 -- Table structure for table `registrations`
 --
@@ -202,5 +167,3 @@ CREATE TABLE `clinicals` (
   KEY `registration_id` (`registration_id`),
   CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-```
->>>>>>> d35e48d (update the readme)
