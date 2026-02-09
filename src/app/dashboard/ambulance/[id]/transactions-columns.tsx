@@ -62,7 +62,7 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
   {
     accessorKey: "total_till",
     header: "Total Till",
-    cell: ({row}) => formatCurrency(row.getValue("total_till"))
+    cell: ({row}) => formatCurrency(row.original.total_till)
   },
   {
     accessorKey: "performance",
@@ -75,7 +75,7 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
   {
     accessorKey: "net_banked",
     header: "Net Banked",
-    cell: ({row}) => formatCurrency(row.getValue("net_banked"))
+    cell: ({row}) => formatCurrency(row.original.net_banked)
   },
   {
     accessorKey: "deficit",
