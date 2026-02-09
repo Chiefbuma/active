@@ -1,3 +1,5 @@
+'use client';
+
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -10,9 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
     }
 
-    const connection = await db.getConnection();
-    const [rows] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
-    connection.release();
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
 
     const users = rows as any[];
     if (users.length === 0) {
@@ -26,10 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    // The hashes in the DB might be from PHP's bcrypt ($2y$).
-    // bcryptjs should be able to handle '$2y$' prefix if we replace it with '$2a$'
     const hash = user.password.replace(/^\$2y\$/, '$2a\$');
-
     const isPasswordValid = await bcrypt.compare(password, hash);
 
     if (!isPasswordValid) {

@@ -4,14 +4,13 @@ services:
   app:
     build:
       context: .
-      args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    container_name: taria-health-app
+    container_name: radiant-health-app
     ports:
       - "3000:3000"
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/.next
     working_dir: /app
     env_file:
       - .env
@@ -20,10 +19,11 @@ services:
         condition: service_healthy
     networks:
       - radiant-hospital-network
+    command: npm run dev
 
   mysql:
     image: mysql:8.0
-    container_name: radiant-hospital-mysql
+    container_name: radiant-health-mysql
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: taria_health_db
@@ -44,7 +44,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: radiant-hospital-phpmyadmin
+    container_name: radiant-health-phpmyadmin
     restart: unless-stopped
     ports:
       - "8080:80"
