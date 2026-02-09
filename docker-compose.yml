@@ -5,10 +5,13 @@ services:
     build:
       context: .
       args:
-      
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+<<<<<<< HEAD
       
     container_name: radiant-hospital-app
+=======
+    container_name: taria-health-app
+>>>>>>> 65ea65c (Dont buidk the app , i want to run in local machine)
     ports:
       - "3000:3000"
     volumes:
