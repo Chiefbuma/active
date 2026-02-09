@@ -1,23 +1,10 @@
 import AmbulancesClient from './ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { getAmbulances, getTransactions } from '@/lib/data';
+import { getAmbulances } from '@/lib/data';
 import type { Ambulance } from '@/lib/types';
 
 export default async function AmbulancesPage() {
   const ambulances = await getAmbulances();
-  const transactions = await getTransactions();
-
-  const ambulanceData = ambulances.map(ambulance => {
-    const latestTransaction = transactions
-      .filter(t => t.ambulance.id === ambulance.id)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-
-    return {
-      ...ambulance,
-      last_driven_by: latestTransaction ? latestTransaction.driver.name : 'N/A',
-      last_driven_on: latestTransaction ? new Date(latestTransaction.date).toLocaleDateString() : 'N/A',
-    }
-  }) as Ambulance[];
 
   return (
     <Card>
@@ -33,7 +20,7 @@ export default async function AmbulancesPage() {
                 </p>
                 </div>
             </div>
-            <AmbulancesClient initialAmbulances={ambulanceData} />
+            <AmbulancesClient initialAmbulances={ambulances} />
         </div>
       </CardContent>
     </Card>

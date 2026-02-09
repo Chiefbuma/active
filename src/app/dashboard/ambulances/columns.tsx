@@ -3,16 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ArrowUpDown, MoreHorizontal, Edit, Trash2, DollarSign } from "lucide-react"
+import { ArrowUpDown, Edit, Trash2 } from "lucide-react"
 import type { Ambulance } from "@/lib/types"
 import { TransactButton } from "../view-ambulance-button"
+import { Badge } from "@/components/ui/badge"
 
 interface AmbulancesColumnsProps {
   onEdit: (ambulance: Ambulance) => void
@@ -58,14 +52,6 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
     cell: ({ row }) => <div className="font-medium">{row.getValue("reg_no")}</div>,
   },
   {
-    accessorKey: "last_driven_by",
-    header: "Last Driven By",
-  },
-  {
-    accessorKey: "last_driven_on",
-    header: "Last Driven On",
-  },
-  {
     accessorKey: "status",
     header: ({ column }) => {
       return (
@@ -78,33 +64,27 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
         </Button>
       )
     },
+     cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        return <Badge variant={status === 'active' ? "secondary" : "destructive"} className="capitalize">{status}</Badge>
+    }
   },
   {
     id: "actions",
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
       const ambulance = row.original
       return (
-        <div className="text-right flex items-center justify-end gap-2">
+        <div className="text-right flex items-center justify-end gap-1">
             <TransactButton ambulanceId={ambulance.id} />
-            <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onEdit(ambulance)} className="cursor-pointer">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDelete(ambulance)} className="cursor-pointer text-red-600 focus:text-red-600">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-            </DropdownMenu>
+             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(ambulance)}>
+                <Edit className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-600" onClick={() => onDelete(ambulance)}>
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+            </Button>
         </div>
       )
     },
