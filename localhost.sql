@@ -1,25 +1,10 @@
--- Radiant Hospital Ambulance Management Database Schema
--- Version 1.0
-
--- This file contains the complete SQL schema for the application,
--- including table structures and initial mock data.
---
--- To set up your local database:
--- 1. Ensure your Docker container for MySQL is running.
--- 2. Connect to your MySQL instance (e.g., via phpMyAdmin at http://localhost:8080).
--- 3. Create a database named `radiant_health_db`.
--- 4. Select the `radiant_health_db` database.
--- 5. Import this SQL file.
-
---
--- Drop existing tables if they exist to start fresh
---
+-- Drop tables if they exist to start fresh
 DROP TABLE IF EXISTS `transaction_technicians`;
 DROP TABLE IF EXISTS `transactions`;
-DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `ambulances`;
-DROP TABLE IF EXISTS `drivers`;
 DROP TABLE IF EXISTS `emergency_technicians`;
+DROP TABLE IF EXISTS `drivers`;
+DROP TABLE IF EXISTS `ambulances`;
+DROP TABLE IF EXISTS `users`;
 
 
 --
@@ -127,48 +112,43 @@ CREATE TABLE `transaction_technicians` (
 
 
 --
--- Mock Data Insertion
+-- Dumping data for table `users`
 --
+LOCK TABLES `users` WRITE;
+INSERT INTO `users` VALUES (1,'Admin User','admin@superadmin.com','$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g','admin',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(2,'Staff User','staff@radiant.com','$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g','staff',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34');
+UNLOCK TABLES;
 
--- Default Users (password for both is "password")
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES
-('Admin User', 'admin@superadmin.com', '$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g', 'admin'),
-('Staff User', 'staff@example.com', '$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g', 'staff');
+--
+-- Dumping data for table `drivers`
+--
+LOCK TABLES `drivers` WRITE;
+INSERT INTO `drivers` VALUES (1,'John Doe',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(2,'Peter Jones',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(3,'Mary Jane',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(4,'Alex Ray',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34');
+UNLOCK TABLES;
 
--- Mock Drivers
-INSERT INTO `drivers` (`name`) VALUES
-('John Mwangi'),
-('Peter Ochieng'),
-('Mary Wanjiru');
+--
+-- Dumping data for table `emergency_technicians`
+--
+LOCK TABLES `emergency_technicians` WRITE;
+INSERT INTO `emergency_technicians` VALUES (1,'Susan Smith',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(2,'David Williams',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(3,'Emily Brown',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(4,'Michael Miller',NULL,'2024-05-12 19:07:34','2024-05-12 19:07:34');
+UNLOCK TABLES;
 
--- Mock Emergency Technicians
-INSERT INTO `emergency_technicians` (`name`) VALUES
-('Jane Doe'),
-('James Smith'),
-('Fatima Al-Fassi');
+--
+-- Dumping data for table `ambulances`
+--
+LOCK TABLES `ambulances` WRITE;
+INSERT INTO `ambulances` VALUES (1,'KCD 123A',5000.00,2000.00,15000.00,'active','2024-05-12 19:07:34','2024-05-12 19:07:34'),(2,'KDE 456B',5500.00,2200.00,18000.00,'active','2024-05-12 19:07:34','2024-05-12 19:07:34'),(3,'KCF 789C',4800.00,1900.00,14000.00,'inactive','2024-05-12 19:07:34','2024-05-12 19:07:34');
+UNLOCK TABLES;
 
--- Mock Ambulances
-INSERT INTO `ambulances` (`reg_no`, `fuel_cost`, `operation_cost`, `target`, `status`) VALUES
-('KDA 123A', 3000.00, 1500.00, 10000.00, 'active'),
-('KDB 456B', 3500.00, 2000.00, 12000.00, 'active'),
-('KDC 789C', 2800.00, 1200.00, 9000.00, 'inactive');
+--
+-- Dumping data for table `transactions`
+--
+LOCK TABLES `transactions` WRITE;
+INSERT INTO `transactions` VALUES (1,'2024-05-10',1,1,25000.00,15000.00,5000.00,2000.00,10000.00,15000.00,18000.00,3000.00,5000.00,15000.00,0.00,1.0000,0.2000,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(2,'2024-05-10',2,2,20000.00,18000.00,5500.00,2200.00,5000.00,15000.00,12300.00,0.00,2200.00,12300.00,5700.00,0.6833,0.2750,'2024-05-12 19:07:34','2024-05-12 19:07:34'),(3,'2024-05-11',1,3,22000.00,15000.00,5200.00,2100.00,8000.00,14000.00,14700.00,0.00,2100.00,14700.00,300.00,0.9800,0.2364,'2024-05-12 19:07:34','2024-05-12 19:07:34');
+UNLOCK TABLES;
 
--- Mock Transactions
--- Transaction 1
-INSERT INTO `transactions` (`date`, `ambulance_id`, `driver_id`, `total_till`, `target`, `fuel`, `operation`, `cash_deposited_by_staff`, `amount_paid_to_the_till`, `offload`, `salary`, `operations_cost`, `net_banked`, `deficit`, `performance`, `fuel_revenue_ratio`) VALUES
-('2024-05-20', 1, 1, 15000.00, 10000.00, 3000.00, 1500.00, 5000.00, 10000.00, 10500.00, 500.00, 2000.00, 10000.00, 0.00, 1.0000, 0.2000);
--- Transaction 2
-INSERT INTO `transactions` (`date`, `ambulance_id`, `driver_id`, `total_till`, `target`, `fuel`, `operation`, `cash_deposited_by_staff`, `amount_paid_to_the_till`, `offload`, `salary`, `operations_cost`, `net_banked`, `deficit`, `performance`, `fuel_revenue_ratio`) VALUES
-('2024-05-21', 2, 2, 18000.00, 12000.00, 3500.00, 2000.00, 7000.00, 11000.00, 12500.00, 500.00, 2500.00, 12000.00, 0.00, 1.0000, 0.1944);
--- Transaction 3 (Underperformance)
-INSERT INTO `transactions` (`date`, `ambulance_id`, `driver_id`, `total_till`, `target`, `fuel`, `operation`, `cash_deposited_by_staff`, `amount_paid_to_the_till`, `offload`, `salary`, `operations_cost`, `net_banked`, `deficit`, `performance`, `fuel_revenue_ratio`) VALUES
-('2024-05-22', 1, 3, 8000.00, 10000.00, 2500.00, 1000.00, 4000.00, 4000.00, 4500.00, 0.00, 1000.00, 4500.00, 5500.00, 0.4500, 0.3125);
-
--- Link Technicians to Transactions
-INSERT INTO `transaction_technicians` (`transaction_id`, `technician_id`) VALUES
-(1, 1),
-(1, 2),
-(2, 2),
-(2, 3),
-(3, 1),
-(3, 3);
+--
+-- Dumping data for table `transaction_technicians`
+--
+LOCK TABLES `transaction_technicians` WRITE;
+INSERT INTO `transaction_technicians` VALUES (1,1),(3,1),(1,2),(2,3),(3,4);
+UNLOCK TABLES;
