@@ -6,20 +6,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Loader2, Truck, LayoutDashboard, User, Users, UsersRound } from 'lucide-react';
+import { Loader2, Truck, LayoutDashboard, Settings } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
-import { Separator } from '@/components/ui/separator';
 
-const mainNavLinks = [
-  { href: '/dashboard/ambulances', label: 'Ambulances', icon: Truck, admin: false },
+const navLinks = [
   { href: '/dashboard/admin', label: 'Admin Dashboard', icon: LayoutDashboard, admin: true },
-]
-
-const personnelNavLinks = [
-  { href: '/dashboard/drivers', label: 'Drivers', icon: User, admin: true },
-  { href: '/dashboard/medical-staff', label: 'Technicians', icon: Users, admin: true },
-  { href: '/dashboard/users', label: 'App Users', icon: UsersRound, admin: true },
+  { href: '/dashboard/ambulances', label: 'Ambulances', icon: Truck, admin: false },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, admin: true },
 ]
 
 export default function DashboardLayout({
@@ -51,7 +45,7 @@ export default function DashboardLayout({
     );
   }
 
-  const renderNavLinks = (links: typeof mainNavLinks) => {
+  const renderNavLinks = (links: typeof navLinks) => {
     return links.map(link => {
         if (link.admin && user.role !== 'admin') return null;
         const isActive = pathname.startsWith(link.href);
@@ -74,15 +68,7 @@ export default function DashboardLayout({
             <Logo className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
-             {renderNavLinks(mainNavLinks)}
-             
-             {user.role === 'admin' && (
-                <>
-                    <Separator orientation="vertical" className="h-6 mx-2 hidden sm:block" />
-                    {renderNavLinks(personnelNavLinks)}
-                </>
-             )}
-
+             {renderNavLinks(navLinks)}
             <Header user={user} />
           </div>
         </div>
