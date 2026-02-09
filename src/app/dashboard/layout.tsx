@@ -6,14 +6,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Settings, Loader2, Truck, LayoutDashboard } from 'lucide-react';
+import { Loader2, Truck, LayoutDashboard, User, Users, UsersRound } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
+import { Separator } from '@/components/ui/separator';
 
-const navLinks = [
-  { href: '/dashboard/ambulances', label: 'Ambulances', icon: Truck },
+const mainNavLinks = [
+  { href: '/dashboard/ambulances', label: 'Ambulances', icon: Truck, admin: false },
   { href: '/dashboard/admin', label: 'Admin Dashboard', icon: LayoutDashboard, admin: true },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings, admin: true },
+]
+
+const personnelNavLinks = [
+  { href: '/dashboard/drivers', label: 'Drivers', icon: User, admin: true },
+  { href: '/dashboard/medical-staff', label: 'Technicians', icon: Users, admin: true },
+  { href: '/dashboard/users', label: 'App Users', icon: UsersRound, admin: true },
 ]
 
 export default function DashboardLayout({
@@ -45,6 +51,21 @@ export default function DashboardLayout({
     );
   }
 
+  const renderNavLinks = (links: typeof mainNavLinks) => {
+    return links.map(link => {
+        if (link.admin && user.role !== 'admin') return null;
+        const isActive = pathname.startsWith(link.href);
+        return (
+           <Button key={link.href} asChild variant={isActive ? 'secondary' : 'ghost'} size="sm">
+              <Link href={link.href}>
+                <link.icon className="mr-0 sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">{link.label}</span>
+              </Link>
+          </Button>
+        )
+     })
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -53,18 +74,15 @@ export default function DashboardLayout({
             <Logo className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
-             {navLinks.map(link => {
-                if (link.admin && user.role !== 'admin') return null;
-                const isActive = pathname === link.href;
-                return (
-                   <Button key={link.href} asChild variant={isActive ? 'secondary' : 'ghost'} size="sm">
-                      <Link href={link.href}>
-                        <link.icon className="mr-0 sm:mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">{link.label}</span>
-                      </Link>
-                  </Button>
-                )
-             })}
+             {renderNavLinks(mainNavLinks)}
+             
+             {user.role === 'admin' && (
+                <>
+                    <Separator orientation="vertical" className="h-6 mx-2 hidden sm:block" />
+                    {renderNavLinks(personnelNavLinks)}
+                </>
+             )}
+
             <Header user={user} />
           </div>
         </div>
