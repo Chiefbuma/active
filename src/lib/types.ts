@@ -55,7 +55,6 @@ export type AmbulancePerformanceData = {
     reg_no: string;
     total_target: number;
     total_net_banked: number;
-    avg_performance: number;
 }
 
 export type PeriodComparisonData = {

@@ -57,18 +57,16 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                 const totals = data.trans.reduce((acc, t) => {
                     acc.total_target += t.target;
                     acc.total_net_banked += t.net_banked;
-                    acc.total_performance += t.performance;
                     return acc;
-                }, { total_target: 0, total_net_banked: 0, total_performance: 0 });
+                }, { total_target: 0, total_net_banked: 0 });
 
                 return {
                     ambulanceId,
                     reg_no: ambulance.reg_no,
                     total_target: totals.total_target,
                     total_net_banked: totals.total_net_banked,
-                    avg_performance: (data.count > 0 ? (totals.total_performance / data.count) : 0) * 100,
                 };
-            }).sort((a, b) => b.avg_performance - a.avg_performance);
+            });
 
             // Period Comparison
             const prevRange = { from: subMonths(range.from, 1), to: subMonths(range.to, 1) };
