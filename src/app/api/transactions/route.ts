@@ -37,22 +37,23 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
   return transactionRows.map(t => {
     // The calculated values are already in the `t` object from the database.
     // We just need to ensure the data types are correct for the frontend.
+    // The DB driver can return decimal types as strings.
     return {
       ...t,
       date: t.date,
-      total_till: Number(t.total_till) || 0,
-      target: Number(t.target) || 0,
-      fuel: Number(t.fuel) || 0,
-      operation: Number(t.operation) || 0,
-      cash_deposited_by_staff: Number(t.cash_deposited_by_staff) || 0,
-      amount_paid_to_the_till: Number(t.amount_paid_to_the_till) || 0,
-      offload: Number(t.offload) || 0,
-      salary: Number(t.salary) || 0,
-      operations_cost: Number(t.operations_cost) || 0,
-      net_banked: Number(t.net_banked) || 0,
-      deficit: Number(t.deficit) || 0,
-      performance: Number(t.performance) || 0,
-      fuel_revenue_ratio: Number(t.fuel_revenue_ratio) || 0,
+      total_till: t.total_till ? parseFloat(t.total_till) : 0,
+      target: t.target ? parseFloat(t.target) : 0,
+      fuel: t.fuel ? parseFloat(t.fuel) : 0,
+      operation: t.operation ? parseFloat(t.operation) : 0,
+      cash_deposited_by_staff: t.cash_deposited_by_staff ? parseFloat(t.cash_deposited_by_staff) : 0,
+      amount_paid_to_the_till: t.amount_paid_to_the_till ? parseFloat(t.amount_paid_to_the_till) : 0,
+      offload: t.offload ? parseFloat(t.offload) : 0,
+      salary: t.salary ? parseFloat(t.salary) : 0,
+      operations_cost: t.operations_cost ? parseFloat(t.operations_cost) : 0,
+      net_banked: t.net_banked ? parseFloat(t.net_banked) : 0,
+      deficit: t.deficit ? parseFloat(t.deficit) : 0,
+      performance: t.performance ? parseFloat(t.performance) : 0,
+      fuel_revenue_ratio: t.fuel_revenue_ratio ? parseFloat(t.fuel_revenue_ratio) : 0,
       ambulance: ambulanceMap.get(t.ambulance_id),
       driver: driverMap.get(t.driver_id),
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
     const salary = (offload - targetNum) >= 0 ? (offload - targetNum) : 0;
     const operations_cost = operationNum + salary;
     const net_banked = totalTillNum - fuelNum - operationNum - salary;
-    const deficit = targetNum - net_banked;
+    const deficit = targetNum > 0 ? targetNum - net_banked : 0;
     const performance = targetNum > 0 ? net_banked / targetNum : 0;
     const fuel_revenue_ratio = totalTillNum > 0 ? fuelNum / totalTillNum : 0;
 

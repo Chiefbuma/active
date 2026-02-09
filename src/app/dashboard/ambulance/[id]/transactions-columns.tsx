@@ -61,28 +61,29 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
   },
   {
     accessorKey: "total_till",
-    header: "Total Till",
-    cell: ({row}) => formatCurrency(row.original.total_till)
+    header: () => <div className="text-right">Total Till</div>,
+    cell: ({row}) => <div className="text-right font-medium">{formatCurrency(row.original.total_till)}</div>
   },
   {
     accessorKey: "performance",
-    header: "Performance",
+    header: () => <div className="text-center">Performance</div>,
     cell: ({row}) => {
       const performance = row.original.performance;
-      return <Badge variant={performance >= 1 ? "secondary" : "destructive"}>{formatPercentage(performance)}</Badge>
+      return <div className="text-center"><Badge variant={performance >= 1 ? "secondary" : "destructive"}>{formatPercentage(performance)}</Badge></div>
     }
   },
   {
     accessorKey: "net_banked",
-    header: "Net Banked",
-    cell: ({row}) => formatCurrency(row.original.net_banked)
+    header: () => <div className="text-right">Net Banked</div>,
+    cell: ({row}) => <div className="text-right font-medium">{formatCurrency(row.original.net_banked)}</div>
   },
   {
     accessorKey: "deficit",
-    header: "Deficit",
+    header: () => <div className="text-right">Deficit</div>,
     cell: ({row}) => {
       const deficit = row.original.deficit;
-      return <span className={deficit > 0 ? 'text-red-500 font-medium' : ''}>{formatCurrency(deficit)}</span>
+      const formattedDeficit = formatCurrency(deficit);
+      return <div className={`text-right font-medium ${deficit > 0 ? 'text-red-500' : ''}`}>{formattedDeficit}</div>
     }
   },
 ]
