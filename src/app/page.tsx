@@ -10,11 +10,10 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import Logo from '@/components/logo';
-import { users } from '@/lib/mock-data'; 
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -24,29 +23,43 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    // Mock authentication
-    setTimeout(() => {
-        const user = users.find(u => u.email === email);
-        // In a real app, you'd also check the password hash. Here we just check for user existence and a static password.
-        if (user && password === 'password') {
-             // Store user info in localStorage
-            localStorage.setItem('loggedInUser', JSON.stringify(user));
-            
-            toast({
-                title: 'Success!',
-                description: 'Logged in successfully.',
-            });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-            router.push('/dashboard');
-        } else {
-             toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Invalid credentials. Please try again.',
-            });
-        }
-        setLoading(false);
-    }, 500);
+      if (response.ok) {
+        const user = await response.json();
+        // Store user info in localStorage
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        
+        toast({
+            title: 'Success!',
+            description: 'Logged in successfully.',
+        });
+
+        router.push('/dashboard');
+      } else {
+        const errorData = await response.json();
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: errorData.message || 'Invalid credentials. Please try again.',
+        });
+      }
+    } catch (error) {
+       toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
