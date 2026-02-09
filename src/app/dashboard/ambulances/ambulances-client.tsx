@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Ambulance } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -50,7 +50,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  const handleOpenModal = (ambulance: Ambulance | null) => {
+  const handleOpenModal = useCallback((ambulance: Ambulance | null) => {
     setEditingAmbulance(ambulance);
     if (ambulance) {
       setFormData(ambulance);
@@ -58,7 +58,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
       setFormData({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0, status: 'active' });
     }
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -110,10 +110,10 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     }
   };
 
-  const handleOpenDeleteDialog = (ambulance: Ambulance) => {
+  const handleOpenDeleteDialog = useCallback((ambulance: Ambulance) => {
     setAmbulanceToDelete(ambulance);
     setIsDeleteDialogOpen(true);
-  };
+  }, []);
   
   const handleConfirmDelete = async () => {
      if (!ambulanceToDelete) return;
@@ -180,10 +180,10 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     }
   };
   
-  const columns = getColumns({
+  const columns = useMemo(() => getColumns({
     onEdit: handleOpenModal,
     onDelete: handleOpenDeleteDialog,
-  });
+  }), [handleOpenModal, handleOpenDeleteDialog]);
 
   const CustomToolbarActions = (
     <Button onClick={() => handleOpenModal(null)}>
