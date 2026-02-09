@@ -34,25 +34,45 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
     }
   });
 
-  return transactionRows.map(t => ({
-    ...t,
-    total_till: Number(t.total_till),
-    target: Number(t.target),
-    fuel: Number(t.fuel),
-    operation: Number(t.operation),
-    cash_deposited_by_staff: Number(t.cash_deposited_by_staff),
-    amount_paid_to_the_till: Number(t.amount_paid_to_the_till),
-    offload: Number(t.offload),
-    salary: Number(t.salary),
-    operations_cost: Number(t.operations_cost),
-    net_banked: Number(t.net_banked),
-    deficit: Number(t.deficit),
-    performance: Number(t.performance),
-    fuel_revenue_ratio: Number(t.fuel_revenue_ratio),
-    ambulance: ambulanceMap.get(t.ambulance_id),
-    driver: driverMap.get(t.driver_id),
-    emergency_technicians: transactionTechniciansMap.get(t.id) || [],
-  }));
+  return transactionRows.map(t => {
+    // Ensure all base values are numbers
+    const totalTillNum = Number(t.total_till) || 0;
+    const fuelNum = Number(t.fuel) || 0;
+    const operationNum = Number(t.operation) || 0;
+    const cashDepositedNum = Number(t.cash_deposited_by_staff) || 0;
+    const targetNum = Number(t.target) || 0;
+
+    // Perform calculations on the backend for every fetch
+    const amount_paid_to_the_till = totalTillNum - cashDepositedNum;
+    const offload = totalTillNum - fuelNum - operationNum;
+    const salary = (offload - targetNum) >= 0 ? (offload - targetNum) : 0;
+    const operations_cost = operationNum + salary;
+    const net_banked = totalTillNum - fuelNum - operationNum - salary;
+    const deficit = targetNum - net_banked;
+    const performance = targetNum > 0 ? net_banked / targetNum : 0;
+    const fuel_revenue_ratio = totalTillNum > 0 ? fuelNum / totalTillNum : 0;
+    
+    return {
+      ...t,
+      date: t.date,
+      total_till: totalTillNum,
+      target: targetNum,
+      fuel: fuelNum,
+      operation: operationNum,
+      cash_deposited_by_staff: cashDepositedNum,
+      amount_paid_to_the_till,
+      offload,
+      salary,
+      operations_cost,
+      net_banked,
+      deficit,
+      performance,
+      fuel_revenue_ratio,
+      ambulance: ambulanceMap.get(t.ambulance_id),
+      driver: driverMap.get(t.driver_id),
+      emergency_technicians: transactionTechniciansMap.get(t.id) || [],
+    };
+  });
 }
 
 
