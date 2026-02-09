@@ -35,39 +35,24 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
   });
 
   return transactionRows.map(t => {
-    // Ensure all base values are numbers
-    const totalTillNum = Number(t.total_till) || 0;
-    const fuelNum = Number(t.fuel) || 0;
-    const operationNum = Number(t.operation) || 0;
-    const cashDepositedNum = Number(t.cash_deposited_by_staff) || 0;
-    const targetNum = Number(t.target) || 0;
-
-    // Perform calculations on the backend for every fetch
-    const amount_paid_to_the_till = totalTillNum - cashDepositedNum;
-    const offload = totalTillNum - fuelNum - operationNum;
-    const salary = (offload - targetNum) >= 0 ? (offload - targetNum) : 0;
-    const operations_cost = operationNum + salary;
-    const net_banked = totalTillNum - fuelNum - operationNum - salary;
-    const deficit = targetNum - net_banked;
-    const performance = targetNum > 0 ? net_banked / targetNum : 0;
-    const fuel_revenue_ratio = totalTillNum > 0 ? fuelNum / totalTillNum : 0;
-    
+    // The calculated values are already in the `t` object from the database.
+    // We just need to ensure the data types are correct for the frontend.
     return {
       ...t,
       date: t.date,
-      total_till: totalTillNum,
-      target: targetNum,
-      fuel: fuelNum,
-      operation: operationNum,
-      cash_deposited_by_staff: cashDepositedNum,
-      amount_paid_to_the_till,
-      offload,
-      salary,
-      operations_cost,
-      net_banked,
-      deficit,
-      performance,
-      fuel_revenue_ratio,
+      total_till: Number(t.total_till) || 0,
+      target: Number(t.target) || 0,
+      fuel: Number(t.fuel) || 0,
+      operation: Number(t.operation) || 0,
+      cash_deposited_by_staff: Number(t.cash_deposited_by_staff) || 0,
+      amount_paid_to_the_till: Number(t.amount_paid_to_the_till) || 0,
+      offload: Number(t.offload) || 0,
+      salary: Number(t.salary) || 0,
+      operations_cost: Number(t.operations_cost) || 0,
+      net_banked: Number(t.net_banked) || 0,
+      deficit: Number(t.deficit) || 0,
+      performance: Number(t.performance) || 0,
+      fuel_revenue_ratio: Number(t.fuel_revenue_ratio) || 0,
       ambulance: ambulanceMap.get(t.ambulance_id),
       driver: driverMap.get(t.driver_id),
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
@@ -120,11 +105,12 @@ export async function POST(req: Request) {
 
     const [ambulanceRows] = await connection.query<RowDataPacket[]>('SELECT target FROM ambulances WHERE id = ?', [ambulance_id]);
     if (ambulanceRows.length === 0) {
-        throw new Error('Ambulance not found');
+        await connection.rollback();
+        return NextResponse.json({ message: 'Ambulance not found' }, { status: 404 });
     }
     const target = ambulanceRows[0].target;
 
-    // Business logic
+    // Business logic for calculation ONCE on creation
     const totalTillNum = Number(total_till) || 0;
     const fuelNum = Number(fuel) || 0;
     const operationNum = Number(operation) || 0;
@@ -169,6 +155,7 @@ export async function POST(req: Request) {
 
     await connection.commit();
 
+    // Fetch the newly created transaction to return it with all relations
     const [rows] = await db.query('SELECT * FROM transactions WHERE id = ?', [transactionId]);
     const newTransaction = await buildTransactions(rows as any[]);
 
