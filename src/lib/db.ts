@@ -15,6 +15,7 @@ const db = global.db || mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  decimalNumbers: true,
 });
 
 if (process.env.NODE_ENV !== 'production') global.db = db;

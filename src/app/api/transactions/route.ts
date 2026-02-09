@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
-import { Transaction } from '@/lib/types';
+import type { Transaction } from '@/lib/types';
 import { RowDataPacket } from 'mysql2';
 
 // Function to fetch related data and build full transaction objects
@@ -35,25 +35,10 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
   });
 
   return transactionRows.map(t => {
-    // The calculated values are already in the `t` object from the database.
-    // We just need to ensure the data types are correct for the frontend.
-    // The DB driver can return decimal types as strings.
+    // With `decimalNumbers: true` in the DB config, all numeric fields are already numbers.
+    // We just need to join the related data.
     return {
       ...t,
-      date: t.date,
-      total_till: t.total_till ? parseFloat(t.total_till) : 0,
-      target: t.target ? parseFloat(t.target) : 0,
-      fuel: t.fuel ? parseFloat(t.fuel) : 0,
-      operation: t.operation ? parseFloat(t.operation) : 0,
-      cash_deposited_by_staff: t.cash_deposited_by_staff ? parseFloat(t.cash_deposited_by_staff) : 0,
-      amount_paid_to_the_till: t.amount_paid_to_the_till ? parseFloat(t.amount_paid_to_the_till) : 0,
-      offload: t.offload ? parseFloat(t.offload) : 0,
-      salary: t.salary ? parseFloat(t.salary) : 0,
-      operations_cost: t.operations_cost ? parseFloat(t.operations_cost) : 0,
-      net_banked: t.net_banked ? parseFloat(t.net_banked) : 0,
-      deficit: t.deficit ? parseFloat(t.deficit) : 0,
-      performance: t.performance ? parseFloat(t.performance) : 0,
-      fuel_revenue_ratio: t.fuel_revenue_ratio ? parseFloat(t.fuel_revenue_ratio) : 0,
       ambulance: ambulanceMap.get(t.ambulance_id),
       driver: driverMap.get(t.driver_id),
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
