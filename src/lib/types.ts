@@ -69,8 +69,4 @@ export type AdminDashboardData = {
     total_deficit: number;
     overall_performance: number;
     ambulance_performance: AmbulancePerformanceData[];
-    period_comparison: {
-        current: PeriodComparisonData;
-        previous: PeriodComparisonData;
-    };
 };

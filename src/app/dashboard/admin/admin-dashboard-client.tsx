@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DataTable } from '@/components/ui/data-table';
 import { columns } from './columns';
@@ -22,7 +22,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     const today = new Date();
     const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
         from: startOfMonth(today),
-        to: endOfMonth(today),
+        to: today,
     });
 
     const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
@@ -68,24 +68,10 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                 };
             });
 
-            // Period Comparison
-            const prevRange = { from: subMonths(range.from, 1), to: subMonths(range.to, 1) };
-            const prevTransactions = transactions.filter(t => isWithinInterval(new Date(t.date), { start: startOfDay(prevRange.from), end: endOfDay(prevRange.to) }));
-            
-            const prevSummary = prevTransactions.reduce((acc, t) => {
-                acc.net_banked += t.net_banked;
-                acc.deficit += t.deficit;
-                return acc;
-            }, { net_banked: 0, deficit: 0 });
-
             return {
                 ...summary,
                 overall_performance,
                 ambulance_performance,
-                period_comparison: {
-                    current: { net_banked: summary.total_net_banked, deficit: summary.total_deficit },
-                    previous: prevSummary
-                }
             };
         };
     }, []);
@@ -115,7 +101,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
         return <div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
-    const { overall_performance, ambulance_performance, period_comparison } = dashboardData;
+    const { overall_performance, ambulance_performance, total_net_banked, total_deficit } = dashboardData;
 
     return (
         <div className="flex flex-col gap-6">
@@ -225,28 +211,27 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
 
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Period Comparison</CardTitle>
-                        <CardDescription>Comparing key metrics against the previous period.</CardDescription>
+                        <CardTitle>Key Metrics Summary</CardTitle>
+                        <CardDescription>
+                             Key metrics for the period {format(dateRange.from, "LLL d")} - {format(dateRange.to, "LLL d, y")}.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Metric</TableHead>
-                                    <TableHead className="text-right">{format(dateRange.from, 'MMM d')} - {format(dateRange.to, 'd')}</TableHead>
-                                    <TableHead className="text-right">{format(subMonths(dateRange.from, 1), 'MMM d')} - {format(subMonths(dateRange.to, 1), 'd')}</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 <TableRow>
                                     <TableCell className="font-medium">Net Banked</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(period_comparison.current.net_banked)}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(period_comparison.previous.net_banked)}</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(total_net_banked)}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell className="font-medium">Deficit</TableCell>
-                                    <TableCell className="text-right text-red-500">{formatCurrency(period_comparison.current.deficit)}</TableCell>
-                                    <TableCell className="text-right text-red-500">{formatCurrency(period_comparison.previous.deficit)}</TableCell>
+                                    <TableCell className="text-right text-red-500">{formatCurrency(total_deficit)}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

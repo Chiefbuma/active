@@ -16,7 +16,7 @@ const formatCurrency = (value: number) => {
 export const columns: ColumnDef<AmbulancePerformanceData>[] = [
     {
         accessorKey: "reg_no",
-        header: "Bus",
+        header: "Ambulance",
         cell: ({ row }) => {
             return (
                 <div className="font-medium">{row.original.reg_no}</div>
