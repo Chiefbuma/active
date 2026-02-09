@@ -61,20 +61,44 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Mock API call
-    setTimeout(() => {
-      if (editingDriver) {
-        setDrivers(drivers.map(d => d.id === editingDriver.id ? { ...editingDriver, ...formData } : d));
-      } else {
-        setDrivers([...drivers, { ...formData, id: Math.random() }]);
-      }
-      toast({
-        title: "Success",
-        description: `Driver ${editingDriver ? 'updated' : 'created'} successfully.`,
-      });
-      setIsSubmitting(false);
-      handleCloseModal();
-    }, 500);
+    
+    const url = editingDriver ? `/api/drivers/${editingDriver.id}` : '/api/drivers';
+    const method = editingDriver ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+
+        const resData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(resData.message || 'An error occurred.');
+        }
+
+        if (editingDriver) {
+            setDrivers(drivers.map(d => d.id === editingDriver.id ? resData.driver : d));
+        } else {
+            setDrivers([resData.driver, ...drivers]);
+        }
+        
+        toast({
+            title: "Success",
+            description: `Driver ${editingDriver ? 'updated' : 'created'} successfully.`,
+        });
+
+        handleCloseModal();
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: (error as Error).message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   const handleOpenDeleteDialog = (driver: Driver) => {
@@ -85,30 +109,46 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
   const handleConfirmDelete = async () => {
     if (!driverToDelete) return;
     setIsDeleting(true);
-     setTimeout(() => {
-      setDrivers(drivers.filter(d => d.id !== driverToDelete.id));
-      toast({
-          title: "Success",
-          description: "Driver deleted successfully.",
-      });
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-      setDriverToDelete(null);
-    }, 500);
+     
+    try {
+        const response = await fetch(`/api/drivers/${driverToDelete.id}`, { method: 'DELETE' });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete driver.');
+        }
+        setDrivers(drivers.filter(d => d.id !== driverToDelete.id));
+        toast({ title: "Success", description: "Driver deleted successfully." });
+    } catch (error) {
+        toast({ variant: 'destructive', title: "Error", description: (error as Error).message });
+    } finally {
+        setIsDeleting(false);
+        setIsDeleteDialogOpen(false);
+        setDriverToDelete(null);
+    }
   };
 
   const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
-    setTimeout(() => {
+    
+    const deletePromises = ids.map(id => fetch(`/api/drivers/${id}`, { method: 'DELETE' }));
+
+    try {
+        const results = await Promise.all(deletePromises);
+        const failed = results.filter(res => !res.ok);
+        
+        if (failed.length > 0) {
+            throw new Error(`${failed.length} out of ${ids.length} drivers could not be deleted.`);
+        }
+
         setDrivers(drivers.filter(d => !ids.includes(d.id)));
-        toast({
-            title: "Success",
-            description: `${ids.length} driver(s) deleted successfully.`,
-        });
+        toast({ title: "Success", description: `${ids.length} driver(s) deleted successfully.` });
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Bulk Delete Error', description: (error as Error).message });
+    } finally {
         setIsBulkDeleting(false);
         onDone();
-    }, 500);
+    }
   };
   
   const columns = getColumns({

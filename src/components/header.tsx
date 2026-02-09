@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { LogOut, User as UserIcon, Settings } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 
@@ -25,7 +25,7 @@ export default function Header({ user }: { user: User }) {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2">
       <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -56,14 +56,6 @@ export default function Header({ user }: { user: User }) {
                 <span>Profile</span>
             </Link>
           </DropdownMenuItem>
-          {user.role === 'admin' && (
-            <DropdownMenuItem asChild className="cursor-pointer">
-                <Link href="/dashboard/users">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>App Users</span>
-                </Link>
-            </DropdownMenuItem>
-          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />

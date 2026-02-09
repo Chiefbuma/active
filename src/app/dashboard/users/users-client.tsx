@@ -90,25 +90,46 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
         return;
     }
 
+    const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
+    const method = editingUser ? 'PUT' : 'POST';
+    
     const body: Partial<User> & {password?: string} = { ...formData };
     if (editingUser && !body.password) {
         delete body.password;
     }
 
-    // Mock API Call
-    setTimeout(() => {
-        if (editingUser) {
-            setUsers(users.map(u => u.id === editingUser.id ? { ...editingUser, ...body, id: editingUser.id } : u));
-        } else {
-            setUsers([...users, { ...body, id: Math.random(), name: body.name!, email: body.email!, role: body.role! }]);
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const resData = await response.json();
+        if (!response.ok) {
+            throw new Error(resData.message || 'An error occurred.');
         }
+
+        if (editingUser) {
+            setUsers(users.map(u => u.id === editingUser.id ? resData.user : u));
+        } else {
+            setUsers([resData.user, ...users]);
+        }
+
         toast({
             title: "Success",
             description: `User ${editingUser ? 'updated' : 'created'} successfully.`,
         });
-        setIsSubmitting(false);
         handleCloseModal();
-    }, 500);
+    } catch (error) {
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: (error as Error).message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   const handleOpenDeleteDialog = (user: User) => {
@@ -123,34 +144,54 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
   const handleConfirmDelete = async () => {
     if (!userToDelete) return;
     setIsDeleting(true);
-    setTimeout(() => {
+    
+    try {
+        const response = await fetch(`/api/users/${userToDelete.id}`, { method: 'DELETE' });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete user.');
+        }
         setUsers(users.filter(u => u.id !== userToDelete.id));
         toast({ title: "Success", description: "User deleted successfully." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: (error as Error).message });
+    } finally {
         setIsDeleting(false);
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
-    }, 500);
+    }
   };
 
   const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
-    if (ids.length === 0) return;
-
-    const filteredIds = ids.filter(id => id !== currentUser?.id);
-    if (filteredIds.length < ids.length) {
+    const safeIds = ids.filter(id => id !== currentUser?.id);
+    if (safeIds.length < ids.length) {
         toast({ title: "Warning", description: "You cannot delete your own account. It has been excluded from the deletion." });
     }
-    if (filteredIds.length === 0) {
+    if (safeIds.length === 0) {
       onDone();
       return;
     };
 
     setIsBulkDeleting(true);
-    setTimeout(() => {
-        setUsers(users.filter(u => !filteredIds.includes(u.id)));
-        toast({ title: "Success", description: `${filteredIds.length} user(s) deleted successfully.` });
+
+    const deletePromises = safeIds.map(id => fetch(`/api/users/${id}`, { method: 'DELETE' }));
+
+    try {
+        const results = await Promise.all(deletePromises);
+        const failed = results.filter(res => !res.ok);
+        
+        if (failed.length > 0) {
+            throw new Error(`${failed.length} out of ${safeIds.length} users could not be deleted.`);
+        }
+
+        setUsers(users.filter(u => !safeIds.includes(u.id)));
+        toast({ title: "Success", description: `${safeIds.length} user(s) deleted successfully.` });
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Bulk Delete Error', description: (error as Error).message });
+    } finally {
         setIsBulkDeleting(false);
         onDone();
-    }, 500);
+    }
   };
   
   const columns = getColumns({
@@ -240,7 +281,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
               </div>
                <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder={editingUser ? "Leave blank to keep current" : ""} />
+                <Input id="password" type="password" value={formData.password || ''} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder={editingUser ? "Leave blank to keep current" : ""} />
               </div>
             </div>
             <DialogFooter>

@@ -94,7 +94,8 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [transactionFormData, setTransactionFormData] = useState({
+  
+  const initialTransactionFormData = {
       date: new Date().toISOString().split('T')[0],
       driver_id: '',
       emergency_technician_ids: [] as number[],
@@ -102,15 +103,21 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
       fuel: String(ambulance.fuel_cost),
       operation: String(ambulance.operation_cost),
       cash_deposited_by_staff: '',
-  });
+  };
+  const [transactionFormData, setTransactionFormData] = useState(initialTransactionFormData);
+
 
   useEffect(() => {
     async function fetchData() {
-        setDrivers(await getDrivers());
-        setEmergencyTechnicians(await getEmergencyTechnicians());
+        try {
+            setDrivers(await getDrivers());
+            setEmergencyTechnicians(await getEmergencyTechnicians());
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load drivers or technicians.' });
+        }
     }
     fetchData();
-  }, []);
+  }, [toast]);
 
   const handleTechnicianSelection = (technicianId: number) => {
     setTransactionFormData(prev => {
@@ -124,73 +131,45 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Mocking adding a transaction
-    setTimeout(() => {
-        const selectedDriver = drivers.find(d => d.id === Number(transactionFormData.driver_id));
-        const selectedTechnicians = emergencyTechnicians.filter(t => transactionFormData.emergency_technician_ids.includes(t.id));
 
-        if (!selectedDriver) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please select a driver.'});
-            setIsSubmitting(false);
-            return;
+    const body = {
+      ...transactionFormData,
+      ambulance_id: ambulance.id
+    };
+    
+    try {
+        const response = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to add transaction.");
         }
 
-        const totalTill = Number(transactionFormData.total_till) || 0;
-        const fuel = Number(transactionFormData.fuel) || 0;
-        const operation = Number(transactionFormData.operation) || 0;
-        const target = ambulance.target || 0;
-        const cashDeposited = Number(transactionFormData.cash_deposited_by_staff) || 0;
-
-        // Business logic
-        const amount_paid_to_the_till = totalTill - cashDeposited;
-        const offload = totalTill - fuel - operation;
-        const salary = (offload - target) >= 0 ? (offload - target) : 0;
-        const operations_cost = operation + salary;
-        const net_banked = totalTill - fuel - operation - salary;
-        const deficit = target - net_banked;
-        const performance = target > 0 ? net_banked / target : 0;
-        const fuel_revenue_ratio = totalTill > 0 ? fuel / totalTill : 0;
-
-        const newTransaction: Transaction = {
-            id: Math.random(),
-            date: transactionFormData.date,
-            ambulance: ambulance,
-            driver: selectedDriver,
-            emergency_technicians: selectedTechnicians,
-            total_till: totalTill,
-            target: target,
-            fuel: fuel,
-            operation: operation,
-            cash_deposited_by_staff: cashDeposited,
-            operations_cost,
-            amount_paid_to_the_till,
-            offload,
-            salary,
-            net_banked,
-            deficit,
-            performance,
-            fuel_revenue_ratio,
-        };
-
+        const { transaction: newTransaction } = await response.json();
+        
         setTransactions([newTransaction, ...transactions]);
-        setIsSubmitting(false);
-        setIsTransactionModalOpen(false);
+        
         toast({
             title: 'Success',
             description: 'Transaction added successfully.'
         });
-        // Reset form
-        setTransactionFormData({
-            date: new Date().toISOString().split('T')[0],
-            driver_id: '',
-            emergency_technician_ids: [],
-            total_till: '',
-            fuel: String(ambulance.fuel_cost),
-            operation: String(ambulance.operation_cost),
-            cash_deposited_by_staff: '',
+        
+        setTransactionFormData(initialTransactionFormData);
+        setIsTransactionModalOpen(false);
+
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: (error as Error).message
         });
-    }, 500);
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   const transactionColumns = getColumns();

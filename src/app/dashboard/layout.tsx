@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -10,6 +10,11 @@ import { Settings, Loader2, Truck, LayoutDashboard } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
 
+const navLinks = [
+  { href: '/dashboard/ambulances', label: 'Ambulances', icon: Truck },
+  { href: '/dashboard/admin', label: 'Admin Dashboard', icon: LayoutDashboard, admin: true },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings, admin: true },
+]
 
 export default function DashboardLayout({
   children,
@@ -19,6 +24,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
@@ -46,31 +52,19 @@ export default function DashboardLayout({
           <Link href="/dashboard" className="flex items-center gap-2">
             <Logo className="h-8 w-auto" />
           </Link>
-          <div className="flex items-center gap-4">
-             {user && user.role === 'admin' && (
-               <Button asChild variant="outline">
-                  <Link href="/dashboard/admin">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Admin Dashboard
-                  </Link>
-              </Button>
-             )}
-             <Button asChild variant="outline">
-                <Link href="/dashboard">
-                  <Truck className="mr-2 h-4 w-4" />
-                  Ambulances
-                </Link>
-              </Button>
-              {user && user.role === 'admin' && (
-                <>
-                <Button asChild variant="outline">
-                    <Link href="/dashboard/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                    </Link>
-                </Button>
-                </>
-             )}
+          <div className="flex items-center gap-2 sm:gap-4">
+             {navLinks.map(link => {
+                if (link.admin && user.role !== 'admin') return null;
+                const isActive = pathname === link.href;
+                return (
+                   <Button key={link.href} asChild variant={isActive ? 'secondary' : 'ghost'} size="sm">
+                      <Link href={link.href}>
+                        <link.icon className="mr-0 sm:mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">{link.label}</span>
+                      </Link>
+                  </Button>
+                )
+             })}
             <Header user={user} />
           </div>
         </div>

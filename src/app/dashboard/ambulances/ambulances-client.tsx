@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { useState } from 'react';
 import type { Ambulance } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -69,20 +69,45 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Mock API call
-    setTimeout(() => {
-      if (editingAmbulance) {
-        setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? { ...editingAmbulance, ...formData } : a));
-      } else {
-        setAmbulances([...ambulances, { ...formData, id: Math.random() }]);
-      }
-      toast({
-        title: "Success",
-        description: `Ambulance ${editingAmbulance ? 'updated' : 'created'} successfully.`,
-      });
-      setIsSubmitting(false);
-      handleCloseModal();
-    }, 500);
+    
+    const url = editingAmbulance ? `/api/ambulances/${editingAmbulance.id}` : '/api/ambulances';
+    const method = editingAmbulance ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+
+        const resData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(resData.message || 'An error occurred.');
+        }
+
+        if (editingAmbulance) {
+            setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? resData.ambulance : a));
+        } else {
+            setAmbulances([resData.ambulance, ...ambulances]);
+        }
+        
+        toast({
+            title: "Success",
+            description: `Ambulance ${editingAmbulance ? 'updated' : 'created'} successfully.`,
+        });
+
+        handleCloseModal();
+
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: "Error",
+            description: (error as Error).message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const handleOpenDeleteDialog = (ambulance: Ambulance) => {
@@ -93,30 +118,66 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const handleConfirmDelete = async () => {
      if (!ambulanceToDelete) return;
      setIsDeleting(true);
-     setTimeout(() => {
-      setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
-      toast({
-          title: "Success",
-          description: "Ambulance deleted successfully.",
-      });
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-      setAmbulanceToDelete(null);
-    }, 500);
+
+     try {
+        const response = await fetch(`/api/ambulances/${ambulanceToDelete.id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to delete ambulance.");
+        }
+
+        setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
+        toast({
+            title: "Success",
+            description: "Ambulance deleted successfully.",
+        });
+
+     } catch(error) {
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: (error as Error).message,
+        });
+     } finally {
+        setIsDeleting(false);
+        setIsDeleteDialogOpen(false);
+        setAmbulanceToDelete(null);
+     }
   };
 
   const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
-    setTimeout(() => {
+
+    const deletePromises = ids.map(id => fetch(`/api/ambulances/${id}`, { method: 'DELETE' }));
+
+    try {
+        const results = await Promise.all(deletePromises);
+        const failed = results.filter(res => !res.ok);
+        
+        if (failed.length > 0) {
+            throw new Error(`${failed.length} out of ${ids.length} ambulances could not be deleted.`);
+        }
+
         setAmbulances(ambulances.filter(a => !ids.includes(a.id)));
         toast({
             title: "Success",
             description: `${ids.length} ambulance(s) deleted successfully.`,
         });
+
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Bulk Delete Error',
+            description: (error as Error).message
+        });
+    } finally {
         setIsBulkDeleting(false);
         onDone();
-    }, 500);
+    }
   };
   
   const columns = getColumns({
@@ -271,4 +332,3 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     </div>
   );
 }
-''

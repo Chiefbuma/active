@@ -1,17 +1,16 @@
 # Radiant Hospital Ambulance Management
 
-This is a comprehensive, full-stack web application designed for managing health activation campaigns. It provides a robust platform for healthcare staff to register patients, track health assessments, manage corporate partnerships, and generate detailed wellness reports. The application is built with a modern tech stack and leverages server-side rendering for optimal performance.
+This is a full-stack web application for managing an ambulance fleet's financial performance and personnel. It provides a robust platform for staff to manage ambulances, track daily financial transactions, and manage drivers and emergency technicians.
 
 ## Key Features
 
 -   **Secure User Authentication**: Complete login system for staff with password hashing and a "Forgot Password" flow.
--   **Centralized Dashboard**: An overview of recently registered patients.
--   **Patient Management**: A complete workflow for registering new patients and viewing their detailed profiles with all related health records.
--   **Comprehensive Assessments**: Functionality to add and view records for Vitals, Nutrition, Health Goals, and Clinical Notes for each patient.
--   **Corporate Partner Management**: Full CRUD (Create, Read, Update, Delete) functionality for managing corporate partners.
--   **User Management**: An admin-only interface to manage staff user accounts.
--   **Dynamic PDF Reporting**: On-the-fly generation of a printable wellness report for each patient, summarizing all their assessment data.
--   **Ambulance Fleet Management**: Features for tracking ambulances, managing drivers and emergency technicians, and recording financial transactions.
+-   **Centralized Admin Dashboard**: An overview of fleet performance with date-range filtering, overall performance metrics, and period-over-period comparisons.
+-   **Ambulance Fleet Management**: Full CRUD (Create, Read, Update, Delete) functionality for managing the ambulance fleet, including setting financial targets and default costs.
+-   **Detailed Ambulance View**: A dedicated dashboard for each ambulance, showing its details and a complete history of its financial transactions.
+-   **Transaction Logging**: A comprehensive form to log daily transactions for each ambulance, automatically calculating performance metrics like `net banked`, `deficit`, and `salary`.
+-   **Personnel Management**: Admin-only interfaces to manage drivers, emergency technicians, and application users (staff/admins) with full CRUD capabilities.
+-   **Responsive UI**: A modern, responsive user interface built with ShadCN UI and Tailwind CSS.
 
 ## Tech Stack
 
@@ -35,9 +34,6 @@ This project is fully containerized with Docker, making local setup straightforw
 ### Running the Application
 
 1.  **Clone the Repository**
-    ```sh
-    git clone https://github.com/your_username_/Project-Name.git
-    ```
 
 2.  **Install Dependencies**
     ```sh
@@ -46,124 +42,132 @@ This project is fully containerized with Docker, making local setup straightforw
 
 3.  **Environment Configuration**: The project includes a `.env` file which is pre-configured for the Docker environment. No changes are needed to get started.
 
-4.  **Build and Run Services**: Open your terminal in the project root and run the following command. This will build the Next.js app image and start all the necessary services (app, database, phpMyAdmin).
+4.  **Set up the Database**: The application requires a specific database schema to function. Connect to your MySQL instance (e.g., via phpMyAdmin at `http://localhost:8080`) and execute the SQL commands provided in the `Database Schema` section below to create the necessary tables.
+
+5.  **Build and Run Services**: Open your terminal in the project root and run the following command. This will build the Next.js app image and start all the necessary services (app, database, phpMyAdmin).
 
     ```bash
     docker-compose up --build
     ```
-    The database will be created, but it will be empty. To use the application, you will need to manually create the tables and insert the initial seed data using a tool like phpMyAdmin. The full database schema is provided below for reference.
 
-5.  **Access the Services**:
+6.  **Access the Services**:
     -   **Web Application**: [http://localhost:3000](http://localhost:3000)
-    -   **Database Admin (phpMyAdmin)**: [http://localhost:8080](http://localhost:8080)
+    -   **Database Admin (phpMyAdmin)**: [http://localhost:8080](http://localhost:8080) (User: `root`, Password: `secret`)
 
 ### Default Login Credentials
 
-After seeding the database, you can log in with:
--   **Email**: `admin@superadmin.com`
--   **Password**: `password`
+After setting up the database and seeding the `users` table, you can log in. To create an initial admin user, you can run the following SQL:
+```sql
+INSERT INTO users (name, email, password, role) VALUES ('Admin User', 'admin@superadmin.com', '$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g', 'admin');
+-- Note: The password is 'password'. Generate a secure hash for production.
+```
 
 ## Database Schema
 
-Below is the SQL schema for the application.
+Execute the following SQL queries in your MySQL database to set up the required tables.
 
+```sql
 --
--- Table structure for table `registrations`
+-- Table structure for table `users`
 --
-
-CREATE TABLE `registrations` (
+CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL,
-  `middle_name` varchar(255) DEFAULT NULL,
-  `surname` varchar(255) DEFAULT NULL,
-  `sex` enum('Male','Female','Other') DEFAULT NULL,
-  `dob` date DEFAULT NULL,
-  `age` int DEFAULT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `corporate_id` int DEFAULT NULL,
-  `wellness_date` date DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','staff') NOT NULL DEFAULT 'staff',
+  `avatarUrl` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `corporate_id` (`corporate_id`),
-  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`corporate_id`) REFERENCES `corporates` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 --
--- Table structure for table `vitals`
+-- Table structure for table `ambulances`
 --
-
-CREATE TABLE `vitals` (
+CREATE TABLE `ambulances` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `bp_systolic` int DEFAULT NULL,
-  `bp_diastolic` int DEFAULT NULL,
-  `pulse` int DEFAULT NULL,
-  `temp` float DEFAULT NULL,
-  `rbs` varchar(255) DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
-  `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `reg_no` varchar(255) NOT NULL,
+  `fuel_cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `operation_cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `target` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `vitals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `reg_no` (`reg_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Table structure for table `nutritions`
---
 
-CREATE TABLE `nutritions` (
+--
+-- Table structure for table `drivers`
+--
+CREATE TABLE `drivers` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `height` float DEFAULT NULL,
-  `weight` float DEFAULT NULL,
-  `bmi` float DEFAULT NULL,
-  `visceral_fat` float DEFAULT NULL,
-  `body_fat_percent` float DEFAULT NULL,
-  `notes_nutritionist` text,
-  `user_id` int DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `avatarUrl` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+--
+-- Table structure for table `emergency_technicians`
+--
+CREATE TABLE `emergency_technicians` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `avatarUrl` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+--
+-- Table structure for table `transactions`
+--
+CREATE TABLE `transactions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `ambulance_id` int NOT NULL,
+  `driver_id` int NOT NULL,
+  `total_till` decimal(10,2) NOT NULL,
+  `target` decimal(10,2) NOT NULL,
+  `fuel` decimal(10,2) NOT NULL,
+  `operation` decimal(10,2) NOT NULL,
+  `cash_deposited_by_staff` decimal(10,2) NOT NULL,
+  `amount_paid_to_the_till` decimal(10,2) NOT NULL,
+  `offload` decimal(10,2) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `operations_cost` decimal(10,2) NOT NULL,
+  `net_banked` decimal(10,2) NOT NULL,
+  `deficit` decimal(10,2) NOT NULL,
+  `performance` decimal(5,4) NOT NULL,
+  `fuel_revenue_ratio` decimal(5,4) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `nutritions_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+  KEY `ambulance_id` (`ambulance_id`),
+  KEY `driver_id` (`driver_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`ambulance_id`) REFERENCES `ambulances` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Table structure for table `goals`
---
 
-CREATE TABLE `goals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `user_id` int DEFAULT NULL,
-  `discussion` text,
-  `goal` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `goals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+--
+-- Table structure for table `transaction_technicians`
+--
+CREATE TABLE `transaction_technicians` (
+  `transaction_id` int NOT NULL,
+  `technician_id` int NOT NULL,
+  PRIMARY KEY (`transaction_id`,`technician_id`),
+  KEY `technician_id` (`technician_id`),
+  CONSTRAINT `transaction_technicians_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `transaction_technicians_ibfk_2` FOREIGN KEY (`technician_id`) REFERENCES `emergency_technicians` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Table structure for table `clinicals`
---
-
-CREATE TABLE `clinicals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `notes_psychologist` text,
-  `notes_doctor` text,
-  `user_id` int DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+```

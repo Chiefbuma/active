@@ -31,22 +31,46 @@ export default function ProfilePage() {
     if (!user) return;
     setIsSubmitting(true);
 
-    // Mock update
-    setTimeout(() => {
-        const updatedUser = { ...user, name: formData.name, email: formData.email };
-        // In a real app, you would also handle password change logic
-        
-        // Update localStorage
+    const body: any = {
+      name: formData.name,
+      email: formData.email,
+      role: user.role, // Role is not editable from profile page
+    };
+    if (formData.password) {
+      body.password = formData.password;
+    }
+
+    try {
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+
+        const resData = await response.json();
+        if (!response.ok) {
+            throw new Error(resData.message || 'Failed to update profile.');
+        }
+
+        const updatedUser = resData.user;
         localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-        setUser(updatedUser); // update state to reflect change on page
+        setUser(updatedUser);
         
         toast({
             title: "Success",
             description: "Your profile has been updated successfully.",
         });
-        setFormData(prev => ({ ...prev, password: '' })); // Clear password field
+        setFormData(prev => ({ ...prev, password: '' }));
+
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: (error as Error).message
+        });
+    } finally {
         setIsSubmitting(false);
-    }, 500);
+    }
   };
 
   if (loading) {

@@ -61,20 +61,44 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Mock API call
-    setTimeout(() => {
-      if (editingStaff) {
-        setMedicalStaff(medicalStaff.map(d => d.id === editingStaff.id ? { ...editingStaff, ...formData } : d));
-      } else {
-        setMedicalStaff([...medicalStaff, { ...formData, id: Math.random() }]);
-      }
-      toast({
-        title: "Success",
-        description: `Emergency Technician ${editingStaff ? 'updated' : 'created'} successfully.`,
-      });
-      setIsSubmitting(false);
-      handleCloseModal();
-    }, 500);
+    
+    const url = editingStaff ? `/api/emergency-technicians/${editingStaff.id}` : '/api/emergency-technicians';
+    const method = editingStaff ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+
+        const resData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(resData.message || 'An error occurred.');
+        }
+
+        if (editingStaff) {
+            setMedicalStaff(medicalStaff.map(s => s.id === editingStaff.id ? resData.technician : s));
+        } else {
+            setMedicalStaff([resData.technician, ...medicalStaff]);
+        }
+        
+        toast({
+            title: "Success",
+            description: `Emergency Technician ${editingStaff ? 'updated' : 'created'} successfully.`,
+        });
+
+        handleCloseModal();
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: (error as Error).message,
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
   const handleOpenDeleteDialog = (staff: EmergencyTechnician) => {
@@ -85,30 +109,46 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
   const handleConfirmDelete = async () => {
     if (!staffToDelete) return;
     setIsDeleting(true);
-     setTimeout(() => {
-      setMedicalStaff(medicalStaff.filter(d => d.id !== staffToDelete.id));
-      toast({
-          title: "Success",
-          description: "Emergency Technician deleted successfully.",
-      });
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-      setStaffToDelete(null);
-    }, 500);
+     
+    try {
+        const response = await fetch(`/api/emergency-technicians/${staffToDelete.id}`, { method: 'DELETE' });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete technician.');
+        }
+        setMedicalStaff(medicalStaff.filter(s => s.id !== staffToDelete.id));
+        toast({ title: "Success", description: "Emergency Technician deleted successfully." });
+    } catch (error) {
+        toast({ variant: 'destructive', title: "Error", description: (error as Error).message });
+    } finally {
+        setIsDeleting(false);
+        setIsDeleteDialogOpen(false);
+        setStaffToDelete(null);
+    }
   };
 
   const handleConfirmBulkDelete = async (ids: number[], onDone: () => void) => {
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
-    setTimeout(() => {
-        setMedicalStaff(medicalStaff.filter(d => !ids.includes(d.id)));
-        toast({
-            title: "Success",
-            description: `${ids.length} technician(s) deleted successfully.`,
-        });
+    
+    const deletePromises = ids.map(id => fetch(`/api/emergency-technicians/${id}`, { method: 'DELETE' }));
+
+    try {
+        const results = await Promise.all(deletePromises);
+        const failed = results.filter(res => !res.ok);
+        
+        if (failed.length > 0) {
+            throw new Error(`${failed.length} out of ${ids.length} technicians could not be deleted.`);
+        }
+
+        setMedicalStaff(medicalStaff.filter(s => !ids.includes(s.id)));
+        toast({ title: "Success", description: `${ids.length} technician(s) deleted successfully.` });
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Bulk Delete Error', description: (error as Error).message });
+    } finally {
         setIsBulkDeleting(false);
         onDone();
-    }, 500);
+    }
   };
   
   const columns = getColumns({
