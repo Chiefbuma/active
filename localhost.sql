@@ -1,4 +1,10 @@
 --
+-- Database: `radiant_health_db`
+--
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 CREATE TABLE `users` (
@@ -15,11 +21,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Inserting a default admin user
+-- Dumping data for table `users`
 --
-INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES ('Admin User', 'admin@superadmin.com', '$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g', 'admin');
--- Note: The password for this user is 'password'.
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`) VALUES
+(1, 'Admin User', 'admin@superadmin.com', '$2a$10$3l4SgUuI4wI3/1Q3w0D8k.vjS2/jV0Kz3M5.L.x.k.Z.y.U.S.G.w', 'admin');
 
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `ambulances`
@@ -38,6 +46,8 @@ CREATE TABLE `ambulances` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `drivers`
 --
@@ -51,6 +61,8 @@ CREATE TABLE `drivers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `emergency_technicians`
 --
@@ -63,6 +75,8 @@ CREATE TABLE `emergency_technicians` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `transactions`
@@ -94,6 +108,8 @@ CREATE TABLE `transactions` (
   CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `transaction_technicians`
