@@ -1,9 +1,13 @@
+--
+-- Table structure for table `users`
+--
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `role` enum('admin','staff','navigator','payer','physician') NOT NULL DEFAULT 'staff',
   `password` varchar(255) NOT NULL,
+  `role` enum('admin','staff') NOT NULL DEFAULT 'staff',
+  `avatarUrl` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -11,176 +15,94 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Table structure for table `corporates`
+-- Inserting a default admin user
 --
+INSERT INTO `users` (`name`, `email`, `password`, `role`) VALUES ('Admin User', 'admin@superadmin.com', '$2a$10$f.4.B5/1F2b.b5f5E5g5Cu0y5G5E5g5Cu0y5G5E5g5Cu0y5G5E5g', 'admin');
+-- Note: The password for this user is 'password'.
 
-CREATE TABLE `corporates` (
+
+--
+-- Table structure for table `ambulances`
+--
+CREATE TABLE `ambulances` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `reg_no` varchar(255) NOT NULL,
+  `fuel_cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `operation_cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `target` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reg_no` (`reg_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+--
+-- Table structure for table `drivers`
+--
+CREATE TABLE `drivers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `wellness_date` date NOT NULL,
+  `avatarUrl` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Table structure for table `registrations`
---
 
-CREATE TABLE `registrations` (
+--
+-- Table structure for table `emergency_technicians`
+--
+CREATE TABLE `emergency_technicians` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL,
-  `middle_name` varchar(255) DEFAULT NULL,
-  `surname` varchar(255) DEFAULT NULL,
-  `sex` enum('Male','Female','Other') DEFAULT NULL,
-  `dob` date DEFAULT NULL,
-  `age` int DEFAULT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `corporate_id` int DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `avatarUrl` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `corporate_id` (`corporate_id`),
-  CONSTRAINT `registrations_ibfk_1` FOREIGN KEY (`corporate_id`) REFERENCES `corporates` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 --
--- Table structure for table `vitals`
+-- Table structure for table `transactions`
 --
-
-CREATE TABLE `vitals` (
+CREATE TABLE `transactions` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `bp_systolic` int DEFAULT NULL,
-  `bp_diastolic` int DEFAULT NULL,
-  `pulse` int DEFAULT NULL,
-  `temp` float DEFAULT NULL,
-  `rbs` varchar(255) DEFAULT NULL,
-  `user_id` int DEFAULT NULL,
-  `measured_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date` date NOT NULL,
+  `ambulance_id` int NOT NULL,
+  `driver_id` int NOT NULL,
+  `total_till` decimal(10,2) NOT NULL,
+  `target` decimal(10,2) NOT NULL,
+  `fuel` decimal(10,2) NOT NULL,
+  `operation` decimal(10,2) NOT NULL,
+  `cash_deposited_by_staff` decimal(10,2) NOT NULL,
+  `amount_paid_to_the_till` decimal(10,2) NOT NULL,
+  `offload` decimal(10,2) NOT NULL,
+  `salary` decimal(10,2) NOT NULL,
+  `operations_cost` decimal(10,2) NOT NULL,
+  `net_banked` decimal(10,2) NOT NULL,
+  `deficit` decimal(10,2) NOT NULL,
+  `performance` decimal(5,4) NOT NULL,
+  `fuel_revenue_ratio` decimal(5,4) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `vitals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Table structure for table `nutritions`
---
-
-CREATE TABLE `nutritions` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `height` float DEFAULT NULL,
-  `weight` float DEFAULT NULL,
-  `bmi` float DEFAULT NULL,
-  `visceral_fat` float DEFAULT NULL,
-  `body_fat_percent` float DEFAULT NULL,
-  `notes_nutritionist` text,
-  `user_id` int DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `nutritions_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Table structure for table `goals`
---
-
-CREATE TABLE `goals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `user_id` int DEFAULT NULL,
-  `discussion` text,
-  `goal` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `goals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Table structure for table `clinicals`
---
-
-CREATE TABLE `clinicals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `registration_id` int NOT NULL,
-  `notes_psychologist` text,
-  `notes_doctor` text,
-  `user_id` int DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `registration_id` (`registration_id`),
-  CONSTRAINT `clinicals_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registrations` (`id`) ON DELETE CASCADE
+  KEY `ambulance_id` (`ambulance_id`),
+  KEY `driver_id` (`driver_id`),
+  CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`ambulance_id`) REFERENCES `ambulances` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-INSERT INTO `users` (`name`, `email`, `role`, `password`) VALUES
-('Taria Admin', 'admin@superadmin.com', 'admin', '$2b$10$W3a1ZyygMwNhyty8RnROH.7sfbVEAdO5qrHVNh./.vAn2346k.ClW');
-
-
 --
--- Dumping data for table `corporates`
+-- Table structure for table `transaction_technicians`
 --
-
-INSERT INTO `corporates` (`id`, `name`, `wellness_date`) VALUES
-(1, 'Bio Food Products', '2025-09-29'),
-(2, 'Ikomoko', '2025-10-01'),
-(3, 'Taria', '2025-10-01');
-
---
--- Dumping data for table `registrations`
---
-
-INSERT INTO `registrations` (`id`, `first_name`, `middle_name`, `surname`, `sex`, `dob`, `age`, `phone`, `email`, `corporate_id`) VALUES
-(1, 'Sylvester', NULL, 'Musa', 'Male', '1997-01-01', 28, '743955149', 'musasylvester1065@gmail.com', 1),
-(2, 'Tom', 'Mbalala', 'Wawire', 'Male', '1970-01-01', 55, '729089363', 'tommbalala@20.com', 1),
-(3, 'Euticus', 'Matumbi', 'Muthuri', 'Male', '1991-01-01', 34, '742025594', 'matumbieutychus@gmail.com', NULL),
-(4, 'Paul', NULL, 'Ratemo', 'Male', '1985-01-01', 40, '743760460', 'paulratemo84@gmail.com', NULL),
-(5, 'Kingsley', NULL, 'Otieno', 'Male', '1976-01-01', 49, '724785997', 'nyakrojala@gmail.com', NULL);
-
---
--- Dumping data for table `vitals`
---
-
-INSERT INTO `vitals` (`registration_id`, `bp_systolic`, `bp_diastolic`, `pulse`, `temp`, `rbs`) VALUES
-(1, 114, 73, 58, 36.4, '5.1'),
-(2, 150, 99, 62, 36.4, '6.2'),
-(3, 133, 81, 70, 36.1, 'NOT SUPPORTED'),
-(4, 135, 89, 74, 37, '5.5'),
-(5, 171, 118, 76, 37, '5.8');
-
---
--- Dumping data for table `nutritions`
---
-
-INSERT INTO `nutritions` (`registration_id`, `height`, `weight`, `bmi`, `visceral_fat`, `body_fat_percent`, `notes_nutritionist`) VALUES
-(1, 169, 64.8, 23, 2, 10.3, 'normal nutritional status'),
-(2, 175, 84, 27, NULL, NULL, NULL),
-(3, 169, 81, 28, NULL, NULL, 'ecouraged on excercise'),
-(4, 181, 74.8, 23, 6, 18.5, 'encouraged on exercise');
-
---
--- Dumping data for table `goals`
---
-
-INSERT INTO `goals` (`registration_id`, `user_id`, `discussion`, `goal`) VALUES
-(1, 1, 'Patient wants to improve cardiovascular health and reduce stress.', 'Incorporate 30 minutes of moderate cardio exercise 3 times a week. Practice mindfulness meditation for 10 minutes daily.'),
-(2, 1, 'Patient is concerned about his high blood pressure reading and wants to manage it better.', 'Reduce daily sodium intake to under 2,300mg. Monitor blood pressure at home weekly and keep a log.');
-
---
--- Dumping data for table `clinicals`
---
-
-INSERT INTO `clinicals` (`registration_id`, `user_id`, `notes_doctor`, `notes_psychologist`) VALUES
-(1, 1, 'Patient is in good health. Advised on consistent exercise and a balanced diet. Follow up in 6 months.', 'No immediate concerns. Patient seems well-adjusted and motivated.'),
-(2, 1, 'Diagnosed with Stage 1 Hypertension. Prescribed Lisinopril 10mg. Advised on lifestyle modifications, particularly diet and exercise. Follow up in 1 month to check BP.', 'Patient is showing signs of anxiety related to his new diagnosis. Provided resources for stress management.');
+CREATE TABLE `transaction_technicians` (
+  `transaction_id` int NOT NULL,
+  `technician_id` int NOT NULL,
+  PRIMARY KEY (`transaction_id`,`technician_id`),
+  KEY `technician_id` (`technician_id`),
+  CONSTRAINT `transaction_technicians_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `transaction_technicians_ibfk_2` FOREIGN KEY (`technician_id`) REFERENCES `emergency_technicians` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
