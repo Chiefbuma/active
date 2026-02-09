@@ -18,14 +18,34 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Mock functionality
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'An error occurred.');
+      }
+      
       toast({
         title: 'Check your email',
-        description: 'If an account exists for this email, we have sent a password reset link.',
+        description: data.message,
       });
-      setLoading(false);
-    }, 500);
+
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: (error as Error).message,
+      });
+    } finally {
+        setLoading(false);
+    }
   };
 
   return (
@@ -52,6 +72,7 @@ export default function ForgotPasswordPage() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
                                 />
                             </div>
                             <Button type="submit" className="w-full" disabled={loading}>
