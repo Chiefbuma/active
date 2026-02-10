@@ -541,6 +541,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                     data={transactions}
                     customActions={CustomToolbarActions}
                     bulkActions={BulkActions}
+                    initialPageSize={5}
                 />
               </CardContent>
             </Card>

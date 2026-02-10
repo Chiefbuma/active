@@ -34,15 +34,6 @@ interface TransactionColumnsProps {
 
 export const getColumns = ({ isAdmin, onEdit, onDelete }: TransactionColumnsProps): ColumnDef<Transaction>[] => [
   {
-    accessorKey: "reg_no",
-    header: "Reg No",
-    cell: ({ row }) => {
-      const amb = row.original.ambulance;
-      return <div>{amb?.reg_no ?? '-'}</div>;
-    },
-    enableHiding: true,
-  },
-  {
     accessorKey: "date",
     header: ({ column }) => (
       <Button
