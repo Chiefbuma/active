@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,6 +28,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
@@ -109,10 +111,10 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   
   // Load user from localStorage
   useEffect(() => {
@@ -202,7 +204,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const handleBulkDelete = async () => {
     if (selectedRowIds.size === 0) return;
     
-    setIsDeletingBulk(true);
+    setIsDeleting(true);
     try {
       const transactionIds = Array.from(selectedRowIds);
       await Promise.all(
@@ -225,7 +227,8 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         description: 'Failed to delete selected transactions.'
       });
     } finally {
-      setIsDeletingBulk(false);
+      setIsDeleting(false);
+      setIsBulkDeleteDialogOpen(false);
     }
   };
 
@@ -234,7 +237,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     setTransactionFormData({
       date: new Date(transaction.date).toISOString().split('T')[0],
       driver_id: String(transaction.driver.id),
-      emergency_technician_ids: transaction.technicians?.map(t => t.id) || [],
+      emergency_technician_ids: transaction.emergency_technicians?.map(t => t.id) || [],
       total_till: String(transaction.total_till),
       fuel: String(transaction.fuel),
       operation: String(transaction.operation),
@@ -245,6 +248,8 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingTransaction) return;
+
     setIsSubmitting(true);
 
     const body = {
@@ -253,7 +258,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     };
 
     try {
-      const response = await fetch(`/api/transactions/${editingTransaction?.id}`, {
+      const response = await fetch(`/api/transactions/${editingTransaction.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -298,9 +303,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         method: 'DELETE'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete transaction.');
+      if (response.status !== 204) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to delete transaction.');
       }
 
       setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
@@ -322,119 +327,141 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
   };
   
-  const transactionColumns = getColumns(user?.role === 'admin', selectedRowIds, setSelectedRowIds, handleEditTransaction, handleDeleteClick);
+  const transactionColumns = getColumns({
+    isAdmin: user?.role === 'admin',
+    onEdit: handleEditTransaction,
+    onDelete: handleDeleteClick,
+  });
+
+  const transactionForm = (
+    <form onSubmit={editingTransaction ? handleSaveEdit : handleAddTransaction}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+            <div className="space-y-2">
+                <Label htmlFor="date">Transaction Date</Label>
+                <Input id="date" type="date" value={transactionFormData.date} onChange={(e) => setTransactionFormData({...transactionFormData, date: e.target.value})} required />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="driver_id">Driver</Label>
+                <Select required value={transactionFormData.driver_id} onValueChange={(value) => setTransactionFormData({...transactionFormData, driver_id: value})}>
+                    <SelectTrigger id="driver_id"><SelectValue placeholder="Select Driver" /></SelectTrigger>
+                    <SelectContent>
+                    {drivers.map((driver) => (
+                        <SelectItem key={driver.id} value={String(driver.id)}>
+                        {driver.name}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label>Emergency Technicians</Label>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start font-normal">
+                            <Users className="mr-2 h-4 w-4" />
+                            <span>{transactionFormData.emergency_technician_ids.length > 0 ? `${transactionFormData.emergency_technician_ids.length} selected` : 'Select Technicians'}</span>
+                            <ChevronDown className="ml-auto h-4 w-4 opacity-50"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]" align="start">
+                         <DropdownMenuLabel>Select Technicians</DropdownMenuLabel>
+                         <DropdownMenuSeparator />
+                        {emergencyTechnicians.map(tech => (
+                            <DropdownMenuCheckboxItem
+                                key={tech.id}
+                                checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
+                                onCheckedChange={() => handleTechnicianSelection(tech.id)}
+                                onSelect={(e) => e.preventDefault()}
+                            >
+                                {tech.name}
+                            </DropdownMenuCheckboxItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="total_till">Total Till (KES)</Label>
+              <Input id="total_till" type="number" value={transactionFormData.total_till} onChange={(e) => setTransactionFormData({...transactionFormData, total_till: e.target.value})} required />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="fuel">Fuel Cost (KES)</Label>
+              <Input id="fuel" type="number" value={transactionFormData.fuel} onChange={(e) => setTransactionFormData({...transactionFormData, fuel: e.target.value})} required />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="operation">Operation Cost (KES)</Label>
+              <Input id="operation" type="number" value={transactionFormData.operation} onChange={(e) => setTransactionFormData({...transactionFormData, operation: e.target.value})} required />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="cash_deposited_by_staff">Cash Deposited (KES)</Label>
+              <Input id="cash_deposited_by_staff" type="number" value={transactionFormData.cash_deposited_by_staff} onChange={(e) => setTransactionFormData({...transactionFormData, cash_deposited_by_staff: e.target.value})} required />
+            </div>
+        </div>
+        <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
+            </DialogClose>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              {isSubmitting ? 'Saving...' : (editingTransaction ? 'Save Changes' : 'Save Transaction')}
+            </Button>
+        </DialogFooter>
+    </form>
+  );
 
   const CustomToolbarActions = (
     <div className="flex gap-2">
       <Dialog open={isTransactionModalOpen} onOpenChange={setIsTransactionModalOpen}>
         <DialogTrigger asChild>
-          <Button>
+          <Button onClick={() => {
+            setEditingTransaction(null);
+            setTransactionFormData(initialTransactionFormData);
+          }}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Transaction
           </Button>
         </DialogTrigger>
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Add New Transaction for {ambulance.reg_no}</DialogTitle>
-          <CardDescription>
-            Fill in the form below to log a new financial record for this ambulance.
-          </CardDescription>
-        </DialogHeader>
-        <form onSubmit={handleAddTransaction}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-                <div className="space-y-2">
-                    <Label htmlFor="date">Transaction Date</Label>
-                    <Input id="date" type="date" value={transactionFormData.date} onChange={(e) => setTransactionFormData({...transactionFormData, date: e.target.value})} required />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="driver_id">Driver</Label>
-                    <Select required value={transactionFormData.driver_id} onValueChange={(value) => setTransactionFormData({...transactionFormData, driver_id: value})}>
-                        <SelectTrigger id="driver_id"><SelectValue placeholder="Select Driver" /></SelectTrigger>
-                        <SelectContent>
-                        {drivers.map((driver) => (
-                            <SelectItem key={driver.id} value={String(driver.id)}>
-                            {driver.name}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label>Emergency Technicians</Label>
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full justify-start font-normal">
-                                <Users className="mr-2 h-4 w-4" />
-                                <span>{transactionFormData.emergency_technician_ids.length > 0 ? `${transactionFormData.emergency_technician_ids.length} selected` : 'Select Technicians'}</span>
-                                <ChevronDown className="ml-auto h-4 w-4 opacity-50"/>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]" align="start">
-                             <DropdownMenuLabel>Select Technicians</DropdownMenuLabel>
-                             <DropdownMenuSeparator />
-                            {emergencyTechnicians.map(tech => (
-                                <DropdownMenuCheckboxItem
-                                    key={tech.id}
-                                    checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
-                                    onCheckedChange={() => handleTechnicianSelection(tech.id)}
-                                    onSelect={(e) => e.preventDefault()}
-                                >
-                                    {tech.name}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="total_till">Total Till (KES)</Label>
-                  <Input id="total_till" type="number" value={transactionFormData.total_till} onChange={(e) => setTransactionFormData({...transactionFormData, total_till: e.target.value})} required />
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="fuel">Fuel Cost (KES)</Label>
-                  <Input id="fuel" type="number" value={transactionFormData.fuel} onChange={(e) => setTransactionFormData({...transactionFormData, fuel: e.target.value})} required />
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor="operation">Operation Cost (KES)</Label>
-                  <Input id="operation" type="number" value={transactionFormData.operation} onChange={(e) => setTransactionFormData({...transactionFormData, operation: e.target.value})} required />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="cash_deposited_by_staff">Cash Deposited (KES)</Label>
-                  <Input id="cash_deposited_by_staff" type="number" value={transactionFormData.cash_deposited_by_staff} onChange={(e) => setTransactionFormData({...transactionFormData, cash_deposited_by_staff: e.target.value})} required />
-                </div>
-            </div>
-            <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline"><XCircle className="mr-2 h-4 w-4" />Cancel</Button>
-                </DialogClose>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                  {isSubmitting ? 'Saving...' : 'Save Transaction'}
-                </Button>
-            </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-    {user?.role === 'admin' && selectedRowIds.size > 0 && (
-      <Button
-        variant="destructive"
-        disabled={isDeletingBulk}
-        onClick={handleBulkDelete}
-      >
-        {isDeletingBulk ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Deleting...
-          </>
-        ) : (
-          <>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete {selectedRowIds.size}
-          </>
-        )}
-      </Button>
-    )}
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Add New Transaction for {ambulance.reg_no}</DialogTitle>
+            <CardDescription>
+              Fill in the form below to log a new financial record for this ambulance.
+            </CardDescription>
+          </DialogHeader>
+          {transactionForm}
+        </DialogContent>
+      </Dialog>
     </div>
   );
+  
+  const BulkActions = (table: any) => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    if (user?.role !== 'admin' || selectedRows.length === 0) return null;
+
+    return (
+      <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" className="h-8 ml-2">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete ({selectedRows.length})
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the {selectedRows.length} selected transaction(s).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} disabled={isDeleting}>
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Continue"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -489,12 +516,12 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                    <DetailItem 
                     icon={User} 
                     label="Last Driven By" 
-                    value={ambulance.last_driven_by}
+                    value={initialAmbulance.last_driven_by}
                   />
                    <DetailItem 
                     icon={CalendarDays} 
                     label="Last Driven On" 
-                    value={ambulance.last_driven_on}
+                    value={initialAmbulance.last_driven_on}
                   />
                 </div>
               </CardContent>
@@ -513,11 +540,40 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                     columns={transactionColumns}
                     data={transactions}
                     customActions={CustomToolbarActions}
+                    bulkActions={BulkActions}
                 />
               </CardContent>
             </Card>
           </div>
         </div>
-      </div>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Edit Transaction</DialogTitle>
+            <CardDescription>Update the details for this transaction.</CardDescription>
+          </DialogHeader>
+          {transactionForm}
+        </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the transaction.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTransactionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

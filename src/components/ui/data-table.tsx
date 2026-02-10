@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -11,6 +12,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  RowSelectionState,
 } from "@tanstack/react-table"
 import {
   ChevronLeft,
@@ -31,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface DataTableToolbarProps<TData> {
   table: ReturnType<typeof useReactTable<TData>>
@@ -164,26 +167,57 @@ interface DataTableProps<TData, TValue> {
   initialPageSize?: number
 }
 
-export function DataTable<TData, TValue>({
+// Add a generic ID type to allow for string or number IDs
+type RowWithId = { id: string | number };
+
+export function DataTable<TData extends RowWithId, TValue>({
   columns,
   data,
   customActions,
   bulkActions,
   initialPageSize,
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+  
+  // Extend columns to include a selection column if bulkActions is provided
+  const tableColumns = React.useMemo(() => {
+    if (!bulkActions) return columns;
+
+    const selectionColumn: ColumnDef<TData, TValue> = {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    };
+    
+    return [selectionColumn, ...columns];
+  }, [columns, bulkActions]);
+
 
   const table = useReactTable({
     data,
-    columns,
+    columns: tableColumns,
     initialState: {
       pagination: {
-        pageSize: initialPageSize ?? 5,
+        pageSize: initialPageSize ?? 10,
       },
     },
     state: {
@@ -246,7 +280,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   No results.

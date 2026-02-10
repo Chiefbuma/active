@@ -1,15 +1,15 @@
+
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import type { Transaction } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 
-const formatCurrency = (value: number | string | null | undefined) => {
-  if (value === null || value === undefined || value === '') return '-';
-  const num = typeof value === 'number' ? value : Number(String(value));
+const formatCurrency = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return '-';
+  const num = Number(value);
   if (Number.isNaN(num)) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -19,69 +19,40 @@ const formatCurrency = (value: number | string | null | undefined) => {
   }).format(num);
 };
 
-const formatPercentage = (value: number | string | null | undefined) => {
-  if (value === null || value === undefined || value === '') return '-';
-  const num = typeof value === 'number' ? value : Number(String(value));
+const formatPercentage = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return '-';
+  const num = Number(value);
   if (Number.isNaN(num)) return '-';
   return `${(num * 100).toFixed(0)}%`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getColumns = (isAdmin: boolean = false, selectedRowIds: Set<string> = new Set(), setSelectedRowIds?: (ids: Set<string>) => void): ColumnDef<Transaction>[] => [
+interface TransactionColumnsProps {
+  isAdmin: boolean;
+  onEdit: (transaction: Transaction) => void;
+  onDelete: (transaction: Transaction) => void;
+}
+
+export const getColumns = ({ isAdmin, onEdit, onDelete }: TransactionColumnsProps): ColumnDef<Transaction>[] => [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => {
-          table.toggleAllPageRowsSelected(!!value);
-          if (!value) {
-            setSelectedRowIds?.(new Set());
-          }
-        }}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => {
-          row.toggleSelected(!!value);
-          const newIds = new Set(selectedRowIds);
-          if (value) {
-            newIds.add(String(row.original.id));
-          } else {
-            newIds.delete(String(row.original.id));
-          }
-          setSelectedRowIds?.(newIds);
-        }}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "ambulance",
+    accessorKey: "reg_no",
     header: "Reg No",
     cell: ({ row }) => {
-      const amb = (row.original as any).ambulance;
+      const amb = row.original.ambulance;
       return <div>{amb?.reg_no ?? '-'}</div>;
-    }
+    },
+    enableHiding: true,
   },
   {
     accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
         const date = row.getValue("date") as string | null;
         if (!date) return <span className="text-muted-foreground">-</span>
@@ -91,9 +62,19 @@ export const getColumns = (isAdmin: boolean = false, selectedRowIds: Set<string>
   {
     accessorKey: "driver",
     header: "Driver",
+    cell: ({ row }) => <div>{row.original.driver?.name}</div>
+  },
+    {
+    accessorKey: "emergency_technicians",
+    header: "Technicians",
     cell: ({ row }) => {
-      const driver = row.original.driver
-      return <div>{driver.name}</div>
+        const technicians = row.original.emergency_technicians;
+        if (!technicians || technicians.length === 0) return <span>-</span>;
+        return (
+            <div className="flex flex-col">
+                {technicians.map(t => <span key={t.id}>{t.name}</span>)}
+            </div>
+        )
     }
   },
   {
@@ -106,39 +87,51 @@ export const getColumns = (isAdmin: boolean = false, selectedRowIds: Set<string>
     header: () => <div className="text-right">Net Banked</div>,
     cell: ({row}) => <div className="text-right font-medium">{formatCurrency(row.original.net_banked)}</div>
   },
+    {
+    accessorKey: "deficit",
+    header: () => <div className="text-right">Deficit</div>,
+    cell: ({row}) => <div className="text-right font-medium text-destructive">{formatCurrency(row.original.deficit)}</div>
+  },
   {
     accessorKey: "performance",
     header: () => <div className="text-center">Performance</div>,
     cell: ({row}) => {
       const performance = row.original.performance;
-      return <div className="text-center"><Badge variant={performance >= 1 ? "secondary" : "destructive"}>{formatPercentage(performance)}</Badge></div>
+      const color = performance >= 1 ? "secondary" : performance > 0.5 ? "outline" : "destructive";
+      return <div className="text-center"><Badge variant={color}>{formatPercentage(performance)}</Badge></div>
     }
   },
   {
     id: "actions",
     header: () => <div className="text-center">Actions</div>,
-    cell: ({ row }) => (
-      <div className="flex gap-2 justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => console.log('Edit transaction', row.original.id)}
-        >
-          <Edit2 className="h-4 w-4" />
-        </Button>
-        {isAdmin && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => console.log('Delete transaction', row.original.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const transaction = row.original;
+      return (
+        <div className="flex gap-2 justify-center">
+            <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => onEdit(transaction)}
+            >
+                <Edit2 className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+            </Button>
+            {isAdmin && (
+                <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onDelete(transaction)}
+                >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                </Button>
+            )}
+        </div>
+      );
+    },
     enableSorting: false,
     enableHiding: false,
   },
-  // Deficit and Technicians columns removed per request
 ]
