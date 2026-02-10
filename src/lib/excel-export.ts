@@ -57,7 +57,6 @@ export function exportDetailedToExcel(
   
   // Format data for export
   const formattedData = data.map(row => ({
-    'ID': row.id,
     'Date': new Date(row.date).toLocaleDateString(),
     'Ambulance': row.ambulance?.reg_no || '-',
     'Driver': row.driver?.name || '-',
@@ -68,12 +67,10 @@ export function exportDetailedToExcel(
     'Cash Deposited': row.cash_deposited_by_staff,
     'Amount Paid to Till': row.amount_paid_to_the_till,
     'Offload': row.offload,
-    'Salary': row.salary,
     'Operations Cost': row.operations_cost,
     'Net Banked': row.net_banked,
     'Deficit': row.deficit,
     'Performance': (row.performance * 100).toFixed(0) + '%',
-    'Fuel Revenue Ratio': (row.fuel_revenue_ratio * 100).toFixed(2) + '%',
   }));
   
   // Create worksheet
@@ -81,7 +78,6 @@ export function exportDetailedToExcel(
   
   // Set column widths
   ws['!cols'] = [
-    { wch: 8 },   // ID
     { wch: 12 },  // Date
     { wch: 12 },  // Ambulance
     { wch: 15 },  // Driver
@@ -92,12 +88,10 @@ export function exportDetailedToExcel(
     { wch: 15 },  // Cash Deposited
     { wch: 16 },  // Amount Paid to Till
     { wch: 10 },  // Offload
-    { wch: 10 },  // Salary
     { wch: 15 },  // Operations Cost
     { wch: 12 },  // Net Banked
     { wch: 10 },  // Deficit
     { wch: 12 },  // Performance
-    { wch: 16 },  // Fuel Revenue Ratio
   ];
   
   // Create workbook

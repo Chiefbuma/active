@@ -16,7 +16,7 @@ import { columns } from './columns';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { RadialBar, RadialBarChart } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { exportSummaryToExcel } from '@/lib/excel-export';
+import { exportSummaryToExcel, exportDetailedToExcel } from '@/lib/excel-export';
 
 const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return '-';
@@ -123,6 +123,17 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     const filteredDashboardData = useMemo(() => {
         return calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
     }, [initialTransactions, initialAmbulances, dateRange, calculateDashboardData]);
+
+    const filteredTransactions = useMemo(() => {
+        return initialTransactions.filter(t => {
+            try {
+                const txDate = typeof t.date === 'string' ? new Date(t.date) : t.date;
+                return isWithinInterval(txDate, { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to) });
+            } catch (e) {
+                return false;
+            }
+        });
+    }, [initialTransactions, dateRange]);
 
     useEffect(() => {
         setLoading(true);
@@ -321,17 +332,30 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                     Period: {format(dateRange.from, "MMMM d, yyyy")} - {format(dateRange.to, "MMMM d, yyyy")}
                                 </CardDescription>
                             </div>
-                            <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                    const periodLabel = `${format(dateRange.from, "MMMM d, yyyy")} - ${format(dateRange.to, "MMMM d, yyyy")}`;
-                                    exportSummaryToExcel(filteredDashboardData.ambulance_performance, periodLabel);
-                                }}
-                            >
-                                <Download className="mr-2 h-4 w-4" />
-                                Export Summary
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                        const periodLabel = `${format(dateRange.from, "MMMM d, yyyy")} - ${format(dateRange.to, "MMMM d, yyyy")}`;
+                                        exportDetailedToExcel(filteredTransactions, periodLabel);
+                                    }}
+                                >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export Details
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                        const periodLabel = `${format(dateRange.from, "MMMM d, yyyy")} - ${format(dateRange.to, "MMMM d, yyyy")}`;
+                                        exportSummaryToExcel(filteredDashboardData.ambulance_performance, periodLabel);
+                                    }}
+                                >
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export Summary
+                                </Button>
+                            </div>
                         </div>
                     </CardHeader>
                     <CardContent>
