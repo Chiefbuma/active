@@ -2,14 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ArrowUpDown, MoreHorizontal, Edit, Trash2 } from "lucide-react"
+import { ArrowUpDown, Edit, Trash2 } from "lucide-react"
 import type { User } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 
@@ -47,35 +40,32 @@ export const getColumns = ({ onEdit, onDelete, currentUserId }: UsersColumnsProp
   },
   {
     id: "actions",
+    header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
       const user = row.original
       const isCurrentUser = user.id === currentUserId;
 
       return (
-        <div className="text-right">
-            <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => onEdit(user)} className="cursor-pointer">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => onDelete(user)} 
-                  className="cursor-pointer text-red-600 focus:text-red-600"
-                  disabled={isCurrentUser}
-                >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="flex gap-2 justify-end">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onEdit(user)}
+            >
+                <Edit className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-600 hover:text-red-600"
+                onClick={() => onDelete(user)}
+                disabled={isCurrentUser}
+            >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+            </Button>
         </div>
       )
     },
