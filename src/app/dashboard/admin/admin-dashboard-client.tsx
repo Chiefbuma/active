@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
-import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, Download } from 'lucide-react';
 import { format, startOfMonth, isWithinInterval, startOfDay, endOfDay, subMonths } from 'date-fns';
 import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -16,6 +16,7 @@ import { columns } from './columns';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { RadialBar, RadialBarChart } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { exportSummaryToExcel, exportDetailedToExcel } from '@/lib/excel-export';
 
 const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return '-';
@@ -313,13 +314,28 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
             {filteredDashboardData && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Ambulance Performance Analysis</CardTitle>
-                        <CardDescription>
-                            Period: {format(dateRange.from, "MMMM d, yyyy")} - {format(dateRange.to, "MMMM d, yyyy")}
-                        </CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Ambulance Performance Analysis</CardTitle>
+                                <CardDescription>
+                                    Period: {format(dateRange.from, "MMMM d, yyyy")} - {format(dateRange.to, "MMMM d, yyyy")}
+                                </CardDescription>
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                    const periodLabel = `${format(dateRange.from, "MMMM d, yyyy")} - ${format(dateRange.to, "MMMM d, yyyy")}`;
+                                    exportSummaryToExcel(filteredDashboardData.ambulance_performance, periodLabel);
+                                }}
+                            >
+                                <Download className="mr-2 h-4 w-4" />
+                                Export Summary
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={filteredDashboardData.ambulance_performance} />
+                        <DataTable columns={columns} data={filteredDashboardData.ambulance_performance.map((item, index) => ({ ...item, id: index }))} />
                     </CardContent>
                 </Card>
             )}

@@ -54,6 +54,7 @@ import {
   Users,
   ChevronDown,
   Trash2,
+  Download,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable } from '@/components/ui/data-table';
@@ -69,6 +70,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getDrivers, getEmergencyTechnicians } from '@/lib/data';
+import { exportDetailedToExcel } from '@/lib/excel-export';
 
 const DetailItem = ({
   label,
@@ -541,10 +543,25 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
           <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>
-                  A list of all financial records for this ambulance.
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardDescription>
+                      A list of all financial records for this ambulance.
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      const periodLabel = `All transactions for ${ambulance.reg_no}`;
+                      exportDetailedToExcel(transactions, periodLabel);
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export Details
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <DataTable 
