@@ -36,21 +36,21 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     const [previousMonthData, setPreviousMonthData] = useState<AdminDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     
-    // Calculate date ranges for month comparison
     const currentMonthRange = useMemo(() => {
-        const dayOfMonth = today.getDate();
         return {
             from: startOfMonth(today),
-            to: new Date(today.getFullYear(), today.getMonth(), dayOfMonth),
+            to: today,
         };
     }, []);
     
     const previousMonthRange = useMemo(() => {
         const previousMonth = subMonths(today, 1);
         const dayOfMonth = today.getDate();
+        const daysInPreviousMonth = new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 0).getDate();
+        
         return {
             from: startOfMonth(previousMonth),
-            to: new Date(previousMonth.getFullYear(), previousMonth.getMonth(), Math.min(dayOfMonth, new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 0).getDate())),
+            to: new Date(previousMonth.getFullYear(), previousMonth.getMonth(), Math.min(dayOfMonth, daysInPreviousMonth)),
         };
     }, []);
 
@@ -96,6 +96,9 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     return acc;
                 }, { total_target: 0, total_net_banked: 0, total_till: 0, total_cash_deposited: 0 });
 
+                const total_deficit = totals.total_target - totals.total_net_banked;
+                const performance = totals.total_target > 0 ? (totals.total_net_banked / totals.total_target) : 0;
+
                 return {
                     ambulanceId,
                     reg_no: ambulance?.reg_no ?? `Unknown (${ambulanceId})`,
@@ -103,6 +106,8 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     total_net_banked: totals.total_net_banked,
                     total_till: totals.total_till,
                     total_cash_deposited: totals.total_cash_deposited,
+                    total_deficit,
+                    performance,
                 };
             }).sort((a, b) => b.total_net_banked - a.total_net_banked);
 
@@ -113,15 +118,13 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
             };
         };
     }, []);
+    
+    const filteredDashboardData = useMemo(() => {
+        return calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
+    }, [initialTransactions, initialAmbulances, dateRange, calculateDashboardData]);
 
     useEffect(() => {
-        setTempStartDate(dateRange.from);
-        setTempEndDate(dateRange.to);
-    }, []);
-    
-    useEffect(() => {
         setLoading(true);
-        // Always calculate both current month and previous month data
         const currentData = calculateDashboardData(initialTransactions, initialAmbulances, currentMonthRange);
         const previousData = calculateDashboardData(initialTransactions, initialAmbulances, previousMonthRange);
         setDashboardData(currentData);
@@ -231,7 +234,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                 className="mx-auto aspect-square h-[250px]"
                             >
                                 <RadialBarChart
-                                    data={[{ name: "performance", value: dashboardData?.overall_performance || 0 }]}
+                                    data={[{ name: "performance", value: filteredDashboardData?.overall_performance || 0 }]}
                                     startAngle={-140}
                                     endAngle={130}
                                     innerRadius="70%"
@@ -254,7 +257,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                         }
                                     />
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
-                                        {(dashboardData?.overall_performance || 0).toFixed(0)}%
+                                        {(filteredDashboardData?.overall_performance || 0).toFixed(0)}%
                                     </text>
                                     <text x="50%" y="65%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
                                         Performance
@@ -307,7 +310,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                     </Card>
                 </div>
 
-            {dashboardData && (
+            {filteredDashboardData && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Ambulance Performance Analysis</CardTitle>
@@ -316,7 +319,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={dashboardData.ambulance_performance} />
+                        <DataTable columns={columns} data={filteredDashboardData.ambulance_performance} />
                     </CardContent>
                 </Card>
             )}

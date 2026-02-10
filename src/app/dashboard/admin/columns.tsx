@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import type { AmbulancePerformanceData } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
 
 const formatCurrency = (value: number) => {
     if (typeof value !== 'number') return '-';
@@ -13,6 +14,13 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
+const formatPercentage = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return '-';
+  const num = Number(value);
+  if (Number.isNaN(num)) return '-';
+  return `${(num * 100).toFixed(0)}%`;
+}
+
 export const columns: ColumnDef<AmbulancePerformanceData>[] = [
     {
         accessorKey: "reg_no",
@@ -22,11 +30,6 @@ export const columns: ColumnDef<AmbulancePerformanceData>[] = [
                 <div className="font-medium">{row.original.reg_no}</div>
             )
         },
-    },
-    {
-        accessorKey: "total_target",
-        header: () => <div className="text-right">Target</div>,
-        cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_target)}</div>
     },
     {
         accessorKey: "total_till",
@@ -41,6 +44,20 @@ export const columns: ColumnDef<AmbulancePerformanceData>[] = [
     {
         accessorKey: "total_net_banked",
         header: () => <div className="text-right">Net Banked</div>,
-        cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_net_banked)}</div>
+        cell: ({ row }) => <div className="text-right font-semibold">{formatCurrency(row.original.total_net_banked)}</div>
+    },
+    {
+        accessorKey: "total_deficit",
+        header: () => <div className="text-right">Deficit</div>,
+        cell: ({ row }) => <div className="text-right text-red-500 font-semibold">{formatCurrency(row.original.total_deficit)}</div>
+    },
+    {
+        accessorKey: "performance",
+        header: () => <div className="text-center">Performance</div>,
+        cell: ({row}) => {
+          const performance = row.original.performance;
+          const color = performance >= 1 ? "secondary" : performance > 0.5 ? "outline" : "destructive";
+          return <div className="text-center"><Badge variant={color}>{formatPercentage(performance)}</Badge></div>
+        }
     },
 ]

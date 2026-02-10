@@ -57,6 +57,8 @@ export type AmbulancePerformanceData = {
     total_net_banked: number;
     total_till: number;
     total_cash_deposited: number;
+    total_deficit: number;
+    performance: number;
 }
 
 export type PeriodComparisonData = {
