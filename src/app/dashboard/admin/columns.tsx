@@ -29,6 +29,16 @@ export const columns: ColumnDef<AmbulancePerformanceData>[] = [
         cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_target)}</div>
     },
     {
+        accessorKey: "total_till",
+        header: () => <div className="text-right">Total Till</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_till)}</div>
+    },
+    {
+        accessorKey: "total_cash_deposited",
+        header: () => <div className="text-right">Cash Deposited</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_cash_deposited)}</div>
+    },
+    {
         accessorKey: "total_net_banked",
         header: () => <div className="text-right">Net Banked</div>,
         cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.total_net_banked)}</div>

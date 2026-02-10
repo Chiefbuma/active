@@ -1,10 +1,19 @@
 import AmbulancesClient from './ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { getAmbulances } from '@/lib/data';
+import { db } from '@/lib/db';
 import type { Ambulance } from '@/lib/types';
 
 export default async function AmbulancesPage() {
-  const ambulances = await getAmbulances();
+  // Query DB directly on the server to avoid HTTP round-trips to our own API
+  const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at, updated_at FROM ambulances ORDER BY created_at DESC');
+  const ambulances = (rows as any[]).map(r => ({
+    id: r.id,
+    reg_no: r.reg_no,
+    fuel_cost: Number(r.fuel_cost),
+    operation_cost: Number(r.operation_cost),
+    target: Number(r.target),
+    status: String(r.status),
+  })) as Ambulance[];
 
   return (
     <Card>

@@ -11,27 +11,37 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
 
   const transactionIds = transactionRows.map(t => t.id);
 
-  const [ambulances] = await db.query('SELECT * FROM ambulances');
-  const [drivers] = await db.query('SELECT * FROM drivers');
-  const [technicians] = await db.query('SELECT * FROM emergency_technicians');
-  const [technicianLinks] = await db.query<RowDataPacket[]>(
-    'SELECT * FROM transaction_technicians WHERE transaction_id IN (?)',
+  // Only fetch ambulances/drivers that are referenced by these transactions
+  const ambulanceIds = Array.from(new Set(transactionRows.map(t => t.ambulance_id).filter(Boolean)));
+  const driverIds = Array.from(new Set(transactionRows.map(t => t.driver_id).filter(Boolean)));
+
+  const [ambulances] = ambulanceIds.length
+    ? await db.query('SELECT * FROM ambulances WHERE id IN (?)', [ambulanceIds])
+    : [[], undefined];
+
+  const [drivers] = driverIds.length
+    ? await db.query('SELECT * FROM drivers WHERE id IN (?)', [driverIds])
+    : [[], undefined];
+
+  // Fetch technicians linked to these transactions via a join to avoid loading entire table
+  const [technicianRows] = await db.query<RowDataPacket[]>(
+    'SELECT tt.transaction_id, et.* FROM transaction_technicians tt JOIN emergency_technicians et ON et.id = tt.technician_id WHERE tt.transaction_id IN (?)',
     [transactionIds]
   );
 
-  const ambulanceMap = new Map((ambulances as any[]).map(a => [a.id, a]));
-  const driverMap = new Map((drivers as any[]).map(d => [d.id, d]));
-  const technicianMap = new Map((technicians as any[]).map(t => [t.id, t]));
+  // Use string keys to avoid mismatches between number/string id representations
+  const ambulanceMap = new Map((ambulances as any[]).map(a => [String(a.id), a]));
+  const driverMap = new Map((drivers as any[]).map(d => [String(d.id), d]));
 
+  const technicianMap = new Map<number, any>();
+  // Build map of transaction_id -> [technicians]
   const transactionTechniciansMap = new Map<number, any[]>();
-  technicianLinks.forEach(link => {
-    if (!transactionTechniciansMap.has(link.transaction_id)) {
-      transactionTechniciansMap.set(link.transaction_id, []);
-    }
-    const technician = technicianMap.get(link.technician_id);
-    if (technician) {
-      transactionTechniciansMap.get(link.transaction_id)!.push(technician);
-    }
+  technicianRows.forEach(row => {
+    const txId = row.transaction_id;
+    const tech = { id: row.id, name: row.name };
+    technicianMap.set(row.id, tech);
+    if (!transactionTechniciansMap.has(txId)) transactionTechniciansMap.set(txId, []);
+    transactionTechniciansMap.get(txId)!.push(tech);
   });
 
   return transactionRows.map(t => {
@@ -39,8 +49,8 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
     // We just need to join the related data.
     return {
       ...t,
-      ambulance: ambulanceMap.get(t.ambulance_id),
-      driver: driverMap.get(t.driver_id),
+      ambulance: ambulanceMap.get(String(t.ambulance_id)),
+      driver: driverMap.get(String(t.driver_id)),
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
     };
   });

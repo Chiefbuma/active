@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
     }
 
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await db.query('SELECT id, name, email, password, role FROM users WHERE email = ?', [email]);
 
     const users = rows as any[];
     if (users.length === 0) {

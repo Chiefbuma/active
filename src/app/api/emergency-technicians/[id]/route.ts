@@ -5,7 +5,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   try {
     const { name } = await req.json();
     await db.query('UPDATE emergency_technicians SET name = ? WHERE id = ?', [name, params.id]);
-    const [rows] = await db.query('SELECT * FROM emergency_technicians WHERE id = ?', [params.id]);
+    const [rows] = await db.query('SELECT id, name FROM emergency_technicians WHERE id = ?', [params.id]);
     return NextResponse.json({ message: 'Technician updated successfully', technician: (rows as any)[0] });
   } catch (error) {
     console.error(error);

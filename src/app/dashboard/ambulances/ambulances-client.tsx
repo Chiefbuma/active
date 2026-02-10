@@ -86,10 +86,26 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
             throw new Error(resData.message || 'An error occurred.');
         }
 
-        if (editingAmbulance) {
+        // Refresh the ambulances list from the server to ensure UI matches DB
+        try {
+          const listRes = await fetch('/api/ambulances');
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            setAmbulances(listData);
+          } else {
+            // Fallback: update locally using response
+            if (editingAmbulance) {
+              setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? resData.ambulance : a));
+            } else {
+              setAmbulances([resData.ambulance, ...ambulances]);
+            }
+          }
+        } catch (e) {
+          if (editingAmbulance) {
             setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? resData.ambulance : a));
-        } else {
+          } else {
             setAmbulances([resData.ambulance, ...ambulances]);
+          }
         }
         
         toast({
@@ -129,7 +145,18 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
             throw new Error(errorData.message || "Failed to delete ambulance.");
         }
 
+      // Refresh list after delete
+      try {
+        const listRes = await fetch('/api/ambulances');
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          setAmbulances(listData);
+        } else {
+          setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
+        }
+      } catch (e) {
         setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
+      }
         toast({
             title: "Success",
             description: "Ambulance deleted successfully.",
@@ -236,6 +263,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
         data={ambulances}
         customActions={CustomToolbarActions}
         bulkActions={BulkActions}
+        initialPageSize={ambulances.length || 10}
       />
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent className="sm:max-w-[425px]">

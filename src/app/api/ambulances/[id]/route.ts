@@ -8,14 +8,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       'UPDATE ambulances SET reg_no = ?, fuel_cost = ?, operation_cost = ?, target = ?, status = ? WHERE id = ?',
       [reg_no, fuel_cost, operation_cost, target, status, params.id]
     );
-    const [rows] = await db.query('SELECT * FROM ambulances WHERE id = ?', [params.id]);
+    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances WHERE id = ?', [params.id]);
     return NextResponse.json({ message: 'Ambulance updated successfully', ambulance: (rows as any)[0] });
   } catch (error) {
     console.error(error);
     if ((error as any).code === 'ER_DUP_ENTRY') {
       return NextResponse.json({ message: 'An ambulance with this registration number already exists.' }, { status: 409 });
     }
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
 

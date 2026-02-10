@@ -43,13 +43,15 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 sm:px-2 h-8"
         >
-          Registration No.
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <span className="hidden sm:inline">Registration No.</span>
+          <span className="sm:hidden">Reg No</span>
+          <ArrowUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("reg_no")}</div>,
+    cell: ({ row }) => <div className="font-medium text-sm">{row.getValue("reg_no")}</div>,
   },
   {
     accessorKey: "status",
@@ -58,30 +60,32 @@ export const getColumns = ({ onEdit, onDelete }: AmbulancesColumnsProps): Column
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 sm:px-2 h-8"
         >
           Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       )
     },
      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        return <Badge variant={status === 'active' ? "secondary" : "destructive"} className="capitalize">{status}</Badge>
+      const raw = row.getValue("status");
+      const status = String(raw ?? '').trim().toLowerCase();
+      return <Badge variant={status === 'active' ? "secondary" : "destructive"} className="capitalize text-xs">{status}</Badge>
     }
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right px-1 sm:px-4">Actions</div>,
     cell: ({ row }) => {
       const ambulance = row.original
       return (
-        <div className="text-right flex items-center justify-end gap-1">
+        <div className="text-right flex items-center justify-end gap-0.5 sm:gap-1">
             <TransactButton ambulanceId={ambulance.id} />
-             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(ambulance)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => onEdit(ambulance)}>
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Edit</span>
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-600" onClick={() => onDelete(ambulance)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-600" onClick={() => onDelete(ambulance)}>
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Delete</span>
             </Button>

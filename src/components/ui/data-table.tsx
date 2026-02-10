@@ -161,6 +161,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   customActions?: React.ReactNode
   bulkActions?: (table: ReturnType<typeof useReactTable<TData>>) => React.ReactNode
+  initialPageSize?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -168,6 +169,7 @@ export function DataTable<TData, TValue>({
   data,
   customActions,
   bulkActions,
+  initialPageSize,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -180,9 +182,9 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     initialState: {
-        pagination: {
-            pageSize: 5,
-        },
+      pagination: {
+        pageSize: initialPageSize ?? 5,
+      },
     },
     state: {
       sorting,

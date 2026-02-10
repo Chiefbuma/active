@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const [rows] = await db.query('SELECT * FROM users');
+    const [rows] = await db.query('SELECT id, name, email, role FROM users');
     return NextResponse.json(rows);
   } catch (error) {
     console.error(error);
