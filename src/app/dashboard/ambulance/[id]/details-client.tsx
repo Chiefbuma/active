@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Ambulance, Transaction, Driver, EmergencyTechnician } from '@/lib/types';
 import {
   Card,
@@ -103,6 +103,8 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const [user, setUser] = useState<any>(null);
   const [ambulance] = useState<Ambulance>(initialAmbulance);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  
+
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
@@ -180,7 +182,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
 
         const { transaction: newTransaction } = await response.json();
         
-        setTransactions([newTransaction, ...transactions]);
+        setTransactions(prev => [newTransaction, ...prev]);
+        
+        window.dispatchEvent(new CustomEvent('resetTableFilter'));
         
         toast({
             title: 'Success',
@@ -278,6 +282,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         title: 'Success',
         description: 'Transaction updated successfully.'
       });
+      
+      // Force table to reset filter  
+      window.dispatchEvent(new CustomEvent('resetTableFilter'));
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -316,6 +323,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         title: 'Success',
         description: 'Transaction deleted successfully.'
       });
+      
+      // Force table to reset filter
+      window.dispatchEvent(new CustomEvent('resetTableFilter'));
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -327,11 +337,12 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
   };
   
-  const transactionColumns = getColumns({
+  // Memoize columns to prevent unnecessary recalculations
+  const transactionColumns = React.useMemo(() => getColumns({
     isAdmin: user?.role === 'admin',
     onEdit: handleEditTransaction,
     onDelete: handleDeleteClick,
-  });
+  }), [user?.role]);
 
   const transactionForm = (
     <form onSubmit={editingTransaction ? handleSaveEdit : handleAddTransaction}>
@@ -342,7 +353,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             </div>
             <div className="space-y-2">
                 <Label htmlFor="driver_id">Driver</Label>
-                <Select required value={transactionFormData.driver_id} onValueChange={(value) => setTransactionFormData({...transactionFormData, driver_id: value})}>
+                <Select required value={transactionFormData.driver_id} onValueChange={(value: string) => setTransactionFormData({...transactionFormData, driver_id: value})}>
                     <SelectTrigger id="driver_id"><SelectValue placeholder="Select Driver" /></SelectTrigger>
                     <SelectContent>
                     {drivers.map((driver) => (
@@ -368,10 +379,10 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                          <DropdownMenuSeparator />
                         {emergencyTechnicians.map(tech => (
                             <DropdownMenuCheckboxItem
-                                key={tech.id}
-                                checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
-                                onCheckedChange={() => handleTechnicianSelection(tech.id)}
-                                onSelect={(e) => e.preventDefault()}
+                              key={tech.id}
+                              checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
+                              onCheckedChange={() => handleTechnicianSelection(tech.id)}
+                              onSelect={(e: React.SyntheticEvent) => e.preventDefault()}
                             >
                                 {tech.name}
                             </DropdownMenuCheckboxItem>

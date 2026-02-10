@@ -184,6 +184,15 @@ export function DataTable<TData extends RowWithId, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
   
+  // Listen for filter reset events (e.g., after adding/updating/deleting rows)
+  React.useEffect(() => {
+    const handleResetFilter = () => {
+      setGlobalFilter('')
+    }
+    window.addEventListener('resetTableFilter', handleResetFilter as EventListener)
+    return () => window.removeEventListener('resetTableFilter', handleResetFilter as EventListener)
+  }, [])
+  
   // Extend columns to include a selection column if bulkActions is provided
   const tableColumns = React.useMemo(() => {
     if (!bulkActions) return columns;
