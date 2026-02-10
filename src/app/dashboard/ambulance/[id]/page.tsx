@@ -1,4 +1,5 @@
-import { getAmbulanceById, getTransactionsByAmbulanceId } from '@/lib/data';
+import { getAmbulanceById } from '@/lib/server-data';
+import { getTransactionsByAmbulanceId } from '@/lib/data';
 import AmbulanceDetailsClient from './details-client';
 import { notFound } from 'next/navigation';
 

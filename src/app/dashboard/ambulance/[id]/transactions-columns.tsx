@@ -1,8 +1,9 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Edit2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import type { Transaction } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 
@@ -26,7 +27,40 @@ const formatPercentage = (value: number | string | null | undefined) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getColumns = (): ColumnDef<Transaction>[] => [
+export const getColumns = (isAdmin: boolean = false, selectedRowIds: Set<string> = new Set(), setSelectedRowIds?: (ids: Set<string>) => void): ColumnDef<Transaction>[] => [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => {
+          table.toggleAllPageRowsSelected(!!value);
+          if (!value) {
+            setSelectedRowIds?.(new Set());
+          }
+        }}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => {
+          row.toggleSelected(!!value);
+          const newIds = new Set(selectedRowIds);
+          if (value) {
+            newIds.add(String(row.original.id));
+          } else {
+            newIds.delete(String(row.original.id));
+          }
+          setSelectedRowIds?.(newIds);
+        }}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "ambulance",
     header: "Reg No",
@@ -79,6 +113,32 @@ export const getColumns = (): ColumnDef<Transaction>[] => [
       const performance = row.original.performance;
       return <div className="text-center"><Badge variant={performance >= 1 ? "secondary" : "destructive"}>{formatPercentage(performance)}</Badge></div>
     }
+  },
+  {
+    id: "actions",
+    header: () => <div className="text-center">Actions</div>,
+    cell: ({ row }) => (
+      <div className="flex gap-2 justify-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => console.log('Edit transaction', row.original.id)}
+        >
+          <Edit2 className="h-4 w-4" />
+        </Button>
+        {isAdmin && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => console.log('Delete transaction', row.original.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
   // Deficit and Technicians columns removed per request
 ]

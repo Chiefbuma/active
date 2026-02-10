@@ -19,6 +19,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -41,6 +51,7 @@ import {
   CalendarDays,
   Users,
   ChevronDown,
+  Trash2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable } from '@/components/ui/data-table';
@@ -87,13 +98,29 @@ const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style
 export default function AmbulanceDetailsClient({ initialAmbulance, initialTransactions }: { initialAmbulance: Ambulance, initialTransactions: Transaction[] }) {
   const { toast } = useToast();
   
+  const [user, setUser] = useState<any>(null);
   const [ambulance] = useState<Ambulance>(initialAmbulance);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
   
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  
+  // Load user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   
   const initialTransactionFormData = {
       date: new Date().toISOString().split('T')[0],
@@ -172,16 +199,140 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
   };
   
-  const transactionColumns = getColumns();
+  const handleBulkDelete = async () => {
+    if (selectedRowIds.size === 0) return;
+    
+    setIsDeletingBulk(true);
+    try {
+      const transactionIds = Array.from(selectedRowIds);
+      await Promise.all(
+        transactionIds.map(id =>
+          fetch(`/api/transactions/${id}`, { method: 'DELETE' })
+        )
+      );
+      
+      setTransactions(transactions.filter(t => !transactionIds.includes(String(t.id))));
+      setSelectedRowIds(new Set());
+      
+      toast({
+        title: 'Success',
+        description: `${transactionIds.length} transaction(s) deleted successfully.`
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete selected transactions.'
+      });
+    } finally {
+      setIsDeletingBulk(false);
+    }
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setTransactionFormData({
+      date: new Date(transaction.date).toISOString().split('T')[0],
+      driver_id: String(transaction.driver.id),
+      emergency_technician_ids: transaction.technicians?.map(t => t.id) || [],
+      total_till: String(transaction.total_till),
+      fuel: String(transaction.fuel),
+      operation: String(transaction.operation),
+      cash_deposited_by_staff: String(transaction.cash_deposited_by_staff),
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const body = {
+      ...transactionFormData,
+      ambulance_id: ambulance.id
+    };
+
+    try {
+      const response = await fetch(`/api/transactions/${editingTransaction?.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update transaction.');
+      }
+
+      const { transaction: updatedTransaction } = await response.json();
+      setTransactions(transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
+      setIsEditModalOpen(false);
+      setEditingTransaction(null);
+
+      toast({
+        title: 'Success',
+        description: 'Transaction updated successfully.'
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: (error as Error).message
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClick = (transaction: Transaction) => {
+    setTransactionToDelete(transaction);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!transactionToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/transactions/${transactionToDelete.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete transaction.');
+      }
+
+      setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
+      setIsDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+
+      toast({
+        title: 'Success',
+        description: 'Transaction deleted successfully.'
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: (error as Error).message
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  const transactionColumns = getColumns(user?.role === 'admin', selectedRowIds, setSelectedRowIds, handleEditTransaction, handleDeleteClick);
 
   const CustomToolbarActions = (
-     <Dialog open={isTransactionModalOpen} onOpenChange={setIsTransactionModalOpen}>
-      <DialogTrigger asChild>
-         <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Transaction
-        </Button>
-      </DialogTrigger>
+    <div className="flex gap-2">
+      <Dialog open={isTransactionModalOpen} onOpenChange={setIsTransactionModalOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+        </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Add New Transaction for {ambulance.reg_no}</DialogTitle>
@@ -263,6 +414,26 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         </form>
       </DialogContent>
     </Dialog>
+    {user?.role === 'admin' && selectedRowIds.size > 0 && (
+      <Button
+        variant="destructive"
+        disabled={isDeletingBulk}
+        onClick={handleBulkDelete}
+      >
+        {isDeletingBulk ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Deleting...
+          </>
+        ) : (
+          <>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete {selectedRowIds.size}
+          </>
+        )}
+      </Button>
+    )}
+    </div>
   );
 
   return (

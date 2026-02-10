@@ -4,11 +4,12 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Transaction, Ambulance, AdminDashboardData, AmbulancePerformanceData } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
-import { format, startOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfMonth, isWithinInterval, startOfDay, endOfDay, subMonths } from 'date-fns';
+import ReactCalendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import { cn } from '@/lib/utils';
 import { DataTable } from '@/components/ui/data-table';
 import { columns } from './columns';
@@ -32,7 +33,26 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     const [tempEndDate, setTempEndDate] = useState<Date>(dateRange.to);
 
     const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
+    const [previousMonthData, setPreviousMonthData] = useState<AdminDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
+    
+    // Calculate date ranges for month comparison
+    const currentMonthRange = useMemo(() => {
+        const dayOfMonth = today.getDate();
+        return {
+            from: startOfMonth(today),
+            to: new Date(today.getFullYear(), today.getMonth(), dayOfMonth),
+        };
+    }, []);
+    
+    const previousMonthRange = useMemo(() => {
+        const previousMonth = subMonths(today, 1);
+        const dayOfMonth = today.getDate();
+        return {
+            from: startOfMonth(previousMonth),
+            to: new Date(previousMonth.getFullYear(), previousMonth.getMonth(), Math.min(dayOfMonth, new Date(previousMonth.getFullYear(), previousMonth.getMonth() + 1, 0).getDate())),
+        };
+    }, []);
 
     const calculateDashboardData = useMemo(() => {
         return (transactions: Transaction[], ambulances: Ambulance[], range: { from: Date, to: Date }): AdminDashboardData => {
@@ -100,12 +120,13 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     
     useEffect(() => {
         setLoading(true);
-        if (dateRange.from && dateRange.to) {
-            const data = calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
-            setDashboardData(data);
-        }
+        // Always calculate both current month and previous month data
+        const currentData = calculateDashboardData(initialTransactions, initialAmbulances, currentMonthRange);
+        const previousData = calculateDashboardData(initialTransactions, initialAmbulances, previousMonthRange);
+        setDashboardData(currentData);
+        setPreviousMonthData(previousData);
         setLoading(false);
-    }, [dateRange, initialTransactions, initialAmbulances, calculateDashboardData]);
+    }, [initialTransactions, initialAmbulances, calculateDashboardData, currentMonthRange, previousMonthRange]);
 
     const handleStartDateChange = (date: Date | undefined) => {
         if (date) {
@@ -152,16 +173,15 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                     {dateRange.from ? format(dateRange.from, "LLL dd, y") : <span>Pick a date</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-4">
-                                <div className="space-y-4 w-fit">
-                                    <Calendar
-                                        mode="single"
-                                        selected={tempStartDate}
-                                        onSelect={handleStartDateChange}
-                                        disabled={{ after: tempEndDate }}
-                                        initialFocus
+                            <PopoverContent className="w-auto p-0">
+                                <div className="p-3 space-y-2">
+                                    <ReactCalendar
+                                        onChange={(date) => handleStartDateChange(date as Date)}
+                                        value={tempStartDate}
+                                        maxDate={tempEndDate}
+                                        className="text-xs border-none"
                                     />
-                                    <Button onClick={handleApplyStartDate} className="w-full">Set Start Date</Button>
+                                    <Button onClick={handleApplyStartDate} className="w-full text-xs h-8">Set Start Date</Button>
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -179,16 +199,15 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                     {dateRange.to ? format(dateRange.to, "LLL dd, y") : <span>Pick a date</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-4">
-                                <div className="space-y-4 w-fit">
-                                    <Calendar
-                                        mode="single"
-                                        selected={tempEndDate}
-                                        onSelect={handleEndDateChange}
-                                        disabled={{ before: tempStartDate }}
-                                        initialFocus
+                            <PopoverContent className="w-auto p-0">
+                                <div className="p-3 space-y-2">
+                                    <ReactCalendar
+                                        onChange={(date) => handleEndDateChange(date as Date)}
+                                        value={tempEndDate}
+                                        minDate={tempStartDate}
+                                        className="text-xs border-none"
                                     />
-                                    <Button onClick={handleApplyEndDate} className="w-full">Set End Date</Button>
+                                    <Button onClick={handleApplyEndDate} className="w-full text-xs h-8">Set End Date</Button>
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -246,9 +265,9 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
 
                     <Card className="lg:col-span-2">
                         <CardHeader>
-                            <CardTitle>Key Metrics Summary</CardTitle>
+                            <CardTitle>Key Metrics Comparison</CardTitle>
                             <CardDescription>
-                                 Key metrics for the period {format(dateRange.from, "LLL d")} - {format(dateRange.to, "LLL d, y")}.
+                                {format(currentMonthRange.from, "MMM")}({format(currentMonthRange.from, "d")}-{format(currentMonthRange.to, "d")}) vs {format(previousMonthRange.from, "MMM")}({format(previousMonthRange.from, "d")}-{format(previousMonthRange.to, "d")})
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -256,17 +275,20 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Metric</TableHead>
-                                        <TableHead className="text-right">Amount</TableHead>
+                                        <TableHead className="text-right">{format(currentMonthRange.from, "MMM")}({format(currentMonthRange.from, "d")}-{format(currentMonthRange.to, "d")})</TableHead>
+                                        <TableHead className="text-right">{format(previousMonthRange.from, "MMM")}({format(previousMonthRange.from, "d")}-{format(previousMonthRange.to, "d")})</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     <TableRow>
                                         <TableCell className="font-medium">Net Banked</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(dashboardData?.total_net_banked)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_net_banked)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_net_banked)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium">Deficit</TableCell>
-                                        <TableCell className="text-right text-red-500">{formatCurrency(dashboardData?.total_deficit)}</TableCell>
+                                        <TableCell className="text-right text-red-500 font-semibold">{formatCurrency(dashboardData?.total_deficit)}</TableCell>
+                                        <TableCell className="text-right text-red-500 font-semibold">{formatCurrency(previousMonthData?.total_deficit)}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>

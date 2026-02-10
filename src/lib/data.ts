@@ -43,11 +43,6 @@ export async function getAmbulances(): Promise<Ambulance[]> {
   return fetchFromAPI('ambulances');
 }
 
-export async function getAmbulanceById(id: number): Promise<Ambulance | undefined> {
-  const ambulances = await getAmbulances();
-  return ambulances.find(a => a.id === id);
-}
-
 export async function getTransactionsByAmbulanceId(ambulanceId: number): Promise<Transaction[]> {
   return fetchFromAPI(`transactions?ambulanceId=${ambulanceId}`);
 }
