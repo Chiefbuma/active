@@ -1,9 +1,9 @@
+
 import { db } from '@/lib/db';
 import { NextResponse, NextRequest } from 'next/server';
 import type { Transaction } from '@/lib/types';
 import { RowDataPacket } from 'mysql2';
 
-// Function to fetch related data and build full transaction objects
 async function buildTransactions(transactionRows: any[]): Promise<Transaction[]> {
   if (transactionRows.length === 0) {
     return [];
@@ -11,25 +11,22 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
 
   const transactionIds = transactionRows.map(t => t.id);
 
-  // Only fetch ambulances/drivers that are referenced by these transactions
   const ambulanceIds = Array.from(new Set(transactionRows.map(t => t.ambulance_id).filter(Boolean)));
   const driverIds = Array.from(new Set(transactionRows.map(t => t.driver_id).filter(Boolean)));
 
   const [ambulances] = ambulanceIds.length
-    ? await db.query('SELECT * FROM ambulances WHERE id IN (?)', [ambulanceIds])
+    ? await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status FROM ambulances WHERE id IN (?)', [ambulanceIds])
     : [[], undefined];
 
   const [drivers] = driverIds.length
-    ? await db.query('SELECT * FROM drivers WHERE id IN (?)', [driverIds])
+    ? await db.query('SELECT id, name FROM drivers WHERE id IN (?)', [driverIds])
     : [[], undefined];
 
-  // Fetch technicians linked to these transactions via a join to avoid loading entire table
   const [technicianRows] = await db.query<RowDataPacket[]>(
-    'SELECT tt.transaction_id, et.* FROM transaction_technicians tt JOIN emergency_technicians et ON et.id = tt.technician_id WHERE tt.transaction_id IN (?)',
+    'SELECT tt.transaction_id, et.id, et.name FROM transaction_technicians tt JOIN emergency_technicians et ON et.id = tt.technician_id WHERE tt.transaction_id IN (?)',
     [transactionIds]
   );
 
-  // Use string keys to avoid mismatches between number/string id representations
   const ambulanceMap = new Map((ambulances as any[]).map(a => [String(a.id), a]));
   const driverMap = new Map((drivers as any[]).map(d => [String(d.id), d]));
   
@@ -45,10 +42,24 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
     const ambulance = ambulanceMap.get(String(t.ambulance_id));
     const driver = driverMap.get(String(t.driver_id));
     return {
-      ...t,
-      ambulance: ambulance || { id: t.ambulance_id, reg_no: 'Unknown', fuel_cost: 0, operation_cost: 0, target: 0, status: 'inactive' },
+      id: t.id,
+      date: new Date(t.date).toISOString(),
+      ambulance: ambulance || { id: t.ambulance_id, reg_no: 'Unknown', fuel_cost: 0, operation_cost: 0, target: 0, status: 'inactive' as const },
       driver: driver || { id: t.driver_id, name: 'Unknown' },
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
+      total_till: Number(t.total_till || 0),
+      target: Number(t.target || 0),
+      fuel: Number(t.fuel || 0),
+      operation: Number(t.operation || 0),
+      cash_deposited_by_staff: Number(t.cash_deposited_by_staff || 0),
+      amount_paid_to_the_till: Number(t.amount_paid_to_the_till || 0),
+      offload: Number(t.offload || 0),
+      salary: Number(t.salary || 0),
+      operations_cost: Number(t.operations_cost || 0),
+      net_banked: Number(t.net_banked || 0),
+      deficit: Number(t.deficit || 0),
+      fuel_revenue_ratio: Number(t.fuel_revenue_ratio || 0),
+      performance: Number(t.performance || 0),
     };
   });
 }
@@ -56,18 +67,21 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const ambulanceId = searchParams.get('ambulanceId');
+  const ambulanceIdParam = searchParams.get('ambulanceId');
 
   try {
-    let query = 'SELECT * FROM transactions';
+    let query = 'SELECT t.id, t.date, t.ambulance_id, t.driver_id, t.total_till, t.target, t.fuel, t.operation, t.cash_deposited_by_staff, t.amount_paid_to_the_till, t.offload, t.salary, t.operations_cost, t.net_banked, t.deficit, t.performance, t.fuel_revenue_ratio, t.created_at, t.updated_at FROM transactions t';
     const params: (string | number)[] = [];
 
-    if (ambulanceId) {
-      query += ' WHERE ambulance_id = ?';
-      params.push(ambulanceId);
+    if (ambulanceIdParam) {
+      const ambulanceId = parseInt(ambulanceIdParam, 10);
+      if (!isNaN(ambulanceId)) {
+        query += ' WHERE t.ambulance_id = ?';
+        params.push(ambulanceId);
+      }
     }
     
-    query += ' ORDER BY date DESC';
+    query += ' ORDER BY t.date DESC';
 
     const [rows] = await db.query(query, params);
     const fullTransactions = await buildTransactions(rows as any[]);
@@ -103,7 +117,6 @@ export async function POST(req: Request) {
     }
     const target = ambulanceRows[0].target;
 
-    // Business logic for calculation ONCE on creation
     const totalTillNum = Number(total_till) || 0;
     const fuelNum = Number(fuel) || 0;
     const operationNum = Number(operation) || 0;
@@ -148,7 +161,6 @@ export async function POST(req: Request) {
 
     await connection.commit();
 
-    // Fetch the newly created transaction to return it with all relations
     const [rows] = await db.query('SELECT * FROM transactions WHERE id = ?', [transactionId]);
     const newTransaction = await buildTransactions(rows as any[]);
 
