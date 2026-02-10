@@ -1,4 +1,3 @@
-
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
@@ -55,14 +54,14 @@ export const getColumns = ({ isAdmin, onEdit, onDelete }: TransactionColumnsProp
     header: "Driver",
     cell: ({ row }) => <div>{row.original.driver?.name}</div>
   },
-    {
+  {
     accessorKey: "emergency_technicians",
     header: "Technicians",
     cell: ({ row }) => {
         const technicians = row.original.emergency_technicians;
         if (!technicians || technicians.length === 0) return <span>-</span>;
         return (
-            <div className="flex flex-col">
+            <div className="flex flex-col text-xs">
                 {technicians.map(t => <span key={t.id}>{t.name}</span>)}
             </div>
         )
@@ -71,12 +70,27 @@ export const getColumns = ({ isAdmin, onEdit, onDelete }: TransactionColumnsProp
   {
     accessorKey: "total_till",
     header: () => <div className="text-right">Total Till</div>,
-    cell: ({row}) => <div className="text-right font-medium">{formatCurrency(row.original.total_till)}</div>
+    cell: ({row}) => <div className="text-right">{formatCurrency(row.original.total_till)}</div>
+  },
+  {
+    accessorKey: "fuel",
+    header: () => <div className="text-right">Fuel</div>,
+    cell: ({row}) => <div className="text-right text-muted-foreground">{formatCurrency(row.original.fuel)}</div>
+  },
+  {
+    accessorKey: "operation",
+    header: () => <div className="text-right">Operation</div>,
+    cell: ({row}) => <div className="text-right text-muted-foreground">{formatCurrency(row.original.operation)}</div>
+  },
+    {
+    accessorKey: "salary",
+    header: () => <div className="text-right">Salary</div>,
+    cell: ({row}) => <div className="text-right text-muted-foreground">{formatCurrency(row.original.salary)}</div>
   },
   {
     accessorKey: "net_banked",
     header: () => <div className="text-right">Net Banked</div>,
-    cell: ({row}) => <div className="text-right font-medium">{formatCurrency(row.original.net_banked)}</div>
+    cell: ({row}) => <div className="text-right font-semibold text-primary">{formatCurrency(row.original.net_banked)}</div>
   },
     {
     accessorKey: "deficit",
