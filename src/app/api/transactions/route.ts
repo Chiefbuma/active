@@ -32,25 +32,22 @@ async function buildTransactions(transactionRows: any[]): Promise<Transaction[]>
   // Use string keys to avoid mismatches between number/string id representations
   const ambulanceMap = new Map((ambulances as any[]).map(a => [String(a.id), a]));
   const driverMap = new Map((drivers as any[]).map(d => [String(d.id), d]));
-
-  const technicianMap = new Map<number, any>();
-  // Build map of transaction_id -> [technicians]
+  
   const transactionTechniciansMap = new Map<number, any[]>();
   technicianRows.forEach(row => {
     const txId = row.transaction_id;
     const tech = { id: row.id, name: row.name };
-    technicianMap.set(row.id, tech);
     if (!transactionTechniciansMap.has(txId)) transactionTechniciansMap.set(txId, []);
     transactionTechniciansMap.get(txId)!.push(tech);
   });
 
   return transactionRows.map(t => {
-    // With `decimalNumbers: true` in the DB config, all numeric fields are already numbers.
-    // We just need to join the related data.
+    const ambulance = ambulanceMap.get(String(t.ambulance_id));
+    const driver = driverMap.get(String(t.driver_id));
     return {
       ...t,
-      ambulance: ambulanceMap.get(String(t.ambulance_id)),
-      driver: driverMap.get(String(t.driver_id)),
+      ambulance: ambulance || { id: t.ambulance_id, reg_no: 'Unknown', fuel_cost: 0, operation_cost: 0, target: 0, status: 'inactive' },
+      driver: driver || { id: t.driver_id, name: 'Unknown' },
       emergency_technicians: transactionTechniciansMap.get(t.id) || [],
     };
   });
