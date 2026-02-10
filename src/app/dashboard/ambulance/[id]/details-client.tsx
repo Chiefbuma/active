@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   PlusCircle,
@@ -101,6 +102,7 @@ const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style
 
 export default function AmbulanceDetailsClient({ initialAmbulance, initialTransactions }: { initialAmbulance: Ambulance, initialTransactions: Transaction[] }) {
   const { toast } = useToast();
+  const router = useRouter();
   
   const [user, setUser] = useState<any>(null);
   const [ambulance] = useState<Ambulance>(initialAmbulance);
@@ -151,6 +153,10 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
     fetchData();
   }, [toast]);
+  
+  useEffect(() => {
+    setTransactions(initialTransactions);
+  }, [initialTransactions]);
 
   const handleTechnicianSelection = (technicianId: number) => {
     setTransactionFormData(prev => {
@@ -181,12 +187,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             const errorData = await response.json();
             throw new Error(errorData.message || "Failed to add transaction.");
         }
-
-        const { transaction: newTransaction } = await response.json();
-        
-        setTransactions(prev => [newTransaction, ...prev]);
-        
-        window.dispatchEvent(new CustomEvent('resetTableFilter'));
         
         toast({
             title: 'Success',
@@ -195,6 +195,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         
         setTransactionFormData(initialTransactionFormData);
         setIsTransactionModalOpen(false);
+        router.refresh();
 
     } catch (error) {
          toast({
@@ -219,13 +220,12 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         )
       );
       
-      setTransactions(transactions.filter(t => !transactionIds.includes(String(t.id))));
-      setSelectedRowIds(new Set());
-      
       toast({
         title: 'Success',
         description: `${transactionIds.length} transaction(s) deleted successfully.`
       });
+      router.refresh();
+      setSelectedRowIds(new Set());
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -274,19 +274,16 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update transaction.');
       }
-
-      const { transaction: updatedTransaction } = await response.json();
-      setTransactions(transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
-      setIsEditModalOpen(false);
-      setEditingTransaction(null);
-
+      
       toast({
         title: 'Success',
         description: 'Transaction updated successfully.'
       });
       
-      // Force table to reset filter  
-      window.dispatchEvent(new CustomEvent('resetTableFilter'));
+      setIsEditModalOpen(false);
+      setEditingTransaction(null);
+      router.refresh();
+
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -317,17 +314,15 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         throw new Error(errorData?.message || 'Failed to delete transaction.');
       }
 
-      setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
-      setIsDeleteDialogOpen(false);
-      setTransactionToDelete(null);
-
       toast({
         title: 'Success',
         description: 'Transaction deleted successfully.'
       });
       
-      // Force table to reset filter
-      window.dispatchEvent(new CustomEvent('resetTableFilter'));
+      setIsDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+      router.refresh();
+
     } catch (error) {
       toast({
         variant: 'destructive',

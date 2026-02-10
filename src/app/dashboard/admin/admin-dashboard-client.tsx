@@ -16,7 +16,7 @@ import { columns } from './columns';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { RadialBar, RadialBarChart } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { exportSummaryToExcel, exportDetailedToExcel } from '@/lib/excel-export';
+import { exportSummaryToExcel } from '@/lib/excel-export';
 
 const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return '-';

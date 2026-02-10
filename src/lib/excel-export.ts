@@ -9,8 +9,17 @@ export function exportSummaryToExcel(
 ) {
   const fileName = `Ambulance_Performance_Summary_${new Date().toISOString().split('T')[0]}.xlsx`;
   
+  // Format data for export, removing ambulanceId and performance
+  const formattedData = data.map(item => ({
+    'Ambulance': item.reg_no,
+    'Total Till': item.total_till,
+    'Cash Deposited': item.total_cash_deposited,
+    'Net Banked': item.total_net_banked,
+    'Deficit': item.total_deficit,
+  }));
+  
   // Create worksheet with data
-  const ws = XLSX.utils.json_to_sheet(data);
+  const ws = XLSX.utils.json_to_sheet(formattedData);
   
   // Set column widths
   ws['!cols'] = [
@@ -19,7 +28,6 @@ export function exportSummaryToExcel(
     { wch: 18 }, // Cash Deposited
     { wch: 15 }, // Net Banked
     { wch: 12 }, // Deficit
-    { wch: 12 }, // Performance
   ];
   
   // Create workbook
