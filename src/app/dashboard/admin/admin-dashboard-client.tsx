@@ -70,8 +70,9 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                 acc.total_net_banked += t.net_banked || 0;
                 acc.total_till += t.total_till || 0;
                 acc.total_deficit += t.deficit || 0;
+                acc.total_cash_deposited += t.cash_deposited_by_staff || 0;
                 return acc;
-            }, { total_target: 0, total_net_banked: 0, total_till: 0, total_deficit: 0 });
+            }, { total_target: 0, total_net_banked: 0, total_till: 0, total_deficit: 0, total_cash_deposited: 0 });
 
             const overall_performance = summary.total_target > 0 ? Math.min(100, (summary.total_net_banked / summary.total_target) * 100) : 0;
             
@@ -280,6 +281,16 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Cash Deposited</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_cash_deposited)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_cash_deposited)}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="font-medium">Total Till</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_till)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_till)}</TableCell>
+                                    </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium">Net Banked</TableCell>
                                         <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_net_banked)}</TableCell>

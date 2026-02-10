@@ -68,6 +68,7 @@ export type AdminDashboardData = {
     total_target: number;
     total_net_banked: number;
     total_till: number;
+    total_cash_deposited: number;
     total_deficit: number;
     overall_performance: number;
     ambulance_performance: AmbulancePerformanceData[];
