@@ -2,6 +2,8 @@ import { db } from '@/lib/db';
 import AdminDashboardClient from './admin-dashboard-client';
 import type { Transaction, Ambulance } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   // Fetch ambulances directly from DB
   const [ambulanceRows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at, updated_at FROM ambulances ORDER BY created_at DESC');

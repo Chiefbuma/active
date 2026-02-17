@@ -3,7 +3,7 @@ import { getTransactionsByAmbulanceId } from '@/lib/data';
 import AmbulanceDetailsClient from './details-client';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 60; // Revalidate cached data every 60 seconds
+export const dynamic = 'force-dynamic';
 
 export default async function AmbulanceDetailsPage({ params }: { params: { id: string } }) {
   const ambulanceId = Number(params.id);
