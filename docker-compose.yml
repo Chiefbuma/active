@@ -7,11 +7,7 @@ services:
     container_name: radiant-health-app
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    working_dir: /app
+    # Volumes are removed for production; the image should be self-contained.
     env_file:
       - .env
     depends_on:
@@ -19,7 +15,8 @@ services:
         condition: service_healthy
     networks:
       - radiant-hospital-network
-    command: npm run dev
+    # Use 'npm run start' for production. The build should happen in the Dockerfile.
+    command: npm run start
 
   mysql:
     image: mysql:8.0
