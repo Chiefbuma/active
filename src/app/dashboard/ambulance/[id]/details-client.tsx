@@ -513,12 +513,12 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                   />
                   <DetailItem 
                     icon={Fuel} 
-                    label="Default Fuel Cost" 
+                    label="Fuel Cost" 
                     value={formatCurrency(ambulance.fuel_cost)} 
                   />
                   <DetailItem 
                     icon={Wrench} 
-                    label="Default Operation Cost" 
+                    label="Operation Cost" 
                     value={formatCurrency(ambulance.operation_cost)}
                   />
                    <DetailItem 
