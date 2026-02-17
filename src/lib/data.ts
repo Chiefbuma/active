@@ -17,7 +17,7 @@ const API_URL = getApiUrl();
 
 async function fetchFromAPI(endpoint: string, options?: RequestInit) {
   try {
-    const res = await fetch(`${API_URL}/${endpoint}`, options);
+    const res = await fetch(`${API_URL}/${endpoint}`, { ...options, cache: 'no-store' });
     if (!res.ok) {
         // Try to parse the error message from the response body
         const errorBody = await res.json().catch(() => ({ message: `Request failed with status ${res.status}` }));
