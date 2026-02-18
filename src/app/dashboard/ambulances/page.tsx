@@ -1,21 +1,25 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import AmbulancesClient from './ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { db } from '@/lib/db';
+import { getAmbulances } from '@/lib/data';
 import type { Ambulance } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export default function AmbulancesPage() {
+  const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
 
-export default async function AmbulancesPage() {
-  // Query DB directly on the server to avoid HTTP round-trips to our own API
-  const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at, updated_at FROM ambulances ORDER BY created_at DESC');
-  const ambulances = (rows as any[]).map(r => ({
-    id: r.id,
-    reg_no: r.reg_no,
-    fuel_cost: Number(r.fuel_cost),
-    operation_cost: Number(r.operation_cost),
-    target: Number(r.target),
-    status: String(r.status),
-  })) as Ambulance[];
+  useEffect(() => {
+    getAmbulances()
+      .then(data => {
+        setAmbulances(data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch ambulances", err);
+        setAmbulances([]); // Set to empty array on error
+      });
+  }, []);
 
   return (
     <Card>
@@ -31,7 +35,11 @@ export default async function AmbulancesPage() {
                 </p>
                 </div>
             </div>
-            <AmbulancesClient initialAmbulances={ambulances} />
+            {ambulances === null ? (
+              <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+            ) : (
+              <AmbulancesClient initialAmbulances={ambulances} />
+            )}
         </div>
       </CardContent>
     </Card>
