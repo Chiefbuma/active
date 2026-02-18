@@ -1,11 +1,5 @@
 import mysql from 'mysql2/promise';
 import type { Pool } from 'mysql2/promise';
-import path from 'path';
-import dotenv from 'dotenv';
-
-// Next.js automatically loads .env files, but this ensures it works in the standalone server context.
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-
 
 declare global {
   // Allow global `var` declarations
