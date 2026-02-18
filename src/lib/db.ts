@@ -16,7 +16,7 @@ const createPool = (): Pool => {
     throw new Error(`Database configuration error: Missing ${missingEnvVars.join(', ')}`);
   }
 
-  console.log('🔧 Database pool configuration created.');
+  console.log(`🔧 Attempting to create pool for user '${process.env.DB_USER}' on database '${process.env.DB_DATABASE}' at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
 
   return mysql.createPool({
     host: process.env.DB_HOST,

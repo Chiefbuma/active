@@ -1,3 +1,3 @@
-// This file should not be here and is intentionally left blank.
-// The primary configuration is in the root next.config.js file.
-module.exports = {};
+// This file should not exist.
+// The primary Next.js configuration is in the root `next.config.js` file.
+// This file is intentionally left blank to prevent build conflicts.

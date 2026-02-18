@@ -1,7 +1,2 @@
-// This file is intentionally left blank.
-// The primary configuration is now in next.config.js.
-import type { NextConfig } from 'next';
-
-const config: NextConfig = {};
-
-export default config;
+// This file is intentionally left blank to prevent conflicts with next.config.js.
+// The primary Next.js configuration is in the root `next.config.js` file.
