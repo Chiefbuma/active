@@ -44,7 +44,7 @@ const projectRoot = path.join(__dirname, '..');
 archive.glob('**/*', {
   cwd: projectRoot,
   ignore: [
-    // node_modules is now included to be part of the deployment.
+    'node_modules/**',
     '.next/**',
     '.git/**',
     'dbdata/**',
