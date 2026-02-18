@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Transaction, Ambulance, AdminDashboardData, AmbulancePerformanceData } from '@/lib/types';
+import { getTransactions, getAmbulances } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -23,7 +24,10 @@ const formatCurrency = (value: number | null | undefined) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KES', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 };
 
-export default function AdminDashboardClient({ initialTransactions, initialAmbulances }: { initialTransactions: Transaction[], initialAmbulances: Ambulance[] }) {
+export default function AdminDashboardClient() {
+    const [transactions, setTransactions] = useState<Transaction[] | null>(null);
+    const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
+
     const today = new Date();
     const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
         from: startOfMonth(today),
@@ -37,12 +41,31 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     const [previousMonthData, setPreviousMonthData] = useState<AdminDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true);
+                const [transactionsData, ambulancesData] = await Promise.all([
+                getTransactions(),
+                getAmbulances(),
+                ]);
+                setTransactions(transactionsData);
+                setAmbulances(ambulancesData);
+            } catch (error) {
+                console.error("Failed to load dashboard data", error);
+                setTransactions([]);
+                setAmbulances([]);
+            }
+        }
+        fetchData();
+    }, []);
+
     const currentMonthRange = useMemo(() => {
         return {
             from: startOfMonth(today),
             to: today,
         };
-    }, []);
+    }, [today]);
     
     const previousMonthRange = useMemo(() => {
         const previousMonth = subMonths(today, 1);
@@ -53,7 +76,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
             from: startOfMonth(previousMonth),
             to: new Date(previousMonth.getFullYear(), previousMonth.getMonth(), Math.min(dayOfMonth, daysInPreviousMonth)),
         };
-    }, []);
+    }, [today]);
 
     const calculateDashboardData = useMemo(() => {
         return (transactions: Transaction[], ambulances: Ambulance[], range: { from: Date, to: Date }): AdminDashboardData => {
@@ -121,11 +144,13 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
     }, []);
     
     const filteredDashboardData = useMemo(() => {
-        return calculateDashboardData(initialTransactions, initialAmbulances, dateRange);
-    }, [initialTransactions, initialAmbulances, dateRange, calculateDashboardData]);
+        if (!transactions || !ambulances) return null;
+        return calculateDashboardData(transactions, ambulances, dateRange);
+    }, [transactions, ambulances, dateRange, calculateDashboardData]);
 
     const filteredTransactions = useMemo(() => {
-        return initialTransactions.filter(t => {
+        if (!transactions) return [];
+        return transactions.filter(t => {
             try {
                 const txDate = typeof t.date === 'string' ? new Date(t.date) : t.date;
                 return isWithinInterval(txDate, { start: startOfDay(dateRange.from), end: endOfDay(dateRange.to) });
@@ -133,16 +158,18 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                 return false;
             }
         });
-    }, [initialTransactions, dateRange]);
+    }, [transactions, dateRange]);
 
     useEffect(() => {
+        if (!transactions || !ambulances) return;
+
         setLoading(true);
-        const currentData = calculateDashboardData(initialTransactions, initialAmbulances, currentMonthRange);
-        const previousData = calculateDashboardData(initialTransactions, initialAmbulances, previousMonthRange);
+        const currentData = calculateDashboardData(transactions, ambulances, currentMonthRange);
+        const previousData = calculateDashboardData(transactions, ambulances, previousMonthRange);
         setDashboardData(currentData);
         setPreviousMonthData(previousData);
         setLoading(false);
-    }, [initialTransactions, initialAmbulances, calculateDashboardData, currentMonthRange, previousMonthRange]);
+    }, [transactions, ambulances, calculateDashboardData, currentMonthRange, previousMonthRange]);
 
     const handleStartDateChange = (date: Date | undefined) => {
         if (date) {
@@ -164,7 +191,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
         setDateRange(prev => ({ ...prev, to: tempEndDate }));
     }
     
-    if (loading || !dashboardData) {
+    if (loading || !dashboardData || !filteredDashboardData) {
         return <div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
@@ -246,7 +273,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                 className="mx-auto aspect-square h-[250px]"
                             >
                                 <RadialBarChart
-                                    data={[{ name: "performance", value: filteredDashboardData?.overall_performance || 0 }]}
+                                    data={[{ name: "performance", value: filteredDashboardData.overall_performance }]}
                                     startAngle={-140}
                                     endAngle={130}
                                     innerRadius="70%"
@@ -269,7 +296,7 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                         }
                                     />
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-4xl font-bold">
-                                        {(filteredDashboardData?.overall_performance || 0).toFixed(0)}%
+                                        {(filteredDashboardData.overall_performance).toFixed(0)}%
                                     </text>
                                     <text x="50%" y="65%" textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-sm">
                                         Performance
@@ -298,22 +325,22 @@ export default function AdminDashboardClient({ initialTransactions, initialAmbul
                                 <TableBody>
                                     <TableRow>
                                         <TableCell className="font-medium">Cash Deposited</TableCell>
-                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_cash_deposited)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData.total_cash_deposited)}</TableCell>
                                         <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_cash_deposited)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium">Total Till</TableCell>
-                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_till)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData.total_till)}</TableCell>
                                         <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_till)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium">Net Banked</TableCell>
-                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData?.total_net_banked)}</TableCell>
+                                        <TableCell className="text-right font-semibold">{formatCurrency(dashboardData.total_net_banked)}</TableCell>
                                         <TableCell className="text-right font-semibold">{formatCurrency(previousMonthData?.total_net_banked)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell className="font-medium">Deficit</TableCell>
-                                        <TableCell className="text-right text-red-500 font-semibold">{formatCurrency(dashboardData?.total_deficit)}</TableCell>
+                                        <TableCell className="text-right text-red-500 font-semibold">{formatCurrency(dashboardData.total_deficit)}</TableCell>
                                         <TableCell className="text-right text-red-500 font-semibold">{formatCurrency(previousMonthData?.total_deficit)}</TableCell>
                                     </TableRow>
                                 </TableBody>

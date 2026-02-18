@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Ambulance } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { getColumns } from './columns';
@@ -35,10 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getAmbulances } from '@/lib/data';
 
 
-export default function AmbulancesClient({ initialAmbulances }: { initialAmbulances: Ambulance[] }) {
-  const [ambulances, setAmbulances] = useState<Ambulance[]>(initialAmbulances);
+export default function AmbulancesClient() {
+  const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAmbulance, setEditingAmbulance] = useState<Ambulance | null>(null);
   const [formData, setFormData] = useState({ reg_no: '', fuel_cost: 0, operation_cost: 0, target: 0, status: 'active' as 'active' | 'inactive' });
@@ -49,6 +50,25 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
   const [ambulanceToDelete, setAmbulanceToDelete] = useState<Ambulance | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const fetchAmbulances = useCallback(async () => {
+    try {
+        const data = await getAmbulances();
+        setAmbulances(data);
+    } catch (err) {
+        console.error("Failed to fetch ambulances", err);
+        setAmbulances([]); // Set to empty array on error
+        toast({
+            variant: 'destructive',
+            title: "Error",
+            description: "Could not load ambulances.",
+        });
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchAmbulances();
+  }, [fetchAmbulances]);
 
   const handleOpenModal = useCallback((ambulance: Ambulance | null) => {
     setEditingAmbulance(ambulance);
@@ -86,27 +106,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
             throw new Error(resData.message || 'An error occurred.');
         }
 
-        // Refresh the ambulances list from the server to ensure UI matches DB
-        try {
-          const listRes = await fetch('/api/ambulances');
-          if (listRes.ok) {
-            const listData = await listRes.json();
-            setAmbulances(listData);
-          } else {
-            // Fallback: update locally using response
-            if (editingAmbulance) {
-              setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? resData.ambulance : a));
-            } else {
-              setAmbulances([resData.ambulance, ...ambulances]);
-            }
-          }
-        } catch (e) {
-          if (editingAmbulance) {
-            setAmbulances(ambulances.map(a => a.id === editingAmbulance.id ? resData.ambulance : a));
-          } else {
-            setAmbulances([resData.ambulance, ...ambulances]);
-          }
-        }
+        await fetchAmbulances();
         
         toast({
             title: "Success",
@@ -140,23 +140,13 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
             method: 'DELETE',
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to delete ambulance.");
+        if (response.status !== 204) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || "Failed to delete ambulance.");
         }
+        
+        await fetchAmbulances();
 
-      // Refresh list after delete
-      try {
-        const listRes = await fetch('/api/ambulances');
-        if (listRes.ok) {
-          const listData = await listRes.json();
-          setAmbulances(listData);
-        } else {
-          setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
-        }
-      } catch (e) {
-        setAmbulances(ambulances.filter(a => a.id !== ambulanceToDelete.id));
-      }
         toast({
             title: "Success",
             description: "Ambulance deleted successfully.",
@@ -189,7 +179,8 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
             throw new Error(`${failed.length} out of ${ids.length} ambulances could not be deleted.`);
         }
 
-        setAmbulances(ambulances.filter(a => !ids.includes(a.id)));
+        await fetchAmbulances();
+
         toast({
             title: "Success",
             description: `${ids.length} ambulance(s) deleted successfully.`,
@@ -256,6 +247,11 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
     );
   }
 
+  if (ambulances === null) {
+      return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+
   return (
     <div className="flex flex-col gap-4">
        <DataTable 
@@ -263,7 +259,7 @@ export default function AmbulancesClient({ initialAmbulances }: { initialAmbulan
         data={ambulances}
         customActions={CustomToolbarActions}
         bulkActions={BulkActions}
-        initialPageSize={ambulances.length || 10}
+        initialPageSize={10}
       />
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent className="sm:max-w-[425px]">

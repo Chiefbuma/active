@@ -1,28 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import AmbulancesClient from './ambulances-client';
 import { Card, CardContent } from '@/components/ui/card';
-import { getAmbulances } from '@/lib/data';
-import type { Ambulance } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default function AmbulancesPage() {
-  const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
-
-  useEffect(() => {
-    getAmbulances()
-      .then(data => {
-        setAmbulances(data);
-      })
-      .catch(err => {
-        console.error("Failed to fetch ambulances", err);
-        setAmbulances([]); // Set to empty array on error
-      });
-  }, []);
-
   return (
     <Card>
       <CardContent className="pt-6">
@@ -37,11 +20,7 @@ export default function AmbulancesPage() {
                 </p>
                 </div>
             </div>
-            {ambulances === null ? (
-              <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
-            ) : (
-              <AmbulancesClient initialAmbulances={ambulances} />
-            )}
+            <AmbulancesClient />
         </div>
       </CardContent>
     </Card>

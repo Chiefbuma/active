@@ -1,8 +1,9 @@
-
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import type { Ambulance, Transaction, Driver, EmergencyTechnician } from '@/lib/types';
+import { getAmbulanceById, getTransactionsByAmbulanceId, getDrivers, getEmergencyTechnicians } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -40,7 +41,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   PlusCircle,
@@ -70,7 +70,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { getDrivers, getEmergencyTechnicians } from '@/lib/data';
 import { exportDetailedToExcel } from '@/lib/excel-export';
 
 const DetailItem = ({
@@ -100,16 +99,18 @@ const DetailItem = ({
 const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KES' }).format(value);
 
 
-export default function AmbulanceDetailsClient({ initialAmbulance, initialTransactions }: { initialAmbulance: Ambulance, initialTransactions: Transaction[] }) {
+export default function AmbulanceDetailsClient() {
   const { toast } = useToast();
   const router = useRouter();
+  const params = useParams();
+  const ambulanceId = Number(params.id);
   
   const [user, setUser] = useState<any>(null);
-  const [ambulance] = useState<Ambulance>(initialAmbulance);
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [ambulance, setAmbulance] = useState<Ambulance | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [emergencyTechnicians, setEmergencyTechnicians] = useState<EmergencyTechnician[]>([]);
   
@@ -121,42 +122,58 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
-  
-  // Load user from localStorage
+
+  const [transactionFormData, setTransactionFormData] = useState({
+      date: new Date().toISOString().split('T')[0],
+      driver_id: '',
+      emergency_technician_ids: [] as number[],
+      total_till: '',
+      fuel: '',
+      operation: '',
+      cash_deposited_by_staff: '',
+  });
+
+  const fetchPageData = useCallback(async () => {
+    if (!ambulanceId || isNaN(ambulanceId)) {
+      setError('Invalid ambulance ID.');
+      setLoading(false);
+      return;
+    }
+    try {
+      setLoading(true);
+      const [ambulanceData, transactionsData, driversData, techniciansData] = await Promise.all([
+        getAmbulanceById(ambulanceId),
+        getTransactionsByAmbulanceId(ambulanceId),
+        getDrivers(),
+        getEmergencyTechnicians(),
+      ]);
+      setAmbulance(ambulanceData);
+      setTransactions(transactionsData);
+      setDrivers(driversData);
+      setEmergencyTechnicians(techniciansData);
+      
+      setTransactionFormData(prev => ({
+          ...prev,
+          fuel: String(ambulanceData.fuel_cost),
+          operation: String(ambulanceData.operation_cost),
+      }));
+
+    } catch (err) {
+      setError('Failed to load ambulance data. It may not exist.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [ambulanceId]);
+
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-  }, []);
-  
-  const initialTransactionFormData = {
-      date: new Date().toISOString().split('T')[0],
-      driver_id: '',
-      emergency_technician_ids: [] as number[],
-      total_till: '',
-      fuel: String(ambulance.fuel_cost),
-      operation: String(ambulance.operation_cost),
-      cash_deposited_by_staff: '',
-  };
-  const [transactionFormData, setTransactionFormData] = useState(initialTransactionFormData);
+    fetchPageData();
+  }, [fetchPageData]);
 
-
-  useEffect(() => {
-    async function fetchData() {
-        try {
-            setDrivers(await getDrivers());
-            setEmergencyTechnicians(await getEmergencyTechnicians());
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load drivers or technicians.' });
-        }
-    }
-    fetchData();
-  }, [toast]);
-  
-  useEffect(() => {
-    setTransactions(initialTransactions);
-  }, [initialTransactions]);
 
   const handleTechnicianSelection = (technicianId: number) => {
     setTransactionFormData(prev => {
@@ -167,13 +184,25 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     })
   };
 
+  const resetTransactionForm = useCallback(() => {
+    setTransactionFormData({
+        date: new Date().toISOString().split('T')[0],
+        driver_id: '',
+        emergency_technician_ids: [] as number[],
+        total_till: '',
+        fuel: String(ambulance?.fuel_cost || 0),
+        operation: String(ambulance?.operation_cost || 0),
+        cash_deposited_by_staff: '',
+    });
+  }, [ambulance]);
+
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const body = {
       ...transactionFormData,
-      ambulance_id: ambulance.id
+      ambulance_id: ambulance?.id
     };
     
     try {
@@ -193,9 +222,9 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
             description: 'Transaction added successfully.'
         });
         
-        setTransactionFormData(initialTransactionFormData);
+        resetTransactionForm();
         setIsTransactionModalOpen(false);
-        router.refresh();
+        await fetchPageData();
 
     } catch (error) {
          toast({
@@ -208,24 +237,22 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
   };
   
-  const handleBulkDelete = async () => {
-    if (selectedRowIds.size === 0) return;
+  const handleBulkDelete = async (selectedIds: string[]) => {
+    if (selectedIds.length === 0) return;
     
     setIsDeleting(true);
     try {
-      const transactionIds = Array.from(selectedRowIds);
       await Promise.all(
-        transactionIds.map(id =>
+        selectedIds.map(id =>
           fetch(`/api/transactions/${id}`, { method: 'DELETE' })
         )
       );
       
       toast({
         title: 'Success',
-        description: `${transactionIds.length} transaction(s) deleted successfully.`
+        description: `${selectedIds.length} transaction(s) deleted successfully.`
       });
-      router.refresh();
-      setSelectedRowIds(new Set());
+      await fetchPageData();
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -260,7 +287,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
 
     const body = {
       ...transactionFormData,
-      ambulance_id: ambulance.id
+      ambulance_id: ambulance?.id
     };
 
     try {
@@ -282,7 +309,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
       
       setIsEditModalOpen(false);
       setEditingTransaction(null);
-      router.refresh();
+      await fetchPageData();
 
     } catch (error) {
       toast({
@@ -321,7 +348,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
       
       setIsDeleteDialogOpen(false);
       setTransactionToDelete(null);
-      router.refresh();
+      await fetchPageData();
 
     } catch (error) {
       toast({
@@ -334,7 +361,6 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
     }
   };
   
-  // Memoize columns to prevent unnecessary recalculations
   const transactionColumns = React.useMemo(() => getColumns({
     isAdmin: user?.role === 'admin',
     onEdit: handleEditTransaction,
@@ -422,7 +448,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         <DialogTrigger asChild>
           <Button onClick={() => {
             setEditingTransaction(null);
-            setTransactionFormData(initialTransactionFormData);
+            resetTransactionForm();
           }}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Transaction
@@ -430,7 +456,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
         </DialogTrigger>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Add New Transaction for {ambulance.reg_no}</DialogTitle>
+            <DialogTitle>Add New Transaction for {ambulance?.reg_no}</DialogTitle>
             <CardDescription>
               Fill in the form below to log a new financial record for this ambulance.
             </CardDescription>
@@ -462,12 +488,30 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDelete} disabled={isDeleting}>
+            <AlertDialogAction onClick={() => {
+              const idsToDelete = selectedRows.map((row: any) => row.original.id);
+              handleBulkDelete(idsToDelete).then(() => table.toggleAllPageRowsSelected(false));
+            }} disabled={isDeleting}>
               {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Continue"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    );
+  }
+
+  if (loading) {
+    return <div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (error || !ambulance || transactions === null) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>{error || 'Ambulance not found.'}</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -524,12 +568,12 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                    <DetailItem 
                     icon={User} 
                     label="Last Driven By" 
-                    value={initialAmbulance.last_driven_by}
+                    value={ambulance.last_driven_by}
                   />
                    <DetailItem 
                     icon={CalendarDays} 
                     label="Last Driven On" 
-                    value={initialAmbulance.last_driven_on}
+                    value={ambulance.last_driven_on}
                   />
                 </div>
               </CardContent>
