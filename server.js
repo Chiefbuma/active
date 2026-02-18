@@ -1,33 +1,25 @@
+const path = require('path');
 
-const { createServer } = require('http');
-const { parse } = require('url');
-const next = require('next');
+// This is the entry point for your Phusion Passenger server.
+// It detects if the app is running in a standalone build folder
+// and correctly starts the Next.js server.
 
-// Ensure NODE_ENV is set, defaulting to 'production' if not, as this is for production.
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const standaloneDir = path.join(__dirname, '.next/standalone');
+
 // Phusion Passenger provides the port to listen on via the process.env.PORT variable.
-// Default to 3000 for local development.
-const port = process.env.PORT || 3000;
+// The Next.js standalone server automatically uses this.
+process.env.PORT = process.env.PORT || '3000';
 
-// when using middleware `hostname` and `port` must be provided below
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
+// The standalone server needs to be run from its own directory.
+try {
+  process.chdir(standaloneDir);
+} catch (err) {
+  console.error(`Could not change directory to ${standaloneDir}. Standalone build may not exist. Run 'npm run build' first.`);
+  process.exit(1);
+}
 
-app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      // Be sure to pass `true` as the second argument to `url.parse`.
-      // This tells it to parse the query portion of the URL.
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err);
-      res.statusCode = 500;
-      res.end('internal server error');
-    }
-  }).listen(port, (err) => {
-    if (err) throw err;
-    console.log(`> Ready on http://${hostname}:${port}`);
-  });
-});
+
+console.log(`Starting Next.js server from: ${standaloneDir}`);
+
+// Require the standalone server entry point.
+require('./server.js');
