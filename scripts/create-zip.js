@@ -3,56 +3,45 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-console.log('Creating deployment zip file...');
+console.log('Creating standalone deployment zip file...');
 
-// Define the output path for the zip file in the project root
-const outputPath = path.join(__dirname, '..', 'radiant-health-deployment.zip');
+const projectRoot = path.join(__dirname, '..');
+const standaloneDir = path.join(projectRoot, '.next', 'standalone');
+const publicDir = path.join(projectRoot, 'public');
+const envFile = path.join(projectRoot, '.env');
+const outputPath = path.join(projectRoot, 'radiant-health-standalone-deployment.zip');
+
+if (!fs.existsSync(standaloneDir)) {
+  console.error('Error: .next/standalone directory not found.');
+  console.error('Please run "npm run build" before running the zip script.');
+  process.exit(1);
+}
+
 const output = fs.createWriteStream(outputPath);
+const archive = archiver('zip', { zlib: { level: 9 } });
 
-const archive = archiver('zip', {
-  zlib: { level: 9 } // Sets the compression level for best compression
-});
-
-// Listen for all archive data to be written
 output.on('close', function() {
-  console.log('Zip file created successfully: ' + (archive.pointer() / 1024 / 1024).toFixed(2) + ' MB');
-  console.log('radiant-health-deployment.zip is ready for upload.');
-});
-
-archive.on('warning', function(err) {
-  if (err.code === 'ENOENT') {
-    // Log file not found warnings
-    console.warn(err);
-  } else {
-    // Throw other errors
-    throw err;
-  }
+  console.log(`Zip file created: ${path.basename(outputPath)} (${(archive.pointer() / 1024 / 1024).toFixed(2)} MB)`);
+  console.log('Ready for upload.');
 });
 
 archive.on('error', function(err) {
   throw err;
 });
 
-// Pipe archive data to the file
 archive.pipe(output);
 
-// Define the project root directory
-const projectRoot = path.join(__dirname, '..');
+// Add the entire contents of the standalone directory to the zip's root
+archive.directory(standaloneDir, false);
 
-// Add all files from the project root to the archive,
-// while ignoring the specified patterns.
-archive.glob('**/*', {
-  cwd: projectRoot,
-  ignore: [
-    'node_modules/**',
-    '.next/**',
-    '.git/**',
-    'dbdata/**',
-    '*.zip',
-    'scripts/**', // Ignore the scripts folder itself
-    '.DS_Store',
-  ]
-});
+// The standalone output needs the `public` folder at the root for static assets.
+if (fs.existsSync(publicDir)) {
+  archive.directory(publicDir, 'public');
+}
 
-// Finalize the archive (this is when it starts writing)
+// The standalone output also needs the .env file.
+if (fs.existsSync(envFile)) {
+  archive.file(envFile, { name: '.env' });
+}
+
 archive.finalize();
