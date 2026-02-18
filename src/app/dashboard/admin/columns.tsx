@@ -21,7 +21,7 @@ const formatPercentage = (value: number | null | undefined) => {
   return `${(num * 100).toFixed(0)}%`;
 }
 
-export const columns: ColumnDef<AmbulancePerformanceData>[] = [
+export const columns: ColumnDef<AmbulancePerformanceData & { id: number }>[] = [
     {
         accessorKey: "reg_no",
         header: "Ambulance",
