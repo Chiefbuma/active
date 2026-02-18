@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-
   // Handle images (important for shared hosting)
   images: {
     unoptimized: true, // Prevents sharp dependency issues on some hosts
