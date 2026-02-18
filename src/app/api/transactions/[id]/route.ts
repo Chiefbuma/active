@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { RowDataPacket } from 'mysql2';
 import type { Transaction } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 async function buildSingleTransaction(transactionRow: any): Promise<Transaction | null> {
     if (!transactionRow) {
         return null;

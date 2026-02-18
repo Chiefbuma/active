@@ -1,6 +1,8 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request, { params }: { params: { id:string }}) {
     try {
         const [ambulanceRows] = await db.query('SELECT * FROM ambulances WHERE id = ?', [params.id]);
