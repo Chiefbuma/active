@@ -1,4 +1,11 @@
 import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env file.
+// This is critical for the production server to find its database credentials.
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
 
 declare global {
   // allow global `var` declarations
