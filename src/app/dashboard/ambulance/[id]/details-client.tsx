@@ -379,7 +379,7 @@ export default function AmbulanceDetailsClient({ initialAmbulance, initialTransa
                               key={tech.id}
                               checked={transactionFormData.emergency_technician_ids.includes(tech.id)}
                               onCheckedChange={() => handleTechnicianSelection(tech.id)}
-                              onSelect={(e: React.SyntheticEvent) => e.preventDefault()}
+                              onSelect={(e) => e.preventDefault()}
                             >
                                 {tech.name}
                             </DropdownMenuCheckboxItem>
