@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 type View = 'users' | 'drivers' | 'emergency-technicians';
 
 const viewConfig = {

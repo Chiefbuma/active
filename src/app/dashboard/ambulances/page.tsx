@@ -7,6 +7,8 @@ import { getAmbulances } from '@/lib/data';
 import type { Ambulance } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function AmbulancesPage() {
   const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
 

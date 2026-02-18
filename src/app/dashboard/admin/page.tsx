@@ -6,6 +6,8 @@ import type { Transaction, Ambulance } from '@/lib/types';
 import { getTransactions, getAmbulances } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[] | null>(null);
   const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
