@@ -28,7 +28,7 @@ export default function AdminDashboardClient() {
     const [transactions, setTransactions] = useState<Transaction[] | null>(null);
     const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
 
-    const today = new Date();
+    const today = useMemo(() => new Date(), []);
     const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
         from: startOfMonth(today),
         to: today,
