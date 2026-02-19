@@ -71,6 +71,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { exportDetailedToExcel } from '@/lib/excel-export';
+import { apiClient } from '@/lib/api-client';
 
 const DetailItem = ({
   label,
@@ -206,16 +207,7 @@ export default function AmbulanceDetailsClient() {
     };
     
     try {
-        const response = await fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to add transaction.");
-        }
+        await apiClient.post('/transactions', body);
         
         toast({
             title: 'Success',
@@ -243,9 +235,7 @@ export default function AmbulanceDetailsClient() {
     setIsDeleting(true);
     try {
       await Promise.all(
-        selectedIds.map(id =>
-          fetch(`/api/transactions/${id}`, { method: 'DELETE' })
-        )
+        selectedIds.map(id => apiClient.delete(`/transactions/${id}`))
       );
       
       toast({
@@ -291,16 +281,7 @@ export default function AmbulanceDetailsClient() {
     };
 
     try {
-      const response = await fetch(`/api/transactions/${editingTransaction.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update transaction.');
-      }
+      await apiClient.put(`/transactions/${editingTransaction.id}`, body);
       
       toast({
         title: 'Success',
@@ -332,14 +313,7 @@ export default function AmbulanceDetailsClient() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/transactions/${transactionToDelete.id}`, {
-        method: 'DELETE'
-      });
-
-      if (response.status !== 204) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Failed to delete transaction.');
-      }
+      await apiClient.delete(`/transactions/${transactionToDelete.id}`);
 
       toast({
         title: 'Success',

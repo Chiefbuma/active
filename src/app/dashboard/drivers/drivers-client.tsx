@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { apiClient } from '@/lib/api-client';
 
 export default function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) {
   const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
@@ -62,25 +63,12 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
     e.preventDefault();
     setIsSubmitting(true);
     
-    const url = editingDriver ? `/api/drivers/${editingDriver.id}` : '/api/drivers';
-    const method = editingDriver ? 'PUT' : 'POST';
-
     try {
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-
-        const resData = await response.json();
-
-        if (!response.ok) {
-            throw new Error(resData.message || 'An error occurred.');
-        }
-
         if (editingDriver) {
+            const resData = await apiClient.put(`/drivers/${editingDriver.id}`, formData);
             setDrivers(drivers.map(d => d.id === editingDriver.id ? resData.driver : d));
         } else {
+            const resData = await apiClient.post('/drivers', formData);
             setDrivers([resData.driver, ...drivers]);
         }
         
@@ -111,11 +99,7 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
     setIsDeleting(true);
      
     try {
-        const response = await fetch(`/api/drivers/${driverToDelete.id}`, { method: 'DELETE' });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to delete driver.');
-        }
+        await apiClient.delete(`/drivers/${driverToDelete.id}`);
         setDrivers(drivers.filter(d => d.id !== driverToDelete.id));
         toast({ title: "Success", description: "Driver deleted successfully." });
     } catch (error) {
@@ -131,15 +115,8 @@ export default function DriversClient({ initialDrivers }: { initialDrivers: Driv
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
     
-    const deletePromises = ids.map(id => fetch(`/api/drivers/${id}`, { method: 'DELETE' }));
-
     try {
-        const results = await Promise.all(deletePromises);
-        const failed = results.filter(res => !res.ok);
-        
-        if (failed.length > 0) {
-            throw new Error(`${failed.length} out of ${ids.length} drivers could not be deleted.`);
-        }
+        await Promise.all(ids.map(id => apiClient.delete(`/drivers/${id}`)));
 
         setDrivers(drivers.filter(d => !ids.includes(d.id)));
         toast({ title: "Success", description: `${ids.length} driver(s) deleted successfully.` });

@@ -27,7 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { apiClient } from '@/lib/api-client';
 
 export default function MedicalStaffClient({ initialMedicalStaff }: { initialMedicalStaff: EmergencyTechnician[] }) {
   const [medicalStaff, setMedicalStaff] = useState<EmergencyTechnician[]>(initialMedicalStaff);
@@ -62,25 +63,12 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
     e.preventDefault();
     setIsSubmitting(true);
     
-    const url = editingStaff ? `/api/emergency-technicians/${editingStaff.id}` : '/api/emergency-technicians';
-    const method = editingStaff ? 'PUT' : 'POST';
-
     try {
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-
-        const resData = await response.json();
-
-        if (!response.ok) {
-            throw new Error(resData.message || 'An error occurred.');
-        }
-
         if (editingStaff) {
+            const resData = await apiClient.put(`/emergency-technicians/${editingStaff.id}`, formData);
             setMedicalStaff(medicalStaff.map(s => s.id === editingStaff.id ? resData.technician : s));
         } else {
+            const resData = await apiClient.post('/emergency-technicians', formData);
             setMedicalStaff([resData.technician, ...medicalStaff]);
         }
         
@@ -111,11 +99,7 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
     setIsDeleting(true);
      
     try {
-        const response = await fetch(`/api/emergency-technicians/${staffToDelete.id}`, { method: 'DELETE' });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to delete technician.');
-        }
+        await apiClient.delete(`/emergency-technicians/${staffToDelete.id}`);
         setMedicalStaff(medicalStaff.filter(s => s.id !== staffToDelete.id));
         toast({ title: "Success", description: "Emergency Technician deleted successfully." });
     } catch (error) {
@@ -131,15 +115,8 @@ export default function MedicalStaffClient({ initialMedicalStaff }: { initialMed
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
     
-    const deletePromises = ids.map(id => fetch(`/api/emergency-technicians/${id}`, { method: 'DELETE' }));
-
     try {
-        const results = await Promise.all(deletePromises);
-        const failed = results.filter(res => !res.ok);
-        
-        if (failed.length > 0) {
-            throw new Error(`${failed.length} out of ${ids.length} technicians could not be deleted.`);
-        }
+        await Promise.all(ids.map(id => apiClient.delete(`/emergency-technicians/${id}`)));
 
         setMedicalStaff(medicalStaff.filter(s => !ids.includes(s.id)));
         toast({ title: "Success", description: `${ids.length} technician(s) deleted successfully.` });

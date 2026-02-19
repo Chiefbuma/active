@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Logo from '@/components/logo';
+import { apiClient } from '@/lib/api-client';
 
 export default function LoginClient() {
   const [email, setEmail] = useState('');
@@ -23,17 +24,7 @@ export default function LoginClient() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      const data = await apiClient.post('/auth/login', { email, password });
 
       localStorage.setItem('loggedInUser', JSON.stringify(data));
       

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 export default function ProfileClient() {
   const [user, setUser] = useState<User | null>(null);
@@ -41,16 +42,7 @@ export default function ProfileClient() {
     }
 
     try {
-        const response = await fetch(`/api/users/${user.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-
-        const resData = await response.json();
-        if (!response.ok) {
-            throw new Error(resData.message || 'Failed to update profile.');
-        }
+        const resData = await apiClient.put(`/users/${user.id}`, body);
 
         const updatedUser = resData.user;
         localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));

@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select"
 import { getAmbulances } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
+import { apiClient } from '@/lib/api-client';
 
 export default function AmbulancesClient() {
   const [ambulances, setAmbulances] = useState<Ambulance[] | null>(null);
@@ -90,20 +91,11 @@ export default function AmbulancesClient() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const url = editingAmbulance ? `/api/ambulances/${editingAmbulance.id}` : '/api/ambulances';
-    const method = editingAmbulance ? 'PUT' : 'POST';
-
     try {
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-
-        const resData = await response.json();
-
-        if (!response.ok) {
-            throw new Error(resData.message || 'An error occurred.');
+        if (editingAmbulance) {
+            await apiClient.put(`/ambulances/${editingAmbulance.id}`, formData);
+        } else {
+            await apiClient.post('/ambulances', formData);
         }
 
         await fetchAmbulances();
@@ -136,14 +128,7 @@ export default function AmbulancesClient() {
      setIsDeleting(true);
 
      try {
-        const response = await fetch(`/api/ambulances/${ambulanceToDelete.id}`, {
-            method: 'DELETE',
-        });
-
-        if (response.status !== 204) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.message || "Failed to delete ambulance.");
-        }
+        await apiClient.delete(`/ambulances/${ambulanceToDelete.id}`);
         
         await fetchAmbulances();
 
@@ -169,16 +154,11 @@ export default function AmbulancesClient() {
     if (ids.length === 0) return;
     setIsBulkDeleting(true);
 
-    const deletePromises = ids.map(id => fetch(`/api/ambulances/${id}`, { method: 'DELETE' }));
+    const deletePromises = ids.map(id => apiClient.delete(`/ambulances/${id}`));
 
     try {
-        const results = await Promise.all(deletePromises);
-        const failed = results.filter(res => !res.ok);
+        await Promise.all(deletePromises);
         
-        if (failed.length > 0) {
-            throw new Error(`${failed.length} out of ${ids.length} ambulances could not be deleted.`);
-        }
-
         await fetchAmbulances();
 
         toast({
