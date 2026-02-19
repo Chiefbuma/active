@@ -15,20 +15,26 @@ const createPool = (): Pool => {
     console.error('❌ Missing required DB environment variables:', missingEnvVars.join(', '));
     throw new Error(`Database configuration error: Missing ${missingEnvVars.join(', ')}`);
   }
-
-  console.log(`🔧 Attempting to create pool for user '${process.env.DB_USER}' on database '${process.env.DB_DATABASE}' at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
-
-  return mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: Number(process.env.DB_PORT),
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    decimalNumbers: true,
-  });
+  
+  try {
+    console.log(`🔧 Attempting to create pool for user '${process.env.DB_USER}' on database '${process.env.DB_DATABASE}' at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+    const pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_DATABASE,
+      password: process.env.DB_PASSWORD,
+      port: Number(process.env.DB_PORT),
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      decimalNumbers: true,
+    });
+    console.log('✅ Database connection pool created successfully.');
+    return pool;
+  } catch (error) {
+    console.error('❌ FAILED TO CREATE DATABASE POOL:', error);
+    throw error;
+  }
 };
 
 const getPool = (): Pool => {

@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
   const ambulanceIdParam = searchParams.get('ambulanceId');
 
   try {
+    console.log(`Attempting to GET /api/transactions?${searchParams.toString()}`);
     let query = 'SELECT t.id, t.date, t.ambulance_id, t.driver_id, t.total_till, t.target, t.fuel, t.operation, t.cash_deposited_by_staff, t.amount_paid_to_the_till, t.offload, t.salary, t.operations_cost, t.net_banked, t.deficit, t.performance, t.fuel_revenue_ratio, t.created_at, t.updated_at FROM transactions t';
     const params: (string | number)[] = [];
 
@@ -87,11 +88,11 @@ export async function GET(req: NextRequest) {
 
     const [rows] = await db.query(query, params);
     const fullTransactions = await buildTransactions(rows as any[]);
-    
+    console.log(`Successfully fetched from /api/transactions?${searchParams.toString()}`);
     return NextResponse.json(fullTransactions);
 
   } catch (error) {
-    console.error(error);
+    console.error(`Caught error in GET /api/transactions?${searchParams.toString()}:`, error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
