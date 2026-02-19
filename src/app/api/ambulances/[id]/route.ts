@@ -4,15 +4,17 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: { id:string }}) {
+    let connection: any;
     try {
-        const [ambulanceRows] = await db.query('SELECT * FROM ambulances WHERE id = ?', [params.id]);
+        connection = await db.getConnection();
+        const [ambulanceRows] = await connection.query('SELECT * FROM ambulances WHERE id = ?', [params.id]);
         const ambulance = (ambulanceRows as any)[0];
         if (!ambulance) {
             return NextResponse.json({ message: 'Ambulance not found' }, { status: 404 });
         }
 
         // Get latest transaction to find last driver and date
-        const [latestTransactionRows] = await db.query(
+        const [latestTransactionRows] = await connection.query(
             `SELECT t.date, d.name as driver_name 
              FROM transactions t
              LEFT JOIN drivers d ON t.driver_id = d.id
@@ -33,18 +35,22 @@ export async function GET(req: Request, { params }: { params: { id:string }}) {
     } catch (error) {
         console.error(error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    } finally {
+        if (connection) connection.release();
     }
 }
 
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  let connection: any;
   try {
+    connection = await db.getConnection();
     const { reg_no, fuel_cost, operation_cost, target, status } = await req.json();
-    await db.query(
+    await connection.query(
       'UPDATE ambulances SET reg_no = ?, fuel_cost = ?, operation_cost = ?, target = ?, status = ? WHERE id = ?',
       [reg_no, fuel_cost, operation_cost, target, status, params.id]
     );
-    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances WHERE id = ?', [params.id]);
+    const [rows] = await connection.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances WHERE id = ?', [params.id]);
     return NextResponse.json({ message: 'Ambulance updated successfully', ambulance: (rows as any)[0] });
   } catch (error) {
     console.error(error);
@@ -52,15 +58,21 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ message: 'An ambulance with this registration number already exists.' }, { status: 409 });
     }
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  } finally {
+      if (connection) connection.release();
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  let connection: any;
   try {
-    await db.query('DELETE FROM ambulances WHERE id = ?', [params.id]);
+    connection = await db.getConnection();
+    await connection.query('DELETE FROM ambulances WHERE id = ?', [params.id]);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error(error);
     return new NextResponse('Internal Server Error', { status: 500 });
+  } finally {
+      if (connection) connection.release();
   }
 }
