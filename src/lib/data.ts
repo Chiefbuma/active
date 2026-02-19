@@ -1,28 +1,40 @@
 import type { Transaction, Ambulance, Driver, EmergencyTechnician, User } from '@/lib/types';
 
 // Get the API URL based on environment
-// On the server: use full URL, on the client: use relative path
 const getApiUrl = () => {
-  if (typeof window === 'undefined') {
-    // Server-side
-    const host = process.env.VERCEL_URL || 'localhost:3000';
-    const protocol = process.env.VERCEL_URL ? 'https' : 'http';
-    return `${protocol}://${host}/api`;
+  // For client-side requests, use a relative path.
+  if (typeof window !== 'undefined') {
+    return '/api';
   }
-  // Client-side
-  return '/api';
+
+  // For server-side requests, use the absolute URL from the environment variable.
+  // This is crucial for environments like yours (Passenger) where the app
+  // needs to call its own public-facing API.
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Fallback for local development.
+  return 'http://localhost:3000/api';
 };
 
 const API_URL = getApiUrl();
 
 async function fetchFromAPI(endpoint: string, options?: RequestInit) {
   try {
-    const res = await fetch(`${API_URL}/${endpoint}`, { ...options, cache: 'no-store' });
+    const fullUrl = `${API_URL}/${endpoint}`;
+    console.log(`Attempting to fetch from API: ${fullUrl}`);
+    const res = await fetch(fullUrl, { ...options, cache: 'no-store' });
+    
     if (!res.ok) {
         // Try to parse the error message from the response body
         const errorBody = await res.json().catch(() => ({ message: `Request failed with status ${res.status}` }));
+        console.error(`API response not OK for ${fullUrl}. Status: ${res.status}. Body:`, errorBody);
         throw new Error(errorBody.message);
     }
+    
+    console.log(`Successfully fetched from API: ${fullUrl}`);
+    
     // Handle 204 No Content response
     if (res.status === 204) {
         return null;
