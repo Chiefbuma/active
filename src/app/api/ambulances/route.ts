@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     console.log("Attempting to GET /api/ambulances");
-    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances ORDER BY created_at DESC');
+    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances ORDER BY created_at DESC', []);
     console.log("Successfully fetched from /api/ambulances");
     return NextResponse.json(rows);
   } catch (error) {
