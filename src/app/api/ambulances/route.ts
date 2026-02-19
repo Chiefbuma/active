@@ -1,35 +1,36 @@
-import { db } from '@/lib/db';
+import { executeQuery } from '@/lib/db-helpers';
 import { NextResponse } from 'next/server';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     console.log("Attempting to GET /api/ambulances");
-    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances ORDER BY created_at DESC', []);
+    const rows = await executeQuery<RowDataPacket[]>('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances ORDER BY created_at DESC', []);
     console.log("Successfully fetched from /api/ambulances");
     return NextResponse.json(rows);
   } catch (error) {
     console.error("Caught error in GET /api/ambulances:", error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const { reg_no, fuel_cost, operation_cost, target, status } = await req.json();
-    const [result] = await db.query(
+    const result = await executeQuery<ResultSetHeader>(
       'INSERT INTO ambulances (reg_no, fuel_cost, operation_cost, target, status) VALUES (?, ?, ?, ?, ?)',
       [reg_no, fuel_cost, operation_cost, target, status]
     );
-    const insertId = (result as any).insertId;
-    const [rows] = await db.query('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances WHERE id = ?', [insertId]);
-    return NextResponse.json({ message: 'Ambulance created successfully', ambulance: (rows as any)[0] }, { status: 201 });
+    const insertId = result.insertId;
+    const rows = await executeQuery<RowDataPacket[]>('SELECT id, reg_no, fuel_cost, operation_cost, target, status, created_at FROM ambulances WHERE id = ?', [insertId]);
+    return NextResponse.json({ message: 'Ambulance created successfully', ambulance: rows[0] }, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error("Caught error in POST /api/ambulances:", error);
     if ((error as any).code === 'ER_DUP_ENTRY') {
       return NextResponse.json({ message: 'An ambulance with this registration number already exists.' }, { status: 409 });
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   }
 }

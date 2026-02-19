@@ -1,5 +1,6 @@
 
-import { db } from '@/lib/db';
+import { db, testDatabaseConnection } from '@/lib/db';
+import { executeQuery } from '@/lib/db-helpers';
 import { NextResponse } from 'next/server';
 import { RowDataPacket } from 'mysql2';
 import type { Transaction } from '@/lib/types';
@@ -11,20 +12,25 @@ async function buildSingleTransaction(transactionRow: any): Promise<Transaction 
         return null;
     }
     
-    const [ambulanceRows] = await db.query('SELECT * FROM ambulances WHERE id = ?', [transactionRow.ambulance_id]);
-    const [driverRows] = await db.query('SELECT * FROM drivers WHERE id = ?', [transactionRow.driver_id]);
-    const [technicianLinks] = await db.query<RowDataPacket[]>('SELECT et.* FROM transaction_technicians tt JOIN emergency_technicians et ON et.id = tt.technician_id WHERE tt.transaction_id = ?', [transactionRow.id]);
+    const ambulanceRows = await executeQuery<RowDataPacket[]>('SELECT * FROM ambulances WHERE id = ?', [transactionRow.ambulance_id]);
+    const driverRows = await executeQuery<RowDataPacket[]>('SELECT * FROM drivers WHERE id = ?', [transactionRow.driver_id]);
+    const technicianLinks = await executeQuery<RowDataPacket[]>('SELECT et.* FROM transaction_technicians tt JOIN emergency_technicians et ON et.id = tt.technician_id WHERE tt.transaction_id = ?', [transactionRow.id]);
 
     return {
         ...transactionRow,
-        ambulance: (ambulanceRows as any)[0],
-        driver: (driverRows as any)[0],
+        ambulance: ambulanceRows[0],
+        driver: driverRows[0],
         emergency_technicians: technicianLinks,
     };
 }
 
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const isConnected = await testDatabaseConnection();
+  if (!isConnected) {
+    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+  }
+  
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -94,21 +100,26 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     await connection.commit();
 
-    const [rows] = await db.query('SELECT * FROM transactions WHERE id = ?', [transactionId]);
-    const updatedTransaction = await buildSingleTransaction((rows as any)[0]);
+    const [rows] = await connection.query<RowDataPacket[]>('SELECT * FROM transactions WHERE id = ?', [transactionId]);
+    const updatedTransaction = await buildSingleTransaction(rows[0]);
 
     return NextResponse.json({ message: 'Transaction updated successfully', transaction: updatedTransaction });
 
   } catch (error) {
     await connection.rollback();
-    console.error(error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Caught error in PUT /api/transactions/[id]:", error);
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   } finally {
     connection.release();
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const isConnected = await testDatabaseConnection();
+  if (!isConnected) {
+    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+  }
+  
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -126,8 +137,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   } catch (error) {
     await connection.rollback();
-    console.error(error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Caught error in DELETE /api/transactions/[id]:", error);
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   } finally {
     connection.release();
   }

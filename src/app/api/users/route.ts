@@ -1,14 +1,15 @@
-import { db } from '@/lib/db';
+import { executeQuery } from '@/lib/db-helpers';
 import { NextResponse } from 'next/server';
+import { RowDataPacket } from 'mysql2';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [rows] = await db.query('SELECT id, name, email, role FROM users');
+    const rows = await executeQuery<RowDataPacket[]>('SELECT id, name, email, role FROM users');
     return NextResponse.json(rows);
   } catch (error) {
-    console.error(error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error("Caught error in GET /api/users:", error);
+    return NextResponse.json({ error: 'Database query failed' }, { status: 500 });
   }
 }
