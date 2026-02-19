@@ -1,11 +1,12 @@
 'use client';
 
 import type React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Truck, LayoutDashboard, Settings } from 'lucide-react';
+import { Truck, LayoutDashboard, Settings, Loader2 } from 'lucide-react';
 import type { User as AppUser } from '@/lib/types';
 import Logo from '@/components/logo';
 
@@ -15,25 +16,36 @@ const navLinks = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings, admin: true },
 ]
 
-// Mock user for testing purposes, bypassing login
-const mockUser: AppUser = {
-    id: 1,
-    name: "Test Admin",
-    email: "admin@test.com",
-    role: "admin",
-};
-
-
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('loggedInUser');
+        router.replace('/');
+      }
+    } else {
+      router.replace('/'); // Redirect to login if no user
+    }
+    setLoading(false);
+  }, [router]);
+
 
   const renderNavLinks = (links: typeof navLinks) => {
     return links.map(link => {
-        if (link.admin && mockUser.role !== 'admin') return null;
+        if (!user || (link.admin && user.role !== 'admin')) return null;
         const isActive = pathname.startsWith(link.href);
         return (
            <Button key={link.href} asChild variant={isActive ? 'secondary' : 'ghost'} size="sm">
@@ -46,16 +58,24 @@ export default function DashboardLayout({
      })
   }
 
+  if (loading || !user) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="sticky top-0 z-40 w-full border-b bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/dashboard/admin" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <Logo className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
              {renderNavLinks(navLinks)}
-            <Header user={mockUser} />
+            <Header user={user} />
           </div>
         </div>
       </header>

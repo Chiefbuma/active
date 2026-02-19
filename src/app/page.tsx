@@ -1,6 +1,5 @@
-import { redirect } from 'next/navigation';
+import LoginClient from './login-client';
 
-export default function RootPage() {
-  // Redirect to the admin dashboard for testing purposes
-  redirect('/dashboard/admin');
+export default function LoginPage() {
+  return <LoginClient />;
 }
