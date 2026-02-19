@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // The `standalone` output creates a self-contained folder with a minimal server
+  // and a small, optimized `node_modules` folder with only production dependencies.
+  // This is the recommended approach for deploying to production environments like Passenger.
   output: 'standalone',
 
   // Handle images (important for shared hosting)
